@@ -1,19 +1,10 @@
-# Dependencies
+# Node.js
 node_modules/
-.pnpm-store/
-
-# Build outputs
 dist/
 build/
-.next/
-
-# Flutter
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-build/
-*.iml
+coverage/
+*.tsbuildinfo
+.turbo/
 
 # Environment
 .env
@@ -26,6 +17,7 @@ build/
 *.swp
 *.swo
 .DS_Store
+Thumbs.db
 
 # Logs
 logs/
@@ -33,16 +25,31 @@ logs/
 npm-debug.log*
 pnpm-debug.log*
 
-# Testing
-coverage/
-.nyc_output/
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Turborepo
-.turbo/
-
 # Docker
-*.pid
+.docker/
+
+# Testing
+/test-results/
+/playwright-report/
+
+# Flutter
+apps/mobile/.dart_tool/
+apps/mobile/.packages
+apps/mobile/build/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/mobile/ios/Pods/
+apps/mobile/ios/.symlinks/
+apps/mobile/android/.gradle/
+apps/mobile/android/local.properties
+apps/mobile/android/app/debug/
+apps/mobile/android/app/profile/
+apps/mobile/android/app/release/
+*.g.dart
+*.freezed.dart
+*.config.dart
+
+# Misc
+*.pem
+*.key
+*.cert
