@@ -1,28 +1,14 @@
-FROM node:20-alpine AS builder
-
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/ ./packages/
-COPY apps/backend/notification-service/package.json ./apps/backend/notification-service/
-
+COPY package.json pnpm-lock.yaml ./
 RUN corepack enable && pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm build
 
-COPY apps/backend/notification-service/ ./apps/backend/notification-service/
-COPY tsconfig.base.json ./
-
-RUN pnpm --filter @crab/notification-service build
-
-FROM node:20-alpine AS runner
-
+FROM node:18-alpine
 WORKDIR /app
-
-ENV NODE_ENV=production
-
-COPY --from=builder /app/apps/backend/notification-service/dist ./dist
-COPY --from=builder /app/apps/backend/notification-service/package.json ./
+COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-
+COPY --from=builder /app/package.json ./
 EXPOSE 3007
-
 CMD ["node", "dist/main.js"]
