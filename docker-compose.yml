@@ -1,0 +1,280 @@
+version: '3.8'
+
+services:
+  # Infrastructure
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: crab
+      POSTGRES_PASSWORD: crab_secret
+      POSTGRES_DB: crab
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U crab']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:6
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: crab
+      MONGO_INITDB_ROOT_PASSWORD: crab_secret
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend Services
+  gateway:
+    build:
+      context: ./apps/backend/gateway
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=crab-jwt-secret-key
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - USER_SERVICE_URL=http://user-service:3002
+      - RIDE_SERVICE_URL=http://ride-service:3003
+      - FOOD_SERVICE_URL=http://food-service:3004
+      - PAYMENT_SERVICE_URL=http://payment-service:3005
+      - CHAT_SERVICE_URL=http://chat-service:3006
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3007
+      - RATING_SERVICE_URL=http://rating-service:3008
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./apps/backend/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - JWT_SECRET=crab-jwt-secret-key
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=crab
+      - POSTGRES_PASSWORD=crab_secret
+      - POSTGRES_DB=crab
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  user-service:
+    build:
+      context: ./apps/backend/user-service
+      dockerfile: Dockerfile
+    ports:
+      - '3002:3002'
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=crab
+      - POSTGRES_PASSWORD=crab_secret
+      - POSTGRES_DB=crab
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ride-service:
+    build:
+      context: ./apps/backend/ride-service
+      dockerfile: Dockerfile
+    ports:
+      - '3003:3003'
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=crab
+      - POSTGRES_PASSWORD=crab_secret
+      - POSTGRES_DB=crab
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGO_URI=mongodb://crab:crab_secret@mongodb:27017/crab?authSource=admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  food-service:
+    build:
+      context: ./apps/backend/food-service
+      dockerfile: Dockerfile
+    ports:
+      - '3004:3004'
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=crab
+      - POSTGRES_PASSWORD=crab_secret
+      - POSTGRES_DB=crab
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGO_URI=mongodb://crab:crab_secret@mongodb:27017/crab?authSource=admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ./apps/backend/payment-service
+      dockerfile: Dockerfile
+    ports:
+      - '3005:3005'
+    environment:
+      - NODE_ENV=production
+      - PORT=3005
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=crab
+      - POSTGRES_PASSWORD=crab_secret
+      - POSTGRES_DB=crab
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  chat-service:
+    build:
+      context: ./apps/backend/chat-service
+      dockerfile: Dockerfile
+    ports:
+      - '3006:3006'
+    environment:
+      - NODE_ENV=production
+      - PORT=3006
+      - MONGO_URI=mongodb://crab:crab_secret@mongodb:27017/crab?authSource=admin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=crab-jwt-secret-key
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./apps/backend/notification-service
+      dockerfile: Dockerfile
+    ports:
+      - '3007:3007'
+    environment:
+      - NODE_ENV=production
+      - PORT=3007
+      - MONGO_URI=mongodb://crab:crab_secret@mongodb:27017/crab?authSource=admin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=crab-jwt-secret-key
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  rating-service:
+    build:
+      context: ./apps/backend/rating-service
+      dockerfile: Dockerfile
+    ports:
+      - '3008:3008'
+    environment:
+      - NODE_ENV=production
+      - PORT=3008
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=crab
+      - POSTGRES_PASSWORD=crab_secret
+      - POSTGRES_DB=crab
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web-admin:
+    build:
+      context: ./apps/web-admin
+      dockerfile: Dockerfile
+    ports:
+      - '5173:80'
+    environment:
+      - VITE_API_URL=http://gateway:3000/api/v1
+    depends_on:
+      - gateway
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  mongo_data:
+  redis_data:
+
+networks:
+  default:
+    name: crab-network
