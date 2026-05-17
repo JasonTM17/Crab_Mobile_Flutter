@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-images:
+    needs: create-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - gateway
+          - auth-service
+          - user-service
+          - ride-service
+          - food-service
+          - payment-service
+          - chat-service
+          - notification-service
+          - rating-service
+          - web-admin
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Determine context
+        id: ctx
+        run: |
+          if [ "${{ matrix.service }}" = "web-admin" ]; then
+            echo "CONTEXT=./apps/web-admin" >> $GITHUB_OUTPUT
+          else
+            echo "CONTEXT=./apps/backend/${{ matrix.service }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ steps.ctx.outputs.CONTEXT }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/crab-${{ matrix.service }}:latest
+            ghcr.io/${{ github.repository_owner }}/crab-${{ matrix.service }}:${{ steps.version.outputs.VERSION }}
