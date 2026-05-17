@@ -72,7 +72,6 @@ class _HomeTab extends StatelessWidget {
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
-            // TODO: Open location picker
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -99,11 +98,9 @@ class _HomeTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search bar
             TextField(
               readOnly: true,
               onTap: () {
-                // TODO: Open search
               },
               decoration: const InputDecoration(
                 hintText: 'Where do you want to go?',
