@@ -1,8 +1,14 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src"
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "target": "ES2021",
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

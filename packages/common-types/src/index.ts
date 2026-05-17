@@ -1,109 +1,89 @@
-// ============================================================
-// User Roles
-// ============================================================
 export enum UserRole {
-  RIDER = 'RIDER',
-  DRIVER = 'DRIVER',
-  MERCHANT = 'MERCHANT',
-  ADMIN = 'ADMIN',
+  RIDER = 'rider',
+  DRIVER = 'driver',
+  RESTAURANT_OWNER = 'restaurant_owner',
+  ADMIN = 'admin',
 }
 
-// ============================================================
-// Ride Status
-// ============================================================
 export enum RideStatus {
-  REQUESTED = 'REQUESTED',
-  MATCHED = 'MATCHED',
-  PICKUP = 'PICKUP',
+  SEARCHING = 'SEARCHING',
+  ACCEPTED = 'ACCEPTED',
+  ARRIVING = 'ARRIVING',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
+  NO_DRIVER = 'NO_DRIVER',
 }
 
-// ============================================================
-// Order Status
-// ============================================================
-export enum OrderStatus {
-  PLACED = 'PLACED',
+export enum FoodOrderStatus {
+  PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
   PREPARING = 'PREPARING',
   READY = 'READY',
   PICKED_UP = 'PICKED_UP',
   DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
 }
 
-// ============================================================
-// Payment Method
-// ============================================================
-export enum PaymentMethod {
-  WALLET = 'WALLET',
-  COD = 'COD',
-  BANK_TRANSFER = 'BANK_TRANSFER',
+export enum VehicleType {
+  BIKE = 'bike',
+  CAR = 'car',
+  CAR_PLUS = 'car_plus',
 }
 
-// ============================================================
-// User Status
-// ============================================================
-export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  SUSPENDED = 'SUSPENDED',
-  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
+export enum TransactionType {
+  TOPUP = 'topup',
+  RIDE_PAYMENT = 'ride_payment',
+  FOOD_PAYMENT = 'food_payment',
+  REFUND = 'refund',
+  WITHDRAWAL = 'withdrawal',
 }
 
-// ============================================================
-// Common DTOs
-// ============================================================
-export interface GeoLocation {
-  latitude: number;
-  longitude: number;
+export enum NotificationType {
+  RIDE_ACCEPTED = 'ride_accepted',
+  RIDE_COMPLETED = 'ride_completed',
+  ORDER_CONFIRMED = 'order_confirmed',
+  ORDER_READY = 'order_ready',
+  ORDER_DELIVERED = 'order_delivered',
+  PAYMENT_RECEIVED = 'payment_received',
+  PROMO = 'promo',
+  SYSTEM = 'system',
+}
+
+export interface Location {
+  lat: number;
+  lng: number;
   address?: string;
 }
 
-export interface PaginationDto {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'ASC' | 'DESC';
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
+export interface PaginationMeta {
   page: number;
   limit: number;
+  total: number;
   totalPages: number;
 }
 
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-  statusCode: number;
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
 }
 
-// ============================================================
-// User interfaces
-// ============================================================
-export interface UserProfile {
+export interface ApiError {
+  statusCode: number;
+  message: string;
+  errors?: Array<{ field: string; message: string }>;
+  timestamp: string;
+}
+
+export interface UserPayload {
   id: string;
   email: string;
-  phone: string;
-  firstName: string;
-  lastName: string;
   role: UserRole;
-  status: UserStatus;
-  avatarUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-export interface JwtPayload {
-  sub: string;
-  email: string;
-  role: UserRole;
-  iat?: number;
-  exp?: number;
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
 }
