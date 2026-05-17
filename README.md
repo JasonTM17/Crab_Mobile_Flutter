@@ -1,433 +1,253 @@
-<!-- Back-to-top anchor -->
-<a id="readme-top"></a>
+# Crab - Super App (Ride-Hailing & Food Delivery)
 
-English | [Tiếng Việt](docs/README_VI.md)
+A full-stack super app combining ride-hailing and food delivery services, built with modern microservices architecture.
 
----
+> **Learning Project** - This project was built for educational purposes to demonstrate full-stack mobile app development with microservices. Feedback and contributions are welcome!
 
-<!-- BADGES -->
-[![CI][ci-badge]][ci-url]
-[![Docker][docker-badge]][docker-url]
-[![License][license-badge]][license-url]
-[![Stars][stars-badge]][stars-url]
-[![Issues][issues-badge]][issues-url]
-
-<!-- LOGO + TITLE -->
-<br />
-<div align="center">
-  <a href="https://github.com/JasonTM17/Crab_Mobile_Flutter">
-    <img src="docs/assets/logo.png" alt="Crab Logo" width="120" height="120">
-  </a>
-
-  <h1 align="center">Crab Super App</h1>
-
-  <p align="center">
-    A ride-hailing and food delivery super app built with Flutter, React, and NestJS microservices
-    <br />
-    <a href="docs/"><strong>Explore the docs »</strong></a>
-    <br /><br />
-    <a href="#screenshots">View Screenshots</a>
-    &middot;
-    <a href="https://github.com/JasonTM17/Crab_Mobile_Flutter/issues/new?labels=bug">Report Bug</a>
-    &middot;
-    <a href="https://github.com/JasonTM17/Crab_Mobile_Flutter/issues/new?labels=enhancement">Request Feature</a>
-  </p>
-</div>
+**Author:** Nguyễn Sơn  
+**Email:** jasonbmt06@gmail.com  
+**GitHub:** [@JasonTM17](https://github.com/JasonTM17)
 
 ---
 
-<!-- 30-SECOND REVIEWER BRIEF -->
-## At a Glance
-
-| Aspect | Details |
-|--------|---------|
-| **What** | Super app combining ride-hailing + food delivery (like Grab/ShopeeFood/Be) |
-| **Mobile** | Flutter 3.x with BLoC, GetIt DI, GoRouter |
-| **Web Admin** | React 18 + TypeScript + Vite + TailwindCSS + shadcn/ui |
-| **Backend** | NestJS microservices (Auth, User, Ride, Food, Payment, Chat, Notification) |
-| **Realtime** | Socket.IO with Redis adapter for horizontal scaling |
-| **Database** | PostgreSQL + MongoDB (geospatial) + Redis (cache/pub-sub) |
-| **Storage** | MinIO (S3-compatible) |
-| **Status** | All Phases Complete |
-
----
-
-## Table of Contents
-
-<details>
-<summary>Click to expand</summary>
-
-- [At a Glance](#at-a-glance)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
-- [Docker Services](#docker-services)
-- [Development](#development)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-
-</details>
-
----
-
-## Architecture
+## Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      CLIENT LAYER                            │
-├──────────────────────┬──────────────────────────────────────┤
-│  Flutter Mobile App  │  React Admin Dashboard               │
-│  (iOS + Android)     │  (Vite + TailwindCSS + shadcn/ui)   │
-└──────────┬───────────┴──────────────┬───────────────────────┘
-           │         HTTPS/WSS        │
-           ▼                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│              API GATEWAY (NestJS + Socket.IO)                │
-│         Rate Limiting · JWT Auth · Redis Adapter            │
-└──────────┬──────────────────────────────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   MICROSERVICES LAYER                        │
-├─────────┬─────────┬─────────┬─────────┬─────────┬─────────┤
-│  Auth   │  User   │  Ride   │  Food   │ Payment │  Chat   │
-│ Service │ Service │ Service │ Service │ Service │ Service │
-└────┬────┴────┬────┴────┬────┴────┬────┴────┬────┴────┬────┘
-     │         │         │         │         │         │
-     ▼         ▼         ▼         ▼         ▼         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    DATA LAYER                                │
-├──────────────┬──────────────┬──────────────┬────────────────┤
-│  PostgreSQL  │   MongoDB    │    Redis     │     MinIO      │
-│  (ACID Data) │ (Geospatial) │(Cache/PubSub)│ (File Storage) │
-└──────────────┴──────────────┴──────────────┴────────────────┘
+│                    Flutter Mobile App                         │
+│              (BLoC + GetIt + GoRouter + Dio)                  │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────┐
+│                    API Gateway (:3000)                        │
+│              (NestJS + JWT + Rate Limiting)                   │
+└──┬────┬────┬────┬────┬────┬────┬────┬────┬──────────────────┘
+   │    │    │    │    │    │    │    │    │
+   ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼
+┌────┐┌────┐┌────┐┌────┐┌────┐┌────┐┌────┐┌────┐┌─────────┐
+│Auth││User││Ride││Food││Pay ││Chat││Noti││Rate││Web Admin│
+│3001││3002││3003││3004││3005││3006││3007││3008││  :5173  │
+└────┘└────┘└────┘└────┘└────┘└────┘└────┘└────┘└─────────┘
+   │    │    │    │    │    │    │    │
+   ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼
+┌─────────────┐  ┌──────────┐  ┌──────────┐
+│ PostgreSQL  │  │ MongoDB  │  │  Redis   │
+│  (TypeORM)  │  │(Mongoose)│  │ (Pub/Sub)│
+└─────────────┘  └──────────┘  └──────────┘
 ```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
 
 ## Tech Stack
 
-### Backend
-| Technology | Purpose |
-|-----------|---------|
-| NestJS + TypeScript | Microservice framework |
-| Socket.IO + Redis Adapter | Realtime communication, horizontal scaling |
-| TypeORM | PostgreSQL ORM |
-| Mongoose | MongoDB ODM (geospatial) |
-| BullMQ | Job queue and scheduling |
-| Passport + JWT | Authentication |
-| class-validator | DTO validation |
+### Mobile (Flutter)
+- **Framework:** Flutter 3.x
+- **State Management:** flutter_bloc + equatable
+- **DI:** get_it + injectable
+- **Navigation:** go_router
+- **Networking:** dio + socket_io_client
+- **Maps:** google_maps_flutter
+- **Storage:** flutter_secure_storage
 
-### Mobile
-| Technology | Purpose |
-|-----------|---------|
-| Flutter 3.x | Cross-platform mobile |
-| flutter_bloc | State management |
-| GetIt + Injectable | Dependency injection |
-| GoRouter | Declarative routing |
-| Dio | HTTP client with interceptors |
-| socket_io_client | Realtime connection |
+### Backend (NestJS Microservices)
+- **Framework:** NestJS 10
+- **Database:** PostgreSQL (TypeORM) + MongoDB (Mongoose)
+- **Cache/PubSub:** Redis
+- **Real-time:** Socket.IO with Redis adapter
+- **Auth:** JWT + Passport
+- **Validation:** class-validator + class-transformer
+- **Build:** pnpm workspaces + Turborepo
 
-### Web Admin
-| Technology | Purpose |
-|-----------|---------|
-| React 18 + TypeScript | UI framework |
-| Vite | Build tool |
-| TailwindCSS + shadcn/ui | Styling + components |
-| React Query | Server state management |
-| React Router v6 | Client routing |
+### Web Admin (React)
+- **Framework:** React 18 + TypeScript
+- **Build:** Vite
+- **Styling:** TailwindCSS + shadcn/ui
+- **Charts:** Recharts
+- **State:** TanStack Query
 
-### Infrastructure
-| Technology | Purpose |
-|-----------|---------|
-| PostgreSQL 15 | Transactional data |
-| MongoDB 7 | Geospatial queries (driver locations) |
-| Redis 7 | Cache, sessions, pub/sub, rate limiting |
-| MinIO | S3-compatible file storage |
-| Docker Compose | Development environment |
-| Turborepo + pnpm | Monorepo management |
+## Project Structure
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
+```
+Crab_Mobile_Flutter/
+├── apps/
+│   ├── mobile/              # Flutter mobile app
+│   │   ├── lib/
+│   │   │   ├── core/        # DI, networking, routing, theme
+│   │   │   ├── features/    # Feature modules (auth, ride, food, etc.)
+│   │   │   └── shared/      # Shared models, utils, widgets
+│   │   └── pubspec.yaml
+│   ├── backend/             # NestJS microservices
+│   │   ├── gateway/         # API Gateway (:3000)
+│   │   ├── auth-service/    # Authentication (:3001)
+│   │   ├── user-service/    # User management (:3002)
+│   │   ├── ride-service/    # Ride-hailing (:3003)
+│   │   ├── food-service/    # Food delivery (:3004)
+│   │   ├── payment-service/ # Payments (:3005)
+│   │   ├── chat-service/    # Real-time chat (:3006)
+│   │   ├── notification-service/ # Push notifications (:3007)
+│   │   └── rating-service/  # Ratings & reviews (:3008)
+│   └── web-admin/           # React admin dashboard
+├── docker-compose.yml       # Full stack orchestration
+├── turbo.json              # Turborepo config
+├── pnpm-workspace.yaml     # pnpm workspaces
+└── package.json            # Root package.json
+```
 
 ## Features
 
 ### Ride-Hailing
-- Real-time GPS tracking (driver → server → rider, 2s interval)
-- Intelligent driver matching (nearest + rating weighted)
-- Surge pricing based on demand
-- Ride state machine: REQUESTED → MATCHED → PICKUP → IN_PROGRESS → COMPLETED
+- Real-time driver tracking with animated markers
+- Location search with recent history
+- Fare estimation before booking
+- Driver matching with countdown timer
+- Driver mode with online/offline toggle
+- Ride status progression (searching → matched → pickup → in-progress → completed)
 
 ### Food Delivery
-- Location-based restaurant search (5km radius)
-- Menu management with categories, variants, addons
-- Order tracking with delivery GPS
-- Order state machine: PLACED → CONFIRMED → PREPARING → READY → PICKED_UP → DELIVERED
+- Restaurant browsing with categories
+- Menu with item customization
+- Cart management
+- Order tracking with status stepper
+- Restaurant ratings and reviews
 
-### Payment & Wallet
-- Digital wallet with top-up/withdraw
-- Multiple payment methods (wallet, COD, bank transfer)
-- Double-entry ledger for transaction integrity
-- Promo codes and discount engine
-
-### Chat & Notifications
-- 1-to-1 realtime messaging (rider↔driver, user↔merchant)
-- Typing indicators and read receipts
-- Push notifications via FCM
-- In-app notification center
-
-### Admin Dashboard
-- User/Driver/Merchant management
-- Ride and order monitoring
-- Transaction and payout management
-- Analytics dashboard with stat cards
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
-
-## Screenshots
-
-> Screenshots and GIFs will be added as features are completed.
-
-| Screen | Description |
-|--------|-------------|
-| ![Login](docs/screenshots/login.png) | Mobile login screen with email/phone authentication |
-| ![Home](docs/screenshots/home.png) | Home screen with ride and food service cards |
-| ![Admin](docs/screenshots/admin-dashboard.png) | Admin dashboard with analytics overview |
-| ![Tracking](docs/gifs/ride-tracking.gif) | Real-time ride tracking with driver movement |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
+### Shared Features
+- JWT authentication with token refresh
+- Real-time notifications via Socket.IO
+- In-app chat between rider/driver
+- Digital wallet with top-up
+- Rating system with tags
+- Push notifications
 
 ## Getting Started
 
 ### Prerequisites
-
-- Node.js 20+
-- pnpm 8+
-- Flutter 3.x (for mobile development)
+- Flutter SDK >= 3.0.0
+- Node.js >= 18
+- pnpm >= 8
 - Docker & Docker Compose
+- PostgreSQL 15+
+- MongoDB 6+
+- Redis 7+
 
-### Installation
+### Quick Start with Docker
 
-1. Clone the repository
 ```bash
+# Clone the repository
 git clone https://github.com/JasonTM17/Crab_Mobile_Flutter.git
 cd Crab_Mobile_Flutter
+
+# Start all services
+docker-compose up -d
+
+# Services will be available at:
+# Gateway:      http://localhost:3000
+# Web Admin:    http://localhost:5173
 ```
 
-2. Install dependencies
+### Manual Setup
+
 ```bash
+# Install dependencies
 pnpm install
-```
 
-3. Start infrastructure services
-```bash
-docker compose -f docker-compose.dev.yml up -d
-```
+# Start backend services
+pnpm --filter @crab/gateway dev
+pnpm --filter @crab/auth-service dev
+# ... start other services
 
-4. Copy environment files
-```bash
-cp .env.example .env
-cp apps/backend/gateway/.env.example apps/backend/gateway/.env
-```
+# Start web admin
+pnpm --filter @crab/web-admin dev
 
-5. Start all services in development mode
-```bash
-pnpm dev
-```
-
-6. For Flutter mobile app
-```bash
+# Flutter mobile
 cd apps/mobile
 flutter pub get
 flutter run
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## API Endpoints
 
----
+| Service | Port | Base Path | Description |
+|---------|------|-----------|-------------|
+| Gateway | 3000 | `/api/v1` | API routing, rate limiting, auth |
+| Auth | 3001 | `/auth` | Login, register, token refresh |
+| User | 3002 | `/users` | Profile, preferences |
+| Ride | 3003 | `/rides` | Booking, tracking, history |
+| Food | 3004 | `/food` | Restaurants, menus, orders |
+| Payment | 3005 | `/payments` | Wallet, transactions |
+| Chat | 3006 | `/chat` | Real-time messaging |
+| Notification | 3007 | `/notifications` | Push & in-app notifications |
+| Rating | 3008 | `/ratings` | Reviews, scores |
 
-## Project Structure
+## Socket.IO Namespaces
 
-```
-crab/
-├── apps/
-│   ├── mobile/                    # Flutter mobile app
-│   │   ├── lib/
-│   │   │   ├── core/             # DI, network, router, theme
-│   │   │   ├── features/         # auth, home, ride, food, chat, payment, notifications, profile
-│   │   │   └── shared/           # models, widgets, utils
-│   │   └── pubspec.yaml
-│   ├── web-admin/                 # React admin dashboard
-│   │   ├── src/
-│   │   │   ├── components/       # UI + layout components
-│   │   │   ├── pages/            # Login, Dashboard
-│   │   │   ├── hooks/            # useAuth, etc.
-│   │   │   ├── lib/              # axios, utils
-│   │   │   └── services/         # API services
-│   │   └── package.json
-│   └── backend/
-│       ├── gateway/               # API Gateway + Socket.IO
-│       ├── auth-service/          # JWT authentication
-│       ├── user-service/          # Profile CRUD + avatar
-│       ├── ride-service/          # Ride-hailing + GPS tracking
-│       ├── food-service/          # Restaurant + food ordering
-│       ├── payment-service/       # Wallet + transactions
-│       ├── chat-service/          # Realtime messaging
-│       └── notification-service/  # Push notifications + FCM
-├── packages/
-│   ├── socket-events/             # Shared Socket.IO event types
-│   └── common-types/              # Shared enums, DTOs, interfaces
-├── docker/
-│   └── docker-compose.dev.yml     # Dev infrastructure
-├── docs/                          # Documentation
-├── turbo.json                     # Turborepo pipeline
-└── pnpm-workspace.yaml            # Workspace config
-```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
-
-## API Documentation
-
-### Auth Service
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/auth/register` | Register new user |
-| POST | `/api/v1/auth/login` | Login, returns JWT + refresh token |
-| POST | `/api/v1/auth/refresh` | Rotate refresh token |
-| POST | `/api/v1/auth/logout` | Invalidate refresh token |
-
-### User Service
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/users/:id` | Get user profile |
-| PATCH | `/api/v1/users/:id` | Update profile |
-| POST | `/api/v1/users/:id/avatar` | Upload avatar (JPEG/PNG/WebP, 5MB max) |
-
-### Socket.IO Namespaces
-
-| Namespace | Events | Description |
-|-----------|--------|-------------|
-| `/ride` | ride:request, ride:location, ride:status | Ride-hailing realtime |
-| `/food` | order:placed, order:status, order:tracking | Food delivery tracking |
-| `/chat` | chat:message, chat:typing, chat:read | Realtime messaging |
-| `/notification` | notification:new, notification:read | Push notifications |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
+| Namespace | Purpose |
+|-----------|---------|
+| `/ride` | Driver location updates, ride status changes |
+| `/food` | Order status updates, delivery tracking |
+| `/chat` | Real-time messaging |
+| `/notification` | Push notification delivery |
 
 ## Docker Services
 
-| Service | Port | Image |
-|---------|------|-------|
-| PostgreSQL 16 | 5432 | `postgres:16-alpine` |
-| MongoDB 7 | 27017 | `mongo:7` |
-| Redis 7 | 6379 | `redis:7-alpine` |
-| MinIO | 9000/9001 | `minio/minio` |
-| API Gateway | 3000 | `ghcr.io/jasontm17/crab-gateway` |
-| Auth Service | 3001 | `ghcr.io/jasontm17/crab-auth-service` |
-| User Service | 3002 | `ghcr.io/jasontm17/crab-user-service` |
-| Ride Service | 3003 | `ghcr.io/jasontm17/crab-ride-service` |
-| Food Service | 3004 | `ghcr.io/jasontm17/crab-food-service` |
-| Payment Service | 3005 | `ghcr.io/jasontm17/crab-payment-service` |
-| Chat Service | 3006 | `ghcr.io/jasontm17/crab-chat-service` |
-| Notification Service | 3007 | `ghcr.io/jasontm17/crab-notification-service` |
-| Rating Service | 3008 | `ghcr.io/jasontm17/crab-rating-service` |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
-
-## Development
-
-### Available Scripts
+All services are containerized and available on GitHub Container Registry:
 
 ```bash
-pnpm dev          # Start all services in dev mode
-pnpm build        # Build all packages and services
-pnpm lint         # Lint all packages
-pnpm test         # Run all tests
+# Pull all images
+docker pull ghcr.io/jasontm17/crab-gateway:latest
+docker pull ghcr.io/jasontm17/crab-auth-service:latest
+docker pull ghcr.io/jasontm17/crab-user-service:latest
+docker pull ghcr.io/jasontm17/crab-ride-service:latest
+docker pull ghcr.io/jasontm17/crab-food-service:latest
+docker pull ghcr.io/jasontm17/crab-payment-service:latest
+docker pull ghcr.io/jasontm17/crab-chat-service:latest
+docker pull ghcr.io/jasontm17/crab-notification-service:latest
+docker pull ghcr.io/jasontm17/crab-rating-service:latest
+docker pull ghcr.io/jasontm17/crab-web-admin:latest
 ```
 
-### Quality Gates
+## Environment Variables
 
-| Check | Command | Expected |
-|-------|---------|----------|
-| TypeScript | `pnpm build` | Zero errors |
-| Lint | `pnpm lint` | Zero warnings |
-| Tests | `pnpm test` | All passing |
-| Docker | `docker compose up` | All healthy |
+Copy `.env.example` to `.env` and configure:
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+```env
+# Database
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=crab
+POSTGRES_PASSWORD=crab_secret
+POSTGRES_DB=crab
 
----
+# MongoDB
+MONGO_URI=mongodb://localhost:27017/crab
 
-## Roadmap
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
 
-- [x] **Phase 1**: Foundation (Monorepo, Auth, User, Gateway, Mobile, Admin)
-- [x] **Phase 2**: Ride-Hailing Core (GPS tracking, driver matching, fare calculation)
-- [x] **Phase 3**: Food Delivery (Restaurant listing, ordering, delivery tracking)
-- [x] **Phase 4**: Payment & Wallet (Digital wallet, transactions, payouts)
-- [x] **Phase 5**: Chat & Notifications (Realtime messaging, push notifications)
-- [x] **Phase 6**: Rating, Review & Polish (Rating system, search, performance)
+# JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+# Google Maps
+GOOGLE_MAPS_API_KEY=your-api-key
+```
 
----
+## Screenshots
+
+| Home Screen | Ride Booking | Driver Mode |
+|:-----------:|:------------:|:-----------:|
+| Service selection with wallet balance | Map with pickup/dropoff selection | Online/offline toggle with ride requests |
+
+| Food Ordering | Order Tracking | Admin Dashboard |
+|:-------------:|:--------------:|:---------------:|
+| Restaurant list with categories | Real-time status stepper | Analytics with user management |
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/amazing-feature`)
-3. Commit your Changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the Branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
+This is a learning project and contributions are welcome! Feel free to:
+- Open issues for bugs or feature requests
+- Submit pull requests with improvements
+- Share feedback via email at jasonbmt06@gmail.com
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-<div align="center">
-  <p>Built with dedication by <a href="https://github.com/JasonTM17">Nguyễn Sơn</a></p>
-  <p><em>This is a learning project. Author: Nguyễn Sơn (jasonbmt06@gmail.com). Feedback and suggestions are welcome!</em></p>
-</div>
-
-<!-- BADGE REFERENCE LINKS -->
-[ci-badge]: https://img.shields.io/github/actions/workflow/status/JasonTM17/Crab_Mobile_Flutter/ci.yml?style=for-the-badge&label=CI
-[ci-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/actions
-[docker-badge]: https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white
-[docker-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/pkgs/container/crab-gateway
-[license-badge]: https://img.shields.io/github/license/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
-[license-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/blob/main/LICENSE
-[contributors-badge]: https://img.shields.io/github/contributors/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
-[contributors-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/graphs/contributors
-[stars-badge]: https://img.shields.io/github/stars/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
-[stars-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/stargazers
-[issues-badge]: https://img.shields.io/github/issues/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
-[issues-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/issues
-[security-badge]: https://img.shields.io/badge/Security-Hardened-green?style=for-the-badge&logo=shield
-[security-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/security
+MIT License - see [LICENSE](LICENSE) for details.
