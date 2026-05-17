@@ -1,27 +1,15 @@
 {
   "name": "@crab/socket-events",
   "version": "1.0.0",
-  "private": true,
-  "description": "Crab Socket.IO event type definitions",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
+  "description": "Socket.IO event names and payload types for Crab platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
-    "lint": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
+  "files": ["dist"],
   "dependencies": {
     "@crab/common-types": "workspace:*"
-  },
-  "devDependencies": {
-    "typescript": "^5.4.0"
   }
 }

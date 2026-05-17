@@ -1,159 +1,138 @@
-import type { GeoLocation, RideStatus, OrderStatus, UserProfile } from '@crab/common-types';
+import { Location } from '@crab/common-types';
 
-// ============================================================
-// Ride Namespace Events
-// ============================================================
+export const RIDE_EVENTS = {
+  REQUEST: 'ride:request',
+  ACCEPT: 'ride:accept',
+  CANCEL: 'ride:cancel',
+  ARRIVED: 'ride:arrived',
+  START: 'ride:start',
+  COMPLETE: 'ride:complete',
+  REJOIN: 'ride:rejoin',
+  NEW_REQUEST: 'ride:new_request',
+  ACCEPTED: 'ride:accepted',
+  DRIVER_LOCATION: 'ride:driver_location',
+  STATUS_CHANGED: 'ride:status_changed',
+  NO_DRIVER: 'ride:no_driver',
+} as const;
+
+export const FOOD_EVENTS = {
+  ORDER_TRACK: 'order:track',
+  ORDER_UNTRACK: 'order:untrack',
+  ORDER_STATUS_CHANGED: 'order:status_changed',
+  ORDER_DRIVER_ASSIGNED: 'order:driver_assigned',
+  ORDER_DRIVER_LOCATION: 'order:driver_location',
+} as const;
+
+export const CHAT_EVENTS = {
+  MESSAGE_SEND: 'message:send',
+  MESSAGE_TYPING: 'message:typing',
+  MESSAGE_READ: 'message:read',
+  MESSAGE_NEW: 'message:new',
+  MESSAGE_READ_RECEIPT: 'message:read_receipt',
+} as const;
+
+export const NOTIFICATION_EVENTS = {
+  NEW: 'notification:new',
+  BADGE_UPDATE: 'notification:badge_update',
+} as const;
+
+export const DRIVER_EVENTS = {
+  LOCATION: 'driver:location',
+} as const;
+
 export interface RideRequestPayload {
-  riderId: string;
-  pickup: GeoLocation;
-  dropoff: GeoLocation;
-  paymentMethod: string;
+  pickupLocation: Location;
+  dropoffLocation: Location;
+  vehicleType: 'bike' | 'car' | 'car_plus';
 }
 
-export interface RideMatchedPayload {
+export interface RideAcceptPayload {
   rideId: string;
-  driver: Pick<UserProfile, 'id' | 'firstName' | 'lastName' | 'avatarUrl'>;
-  estimatedArrival: number;
+}
+
+export interface RideCancelPayload {
+  rideId: string;
+  reason?: string;
+}
+
+export interface DriverLocationPayload {
+  lat: number;
+  lng: number;
+  heading: number;
+  speed: number;
+}
+
+export interface RideNewRequestPayload {
+  rideId: string;
+  pickupLocation: Location;
+  dropoffLocation: Location;
+  vehicleType: string;
+  estimatedFare: number;
 }
 
 export interface RideAcceptedPayload {
   rideId: string;
-  driverId: string;
-  estimatedArrival: number;
+  driver: {
+    id: string;
+    name: string;
+    avatar: string;
+    phone: string;
+    vehiclePlate: string;
+    vehicleModel: string;
+    rating: number;
+  };
+  eta: number;
 }
 
-export interface RideLocationPayload {
+export interface RideDriverLocationPayload {
   rideId: string;
-  location: GeoLocation;
-  heading?: number;
-  speed?: number;
+  lat: number;
+  lng: number;
+  heading: number;
+  speed: number;
+  eta: number;
 }
 
-export interface RideStatusPayload {
+export interface RideStatusChangedPayload {
   rideId: string;
-  status: RideStatus;
+  status: string;
   timestamp: string;
 }
 
-export interface RideCompletedPayload {
-  rideId: string;
-  fare: number;
-  duration: number;
-  distance: number;
+export interface MessageSendPayload {
+  conversationId: string;
+  text: string;
+  type: 'text' | 'image' | 'location';
+  imageUrl?: string;
+  location?: Location;
 }
 
-export interface RideCancelledPayload {
-  rideId: string;
-  cancelledBy: string;
-  reason?: string;
-}
-
-export interface RideNamespaceEvents {
-  'ride:request': RideRequestPayload;
-  'ride:matched': RideMatchedPayload;
-  'ride:accepted': RideAcceptedPayload;
-  'ride:location': RideLocationPayload;
-  'ride:status': RideStatusPayload;
-  'ride:completed': RideCompletedPayload;
-  'ride:cancelled': RideCancelledPayload;
-}
-
-// ============================================================
-// Food Namespace Events
-// ============================================================
-export interface OrderPlacedPayload {
-  orderId: string;
-  customerId: string;
-  merchantId: string;
-  items: Array<{ itemId: string; name: string; quantity: number; price: number }>;
-  totalAmount: number;
-}
-
-export interface OrderStatusPayload {
-  orderId: string;
-  status: OrderStatus;
-  timestamp: string;
-  message?: string;
-}
-
-export interface OrderTrackingPayload {
-  orderId: string;
-  driverLocation: GeoLocation;
-  estimatedDelivery: number;
-}
-
-export interface OrderReadyPayload {
-  orderId: string;
-  merchantId: string;
-  readyAt: string;
-}
-
-export interface FoodNamespaceEvents {
-  'order:placed': OrderPlacedPayload;
-  'order:status': OrderStatusPayload;
-  'order:tracking': OrderTrackingPayload;
-  'order:ready': OrderReadyPayload;
-}
-
-// ============================================================
-// Chat Namespace Events
-// ============================================================
-export interface ChatMessagePayload {
-  messageId: string;
-  roomId: string;
+export interface MessageNewPayload {
+  id: string;
+  conversationId: string;
   senderId: string;
-  content: string;
-  contentType: 'text' | 'image' | 'location';
-  timestamp: string;
+  text: string;
+  type: string;
+  createdAt: string;
 }
 
-export interface ChatTypingPayload {
-  roomId: string;
-  userId: string;
+export interface MessageTypingPayload {
+  conversationId: string;
   isTyping: boolean;
 }
 
-export interface ChatReadPayload {
-  roomId: string;
-  userId: string;
-  lastReadMessageId: string;
-  readAt: string;
-}
-
-export interface ChatNamespaceEvents {
-  'chat:message': ChatMessagePayload;
-  'chat:typing': ChatTypingPayload;
-  'chat:read': ChatReadPayload;
-}
-
-// ============================================================
-// Notification Namespace Events
-// ============================================================
 export interface NotificationPayload {
-  notificationId: string;
-  userId: string;
+  id: string;
+  type: string;
   title: string;
   body: string;
-  type: 'ride' | 'order' | 'chat' | 'system' | 'promo';
   data?: Record<string, unknown>;
   createdAt: string;
 }
 
-export interface NotificationReadPayload {
-  notificationId: string;
-  userId: string;
-  readAt: string;
+export interface OrderStatusPayload {
+  orderId: string;
+  status: string;
+  timestamp: string;
+  estimatedTime?: number;
 }
-
-export interface NotificationNamespaceEvents {
-  'notification:new': NotificationPayload;
-  'notification:read': NotificationReadPayload;
-}
-
-// ============================================================
-// Combined socket event map
-// ============================================================
-export type AllSocketEvents = RideNamespaceEvents &
-  FoodNamespaceEvents &
-  ChatNamespaceEvents &
-  NotificationNamespaceEvents;
