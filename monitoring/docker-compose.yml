@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: crab-prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - crab-network
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: crab-grafana
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3100:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=crab_admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - crab-network
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: crab-loki
+    ports:
+      - "3101:3100"
+    volumes:
+      - loki_data:/loki
+    restart: unless-stopped
+    networks:
+      - crab-network
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: crab-postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://crab:crab@postgres:5432/crab?sslmode=disable
+    ports:
+      - "9187:9187"
+    restart: unless-stopped
+    networks:
+      - crab-network
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.55.0
+    container_name: crab-redis-exporter
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    ports:
+      - "9121:9121"
+    restart: unless-stopped
+    networks:
+      - crab-network
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+
+networks:
+  crab-network:
+    external: true
+    name: crab_mobile_flutter_default

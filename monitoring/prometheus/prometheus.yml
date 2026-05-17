@@ -1,0 +1,78 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  - job_name: 'gateway'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['gateway:3000']
+        labels:
+          service: gateway
+
+  - job_name: 'auth-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['auth-service:3001']
+        labels:
+          service: auth
+
+  - job_name: 'user-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['user-service:3002']
+        labels:
+          service: user
+
+  - job_name: 'ride-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['ride-service:3003']
+        labels:
+          service: ride
+
+  - job_name: 'food-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['food-service:3004']
+        labels:
+          service: food
+
+  - job_name: 'payment-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['payment-service:3005']
+        labels:
+          service: payment
+
+  - job_name: 'chat-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['chat-service:3006']
+        labels:
+          service: chat
+
+  - job_name: 'notification-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['notification-service:3007']
+        labels:
+          service: notification
+
+  - job_name: 'rating-service'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['rating-service:3008']
+        labels:
+          service: rating
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
