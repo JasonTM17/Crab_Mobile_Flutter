@@ -1,28 +1,27 @@
 {
-  "name": "crab-monorepo",
+  "name": "crab-super-app",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "apps/backend/*",
-    "packages/*"
-  ],
+  "description": "Crab - Super App for ride-hailing and food delivery",
+  "author": "Nguyen Son <jasonbmt06@gmail.com>",
+  "license": "MIT",
   "scripts": {
-    "build": "turbo run build",
     "dev": "turbo run dev",
+    "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f"
   },
   "devDependencies": {
-    "turbo": "^2.0.0",
-    "typescript": "^5.4.0",
-    "prettier": "^3.2.0",
-    "@types/node": "^20.0.0"
+    "turbo": "^1.13.0"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@9.0.0"
+  "packageManager": "pnpm@8.15.0"
 }

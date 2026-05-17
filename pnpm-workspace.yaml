@@ -1,4 +1,4 @@
 packages:
-  - "apps/*"
-  - "apps/backend/*"
-  - "packages/*"
+  - 'apps/backend/*'
+  - 'apps/web-admin'
+  - 'apps/mobile'
