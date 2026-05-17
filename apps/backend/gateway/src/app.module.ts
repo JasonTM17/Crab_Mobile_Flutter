@@ -1,0 +1,55 @@
+import { Module } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { HttpModule } from '@nestjs/axios'
+import { JwtModule } from '@nestjs/jwt'
+import { PassportModule } from '@nestjs/passport'
+import { ThrottlerModule } from '@nestjs/throttler'
+import configuration from './config/configuration'
+import { AuthModule } from './auth/auth.module'
+import { ProxyModule } from './proxy/proxy.module'
+import { RideGateway } from './gateways/ride.gateway'
+import { FoodGateway } from './gateways/food.gateway'
+import { ChatGateway } from './gateways/chat.gateway'
+import { NotificationGateway } from './gateways/notification.gateway'
+import { HealthController } from './health/health.controller'
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.get<number>('throttle.ttl', 60000),
+          limit: config.get<number>('throttle.limit', 100),
+        },
+      ],
+    }),
+    HttpModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        timeout: config.get<number>('HTTP_TIMEOUT', 10000),
+        maxRedirects: 3,
+      }),
+    }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('jwtSecret', 'change-me-in-production'),
+        signOptions: { expiresIn: '15m' },
+      }),
+    }),
+    AuthModule,
+    ProxyModule,
+  ],
+  controllers: [HealthController],
+  providers: [RideGateway, FoodGateway, ChatGateway, NotificationGateway],
+})
+export class AppModule {}
