@@ -1,0 +1,753 @@
+openapi: 3.0.3
+info:
+  title: Crab Super App API
+  description: |
+    REST API for the Crab super-app platform.
+    Covers ride-hailing, food delivery, payments, chat, and notifications.
+  version: 1.0.0
+  contact:
+    name: Nguyen Son
+    email: jasonbmt06@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+  - url: https://api.crab.app/api
+    description: Production
+
+tags:
+  - name: Auth
+    description: Authentication and authorization
+  - name: Users
+    description: User profile management
+  - name: Rides
+    description: Ride-hailing operations
+  - name: Food
+    description: Food ordering and restaurant management
+  - name: Payments
+    description: Wallet and transaction management
+  - name: Chat
+    description: Real-time messaging
+  - name: Notifications
+    description: Push and in-app notifications
+  - name: Ratings
+    description: Reviews and ratings
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register new user
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and get tokens
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required: [refreshToken]
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  expiresIn:
+                    type: integer
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      operationId: getProfile
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+    patch:
+      tags: [Users]
+      summary: Update current user profile
+      operationId: updateProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  /rides:
+    post:
+      tags: [Rides]
+      summary: Request a new ride
+      operationId: createRide
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRideRequest'
+      responses:
+        '201':
+          description: Ride created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+
+  /rides/history:
+    get:
+      tags: [Rides]
+      summary: Get ride history
+      operationId: getRideHistory
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/RideStatus'
+      responses:
+        '200':
+          description: Ride history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRides'
+
+  /rides/{rideId}:
+    get:
+      tags: [Rides]
+      summary: Get ride details
+      operationId: getRide
+      parameters:
+        - name: rideId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ride details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+
+  /rides/{rideId}/cancel:
+    post:
+      tags: [Rides]
+      summary: Cancel a ride
+      operationId: cancelRide
+      parameters:
+        - name: rideId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Ride cancelled
+
+  /food/restaurants:
+    get:
+      tags: [Food]
+      summary: List nearby restaurants
+      operationId: listRestaurants
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: radius
+          in: query
+          schema:
+            type: number
+            default: 5
+        - name: category
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Restaurant list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRestaurants'
+
+  /food/restaurants/{restaurantId}/menu:
+    get:
+      tags: [Food]
+      summary: Get restaurant menu
+      operationId: getMenu
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Restaurant menu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+
+  /food/orders:
+    post:
+      tags: [Food]
+      summary: Place a food order
+      operationId: createFoodOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFoodOrderRequest'
+      responses:
+        '201':
+          description: Order placed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodOrder'
+
+  /payments/wallet:
+    get:
+      tags: [Payments]
+      summary: Get wallet balance
+      operationId: getWallet
+      responses:
+        '200':
+          description: Wallet info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+
+  /payments/topup:
+    post:
+      tags: [Payments]
+      summary: Top up wallet
+      operationId: topUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopUpRequest'
+      responses:
+        '200':
+          description: Top up successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+
+  /payments/transactions:
+    get:
+      tags: [Payments]
+      summary: Get transaction history
+      operationId: getTransactions
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [topup, ride_payment, food_payment, refund, withdrawal]
+      responses:
+        '200':
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTransactions'
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: Get notifications
+      operationId: getNotifications
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Notification list
+
+  /ratings:
+    post:
+      tags: [Ratings]
+      summary: Submit a rating
+      operationId: createRating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRatingRequest'
+      responses:
+        '201':
+          description: Rating submitted
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password, fullName, phone, role]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        fullName:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [rider, driver, restaurant_owner]
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        fullName:
+          type: string
+        role:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            phone:
+              type: string
+            avatar:
+              type: string
+            rating:
+              type: number
+            totalRides:
+              type: integer
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        phone:
+          type: string
+
+    Location:
+      type: object
+      required: [lat, lng]
+      properties:
+        lat:
+          type: number
+        lng:
+          type: number
+        address:
+          type: string
+
+    CreateRideRequest:
+      type: object
+      required: [pickupLocation, dropoffLocation, vehicleType]
+      properties:
+        pickupLocation:
+          $ref: '#/components/schemas/Location'
+        dropoffLocation:
+          $ref: '#/components/schemas/Location'
+        vehicleType:
+          type: string
+          enum: [bike, car, car_plus]
+
+    Ride:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/RideStatus'
+        estimatedFare:
+          type: integer
+        actualFare:
+          type: integer
+        pickupLocation:
+          $ref: '#/components/schemas/Location'
+        dropoffLocation:
+          $ref: '#/components/schemas/Location'
+        createdAt:
+          type: string
+          format: date-time
+
+    RideStatus:
+      type: string
+      enum: [SEARCHING, ACCEPTED, ARRIVING, IN_PROGRESS, COMPLETED, CANCELLED, NO_DRIVER]
+
+    PaginatedRides:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ride'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        rating:
+          type: number
+        deliveryTime:
+          type: string
+        deliveryFee:
+          type: integer
+        isOpen:
+          type: boolean
+        distance:
+          type: number
+
+    PaginatedRestaurants:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Restaurant'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Menu:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuItem'
+
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+        imageUrl:
+          type: string
+
+    CreateFoodOrderRequest:
+      type: object
+      required: [restaurantId, items, deliveryAddress]
+      properties:
+        restaurantId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              menuItemId:
+                type: string
+              quantity:
+                type: integer
+              options:
+                type: object
+        deliveryAddress:
+          $ref: '#/components/schemas/Location'
+        note:
+          type: string
+
+    FoodOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, PREPARING, READY, PICKED_UP, DELIVERED, CANCELLED]
+        items:
+          type: array
+          items:
+            type: object
+        subtotal:
+          type: integer
+        deliveryFee:
+          type: integer
+        total:
+          type: integer
+        estimatedDelivery:
+          type: string
+
+    Wallet:
+      type: object
+      properties:
+        balance:
+          type: integer
+        currency:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+
+    TopUpRequest:
+      type: object
+      required: [amount, method]
+      properties:
+        amount:
+          type: integer
+          minimum: 10000
+        method:
+          type: string
+          enum: [bank_transfer, momo, zalopay, credit_card]
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        amount:
+          type: integer
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PaginatedTransactions:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    CreateRatingRequest:
+      type: object
+      required: [targetId, targetType, score]
+      properties:
+        targetId:
+          type: string
+          format: uuid
+        targetType:
+          type: string
+          enum: [driver, rider, restaurant]
+        rideId:
+          type: string
+          format: uuid
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    ApiError:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+        timestamp:
+          type: string
+          format: date-time
+
+security:
+  - BearerAuth: []
