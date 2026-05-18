@@ -1,0 +1,6 @@
+{
+  "name": "@crab/backend-shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Crab Backend Shared utilities"
+}
