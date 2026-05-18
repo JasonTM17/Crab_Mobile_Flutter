@@ -1,44 +1,46 @@
-import { Controller, Get, Post, Param, Body, Query, HttpStatus } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { MessagesService } from './messages.service'
+import { SendMessageDto, EditMessageDto } from './dto/message.dto'
 
-@Controller('messages')
+@Controller('chats/messages')
 export class MessagesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(private readonly service: MessagesService) {}
 
-  @Get(':conversationId')
-  async getMessages(
-    @Param('conversationId') conversationId: string,
+  @Post()
+  send(@Body() dto: SendMessageDto) {
+    return this.service.send(dto)
+  }
+
+  @Get('room/:roomId')
+  list(
+    @Param('roomId') roomId: string,
+    @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('before') before?: string,
   ) {
-    const messages = await this.messagesService.getByConversation(
-      conversationId,
-      limit ? parseInt(limit) : 50,
-      before ? new Date(before) : undefined,
-    )
-    return { success: true, data: messages, statusCode: HttpStatus.OK }
+    return this.service.list(roomId, page ? +page : 1, limit ? +limit : 50)
   }
 
-  @Post(':conversationId')
-  async sendMessage(
-    @Param('conversationId') conversationId: string,
-    @Body() body: { sender_id: string; content: string; type?: string },
-  ) {
-    const message = await this.messagesService.create(
-      conversationId,
-      body.sender_id,
-      body.content,
-      body.type,
-    )
-    return { success: true, data: message, statusCode: HttpStatus.CREATED }
+  @Put(':id/read')
+  markRead(@Param('id') id: string, @Body('userId') userId: string) {
+    return this.service.markAsRead(id, userId)
   }
 
-  @Post(':conversationId/read')
-  async markRead(
-    @Param('conversationId') conversationId: string,
-    @Body('user_id') userId: string,
+  @Put('room/:roomId/read')
+  markRoomRead(@Param('roomId') roomId: string, @Body('userId') userId: string) {
+    return this.service.markRoomAsRead(roomId, userId)
+  }
+
+  @Put(':id/edit')
+  edit(
+    @Param('id') id: string,
+    @Body('userId') userId: string,
+    @Body() dto: EditMessageDto,
   ) {
-    await this.messagesService.markAsRead(conversationId, userId)
-    return { success: true, statusCode: HttpStatus.OK }
+    return this.service.edit(id, userId, dto)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string, @Body('userId') userId: string) {
+    return this.service.delete(id, userId)
   }
 }
