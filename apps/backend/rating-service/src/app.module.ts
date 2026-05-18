@@ -1,24 +1,30 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
-import { MongooseModule } from '@nestjs/mongoose'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { RatingsModule } from './ratings/ratings.module'
-import { ReviewsModule } from './reviews/reviews.module'
+import { HealthController } from './health.controller'
+import { RatingEntity } from './ratings/entities/rating.entity'
+import { RatingAggregateEntity } from './ratings/entities/rating-aggregate.entity'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      autoLoadEntities: true,
-      synchronize: process.env.NODE_ENV !== 'production',
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get('DB_HOST', 'localhost'),
+        port: config.get<number>('DB_PORT', 5432),
+        username: config.get('DB_USER', 'crab'),
+        password: config.get('DB_PASSWORD', 'crab_secret'),
+        database: config.get('DB_NAME', 'crab_db'),
+        entities: [RatingEntity, RatingAggregateEntity],
+        synchronize: config.get('NODE_ENV') !== 'production',
+      }),
     }),
-    MongooseModule.forRoot(
-      process.env.MONGODB_URI || 'mongodb://localhost:27017/crab_ratings',
-    ),
     RatingsModule,
-    ReviewsModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

@@ -3,38 +3,38 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   Index,
 } from 'typeorm'
 
+export enum RatingTargetType {
+  DRIVER = 'DRIVER',
+  RIDER = 'RIDER',
+  RESTAURANT = 'RESTAURANT',
+  DELIVERY = 'DELIVERY',
+}
+
+export enum RatingContext {
+  RIDE = 'RIDE',
+  ORDER = 'ORDER',
+}
+
 @Entity('ratings')
-@Index(['targetType', 'targetId'])
-@Index(['userId', 'targetType', 'targetId'], { unique: true })
-export class Rating {
-  @PrimaryGeneratedColumn('uuid')
-  id: string
-
-  @Column()
-  userId: string
-
-  @Column()
-  targetType: string // 'driver', 'restaurant', 'rider'
-
-  @Column()
-  targetId: string
-
-  @Column({ type: 'decimal', precision: 2, scale: 1 })
-  score: number // 1.0 - 5.0
-
-  @Column({ nullable: true })
-  rideId: string
-
-  @Column({ nullable: true })
-  orderId: string
-
-  @CreateDateColumn()
-  createdAt: Date
-
-  @UpdateDateColumn()
-  updatedAt: Date
+@Index(['targetId', 'targetType'])
+@Index(['raterId'])
+@Index(['referenceId'], { unique: true })
+export class RatingEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string
+  @Column() raterId!: string
+  @Column() targetId!: string
+  @Column({ type: 'enum', enum: RatingTargetType }) targetType!: RatingTargetType
+  @Column({ type: 'enum', enum: RatingContext }) context!: RatingContext
+  @Column() referenceId!: string
+  @Column({ type: 'smallint' }) score!: number
+  @Column({ nullable: true, type: 'text' }) review?: string
+  @Column({ type: 'jsonb', nullable: true }) tags?: string[]
+  @Column({ type: 'jsonb', nullable: true }) photos?: string[]
+  @Column({ default: false }) flagged!: boolean
+  @Column({ nullable: true, type: 'text' }) flagReason?: string
+  @Column({ default: false }) hidden!: boolean
+  @CreateDateColumn() createdAt!: Date
 }
