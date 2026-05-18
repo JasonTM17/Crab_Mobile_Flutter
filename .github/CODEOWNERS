@@ -1,0 +1,20 @@
+# Default owner for all files
+* @JasonTM17
+
+# Backend services
+/apps/backend/ @JasonTM17
+
+# Mobile app
+/apps/mobile/ @JasonTM17
+
+# Web admin
+/apps/web-admin/ @JasonTM17
+
+# Infrastructure
+/infra/ @JasonTM17
+/.github/ @JasonTM17
+/docker-compose*.yml @JasonTM17
+
+# Documentation
+*.md @JasonTM17
+/docs/ @JasonTM17
