@@ -1,28 +1,29 @@
+# syntax=docker/dockerfile:1
 FROM node:20-alpine AS builder
-
 WORKDIR /app
-
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/ ./packages/
-COPY apps/backend/notification-service/package.json ./apps/backend/notification-service/
-
-RUN corepack enable && pnpm install --frozen-lockfile
-
-COPY apps/backend/notification-service/ ./apps/backend/notification-service/
 COPY tsconfig.base.json ./
-
+COPY packages ./packages
+COPY apps/backend/notification-service ./apps/backend/notification-service
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @crab/common-types build
 RUN pnpm --filter @crab/notification-service build
 
-FROM node:20-alpine AS runner
-
+FROM node:20-alpine AS runtime
 WORKDIR /app
-
+RUN apk add --no-cache wget
+RUN addgroup -S app && adduser -S app -G app
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/backend/notification-service/package.json ./apps/backend/notification-service/package.json
+COPY --from=builder /app/apps/backend/notification-service/dist ./apps/backend/notification-service/dist
+RUN pnpm install --prod --frozen-lockfile
+USER app
 ENV NODE_ENV=production
-
-COPY --from=builder /app/apps/backend/notification-service/dist ./dist
-COPY --from=builder /app/apps/backend/notification-service/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-
+ENV PORT=3007
 EXPOSE 3007
-
-CMD ["node", "dist/main.js"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD wget -qO- http://localhost:3007/health || exit 1
+CMD ["node", "apps/backend/notification-service/dist/main.js"]

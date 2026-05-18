@@ -1,39 +1,53 @@
-import { Controller, Get, Post, Patch, Param, Query, Body, HttpStatus } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { NotificationsService } from './notifications.service'
+import { CreateNotificationDto, BroadcastDto } from './dto/notification.dto'
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(private readonly service: NotificationsService) {}
 
-  @Get(':userId')
-  async getByUser(
+  @Post()
+  send(@Body() dto: CreateNotificationDto) {
+    return this.service.send(dto)
+  }
+
+  @Post('broadcast')
+  broadcast(@Body() dto: BroadcastDto) {
+    return this.service.broadcast(dto)
+  }
+
+  @Get('user/:userId')
+  list(
     @Param('userId') userId: string,
+    @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query('unreadOnly') unreadOnly?: string,
   ) {
-    const notifications = await this.notificationsService.getByUser(
+    return this.service.list(
       userId,
-      limit ? parseInt(limit) : 30,
-      offset ? parseInt(offset) : 0,
+      page ? +page : 1,
+      limit ? +limit : 30,
+      unreadOnly === 'true',
     )
-    return { success: true, data: notifications, statusCode: HttpStatus.OK }
   }
 
-  @Get(':userId/unread-count')
-  async getUnreadCount(@Param('userId') userId: string) {
-    const count = await this.notificationsService.getUnreadCount(userId)
-    return { success: true, data: { count }, statusCode: HttpStatus.OK }
+  @Get('user/:userId/unread-count')
+  unreadCount(@Param('userId') userId: string) {
+    return this.service.unreadCount(userId)
   }
 
-  @Patch(':id/read')
-  async markAsRead(@Param('id') id: string) {
-    await this.notificationsService.markAsRead(id)
-    return { success: true, statusCode: HttpStatus.OK }
+  @Put(':id/read')
+  markRead(@Param('id') id: string, @Body('userId') userId: string) {
+    return this.service.markRead(id, userId)
   }
 
-  @Post(':userId/read-all')
-  async markAllAsRead(@Param('userId') userId: string) {
-    await this.notificationsService.markAllAsRead(userId)
-    return { success: true, statusCode: HttpStatus.OK }
+  @Put('user/:userId/read-all')
+  markAllRead(@Param('userId') userId: string) {
+    return this.service.markAllRead(userId)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string, @Body('userId') userId: string) {
+    return this.service.delete(id, userId)
   }
 }

@@ -4,18 +4,25 @@ import { Document } from 'mongoose'
 export type NotificationDocument = Notification & Document
 
 export enum NotificationType {
-  RIDE_UPDATE = 'ride_update',
-  ORDER_UPDATE = 'order_update',
-  PAYMENT = 'payment',
-  PROMO = 'promo',
-  SYSTEM = 'system',
+  RIDE = 'ride',
+  ORDER = 'order',
   CHAT = 'chat',
+  SYSTEM = 'system',
+  PROMO = 'promo',
+  PAYMENT = 'payment',
 }
 
-@Schema({ timestamps: true, collection: 'notifications' })
+export enum NotificationChannel {
+  PUSH = 'push',
+  IN_APP = 'in_app',
+  EMAIL = 'email',
+  SMS = 'sms',
+}
+
+@Schema({ timestamps: true })
 export class Notification {
   @Prop({ required: true, index: true })
-  user_id!: string
+  userId!: string
 
   @Prop({ required: true })
   title!: string
@@ -23,19 +30,34 @@ export class Notification {
   @Prop({ required: true })
   body!: string
 
-  @Prop({ type: String, enum: NotificationType, required: true })
+  @Prop({ enum: NotificationType, required: true })
   type!: NotificationType
 
-  @Prop('mixed')
+  @Prop({ type: [String], default: ['in_app', 'push'] })
+  channels!: NotificationChannel[]
+
+  @Prop({ type: Object })
   data?: Record<string, any>
 
-  @Prop({ type: Boolean, default: false })
-  is_read!: boolean
+  @Prop({ default: false })
+  read!: boolean
 
-  @Prop({ type: Date, default: Date.now })
-  sent_at!: Date
+  @Prop()
+  readAt?: Date
+
+  @Prop({ default: false })
+  delivered!: boolean
+
+  @Prop()
+  deliveredAt?: Date
+
+  @Prop()
+  imageUrl?: string
+
+  @Prop()
+  deepLink?: string
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification)
-NotificationSchema.index({ user_id: 1, sent_at: -1 })
-NotificationSchema.index({ user_id: 1, is_read: 1 })
+NotificationSchema.index({ userId: 1, createdAt: -1 })
+NotificationSchema.index({ userId: 1, read: 1 })
