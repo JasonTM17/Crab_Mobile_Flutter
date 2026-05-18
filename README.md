@@ -48,7 +48,7 @@ English | [Tiếng Việt](docs/README_VI.md)
 | **Realtime** | Socket.IO with Redis adapter for horizontal scaling |
 | **Database** | PostgreSQL + MongoDB (geospatial) + Redis (cache/pub-sub) |
 | **Storage** | MinIO (S3-compatible) |
-| **Status** | Phase 1 Complete - Foundation |
+| **Status** | All Phases Complete |
 
 ---
 
@@ -233,7 +233,7 @@ pnpm install
 
 3. Start infrastructure services
 ```bash
-docker compose -f docker/docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 4. Copy environment files
@@ -266,7 +266,7 @@ crab/
 │   ├── mobile/                    # Flutter mobile app
 │   │   ├── lib/
 │   │   │   ├── core/             # DI, network, router, theme
-│   │   │   ├── features/         # auth, home, ride, food, chat, profile
+│   │   │   ├── features/         # auth, home, ride, food, chat, payment, notifications, profile
 │   │   │   └── shared/           # models, widgets, utils
 │   │   └── pubspec.yaml
 │   ├── web-admin/                 # React admin dashboard
@@ -281,10 +281,11 @@ crab/
 │       ├── gateway/               # API Gateway + Socket.IO
 │       ├── auth-service/          # JWT authentication
 │       ├── user-service/          # Profile CRUD + avatar
-│       ├── ride-service/          # (Phase 2)
-│       ├── food-service/          # (Phase 3)
-│       ├── payment-service/       # (Phase 4)
-│       └── chat-service/          # (Phase 5)
+│       ├── ride-service/          # Ride-hailing + GPS tracking
+│       ├── food-service/          # Restaurant + food ordering
+│       ├── payment-service/       # Wallet + transactions
+│       ├── chat-service/          # Realtime messaging
+│       └── notification-service/  # Push notifications + FCM
 ├── packages/
 │   ├── socket-events/             # Shared Socket.IO event types
 │   └── common-types/              # Shared enums, DTOs, interfaces
@@ -335,13 +336,19 @@ crab/
 
 | Service | Port | Image |
 |---------|------|-------|
-| PostgreSQL 15 | 5432 | `postgres:15-alpine` |
+| PostgreSQL 16 | 5432 | `postgres:16-alpine` |
 | MongoDB 7 | 27017 | `mongo:7` |
 | Redis 7 | 6379 | `redis:7-alpine` |
 | MinIO | 9000/9001 | `minio/minio` |
 | API Gateway | 3000 | `ghcr.io/jasontm17/crab-gateway` |
 | Auth Service | 3001 | `ghcr.io/jasontm17/crab-auth-service` |
 | User Service | 3002 | `ghcr.io/jasontm17/crab-user-service` |
+| Ride Service | 3003 | `ghcr.io/jasontm17/crab-ride-service` |
+| Food Service | 3004 | `ghcr.io/jasontm17/crab-food-service` |
+| Payment Service | 3005 | `ghcr.io/jasontm17/crab-payment-service` |
+| Chat Service | 3006 | `ghcr.io/jasontm17/crab-chat-service` |
+| Notification Service | 3007 | `ghcr.io/jasontm17/crab-notification-service` |
+| Rating Service | 3008 | `ghcr.io/jasontm17/crab-rating-service` |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -374,11 +381,11 @@ pnpm test         # Run all tests
 ## Roadmap
 
 - [x] **Phase 1**: Foundation (Monorepo, Auth, User, Gateway, Mobile, Admin)
-- [ ] **Phase 2**: Ride-Hailing Core (GPS tracking, driver matching, fare calculation)
-- [ ] **Phase 3**: Food Delivery (Restaurant listing, ordering, delivery tracking)
-- [ ] **Phase 4**: Payment & Wallet (Digital wallet, transactions, payouts)
-- [ ] **Phase 5**: Chat & Notifications (Realtime messaging, push notifications)
-- [ ] **Phase 6**: Rating, Review & Polish (Rating system, search, performance)
+- [x] **Phase 2**: Ride-Hailing Core (GPS tracking, driver matching, fare calculation)
+- [x] **Phase 3**: Food Delivery (Restaurant listing, ordering, delivery tracking)
+- [x] **Phase 4**: Payment & Wallet (Digital wallet, transactions, payouts)
+- [x] **Phase 5**: Chat & Notifications (Realtime messaging, push notifications)
+- [x] **Phase 6**: Rating, Review & Polish (Rating system, search, performance)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -405,7 +412,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  <p>Built with dedication by <a href="https://github.com/JasonTM17">JasonTM17</a></p>
+  <p>Built with dedication by <a href="https://github.com/JasonTM17">Nguyễn Sơn</a></p>
+  <p><em>This is a learning project. Author: Nguyễn Sơn (jasonbmt06@gmail.com). Feedback and suggestions are welcome!</em></p>
 </div>
 
 <!-- BADGE REFERENCE LINKS -->

@@ -138,9 +138,7 @@ class _HomeTab extends StatelessWidget {
                   subtitle: 'Order food',
                   icon: Icons.restaurant,
                   color: const Color(0xFFFF6D00),
-                  onTap: () {
-                    // TODO: Navigate to food
-                  },
+                  onTap: () => context.push(AppRouter.food),
                 ),
               ],
             ),

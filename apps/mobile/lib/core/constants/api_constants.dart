@@ -19,13 +19,34 @@ class ApiConstants {
 
   // User endpoints
   static const String profile = '/users/me';
+  static const String changePassword = '/users/change-password';
 
   // Ride endpoints
   static const String rides = '/rides';
+  static const String driverBase = '/driver';
   static const String createRide = '/rides';
   static const String estimateFare = '/rides/estimate';
   static const String rideHistory = '/rides/history';
   static const String activeRide = '/rides/active';
+
+  // Food endpoints
+  static const String restaurants = '/restaurants';
+  static const String orders = '/orders';
+  static const String orderHistory = '/orders/history';
+  static const String activeOrder = '/orders/active';
+
+  // Chat endpoints
+  static const String conversations = '/chat/conversations';
+
+  // Payment endpoints
+  static const String wallet = '/payment/wallet';
+  static const String transactions = '/payment/transactions';
+  static const String topUp = '/payment/wallet/topup';
+  static const String promos = '/payment/promos';
+
+  // Notification endpoints
+  static const String notifications = '/notifications';
+  static const String unreadCount = '/notifications/unread-count';
 
   // Socket namespaces
   static const String rideNamespace = '/ride';

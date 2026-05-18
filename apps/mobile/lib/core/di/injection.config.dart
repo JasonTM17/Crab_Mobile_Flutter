@@ -19,6 +19,8 @@ import '../../features/ride/data/repositories/ride_repository.dart' as _i6;
 import '../../features/ride/presentation/bloc/ride_bloc.dart' as _i7;
 import '../../features/ride/driver/data/repositories/driver_repository.dart' as _i8;
 import '../../features/ride/driver/presentation/bloc/driver_bloc.dart' as _i9;
+import '../../features/food/data/repositories/food_repository.dart' as _i10;
+import '../../features/food/presentation/bloc/food_bloc.dart' as _i11;
 
 extension GetItInjectableX on _i174.GetIt {
   Future<_i174.GetIt> init({
@@ -50,6 +52,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i9.DriverBloc>(
       () => _i9.DriverBloc(gh<_i8.DriverRepository>()),
+    );
+    gh.singleton<_i10.FoodRepository>(
+      () => _i10.FoodRepository(gh<_i1.DioClient>()),
+    );
+    gh.factory<_i11.FoodBloc>(
+      () => _i11.FoodBloc(gh<_i10.FoodRepository>(), gh<_i2.SocketClient>()),
     );
     return this;
   }
