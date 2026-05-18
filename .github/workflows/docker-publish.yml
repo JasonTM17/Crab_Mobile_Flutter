@@ -1,0 +1,75 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  REGISTRY: docker.io
+  NAMESPACE: ${{ secrets.DOCKERHUB_NAMESPACE || 'crab' }}
+
+jobs:
+  build-and-push:
+    name: Build & Push (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: gateway
+            dockerfile: apps/backend/gateway/Dockerfile
+          - service: auth-service
+            dockerfile: apps/backend/auth-service/Dockerfile
+          - service: user-service
+            dockerfile: apps/backend/user-service/Dockerfile
+          - service: ride-service
+            dockerfile: apps/backend/ride-service/Dockerfile
+          - service: food-service
+            dockerfile: apps/backend/food-service/Dockerfile
+          - service: payment-service
+            dockerfile: apps/backend/payment-service/Dockerfile
+          - service: chat-service
+            dockerfile: apps/backend/chat-service/Dockerfile
+          - service: notification-service
+            dockerfile: apps/backend/notification-service/Dockerfile
+          - service: rating-service
+            dockerfile: apps/backend/rating-service/Dockerfile
+          - service: web-admin
+            dockerfile: apps/web-admin/Dockerfile
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.NAMESPACE }}/${{ matrix.service }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-,format=short
+      - name: Build & Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
