@@ -8,6 +8,8 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/ride/presentation/bloc/ride_bloc.dart';
 import '../../features/ride/presentation/screens/ride_booking_screen.dart';
+import '../../features/ride/driver/presentation/bloc/driver_bloc.dart';
+import '../../features/ride/driver/presentation/screens/driver_mode_screen.dart';
 import '../constants/api_constants.dart';
 import '../di/injection.dart';
 
@@ -18,6 +20,7 @@ class AppRouter {
   static const String login = '/login';
   static const String register = '/register';
   static const String rideBooking = '/ride';
+  static const String driverMode = '/driver';
 
   static final _storage = const FlutterSecureStorage();
 
@@ -42,6 +45,13 @@ class AppRouter {
         builder: (context, state) => BlocProvider(
           create: (_) => getIt<RideBloc>(),
           child: const RideBookingScreen(),
+        ),
+      ),
+      GoRoute(
+        path: driverMode,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<DriverBloc>(),
+          child: const DriverModeScreen(),
         ),
       ),
     ],
