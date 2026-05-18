@@ -1,25 +1,38 @@
-import { Controller, Get, Post, Param, Body, HttpStatus } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common'
 import { WalletService } from './wallet.service'
+import { TopUpDto, WithdrawDto, TransferDto } from './dto/wallet.dto'
 
 @Controller('wallet')
 export class WalletController {
-  constructor(private readonly walletService: WalletService) {}
+  constructor(private readonly service: WalletService) {}
 
   @Get(':userId')
-  async getBalance(@Param('userId') userId: string) {
-    const balance = await this.walletService.getBalance(userId)
-    return { success: true, data: { balance }, statusCode: HttpStatus.OK }
+  getBalance(@Param('userId') userId: string) {
+    return this.service.getBalance(userId)
   }
 
-  @Post(':userId/topup')
-  async topUp(@Param('userId') userId: string, @Body('amount') amount: number) {
-    const wallet = await this.walletService.topUp(userId, amount)
-    return { success: true, data: wallet, statusCode: HttpStatus.OK }
+  @Post(':userId/top-up')
+  topUp(@Param('userId') userId: string, @Body() dto: TopUpDto) {
+    return this.service.topUp(userId, dto)
   }
 
   @Post(':userId/withdraw')
-  async withdraw(@Param('userId') userId: string, @Body('amount') amount: number) {
-    const wallet = await this.walletService.withdraw(userId, amount)
-    return { success: true, data: wallet, statusCode: HttpStatus.OK }
+  withdraw(@Param('userId') userId: string, @Body() dto: WithdrawDto) {
+    return this.service.withdraw(userId, dto)
+  }
+
+  @Post(':userId/transfer')
+  transfer(@Param('userId') userId: string, @Body() dto: TransferDto) {
+    return this.service.transfer(userId, dto)
+  }
+
+  @Put(':userId/freeze')
+  freeze(@Param('userId') userId: string) {
+    return this.service.freeze(userId)
+  }
+
+  @Put(':userId/unfreeze')
+  unfreeze(@Param('userId') userId: string) {
+    return this.service.unfreeze(userId)
   }
 }

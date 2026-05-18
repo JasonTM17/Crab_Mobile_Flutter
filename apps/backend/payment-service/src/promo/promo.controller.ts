@@ -1,19 +1,38 @@
-import { Controller, Get, Post, Body, Query, HttpStatus } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { PromoService } from './promo.service'
+import { CreatePromoDto, ApplyPromoDto } from './dto/promo.dto'
 
 @Controller('promo')
 export class PromoController {
-  constructor(private readonly promoService: PromoService) {}
-
-  @Post('validate')
-  async validate(@Body() body: { code: string; order_amount: number }) {
-    const result = await this.promoService.validate(body.code, body.order_amount)
-    return { success: true, data: result, statusCode: HttpStatus.OK }
-  }
+  constructor(private readonly service: PromoService) {}
 
   @Post()
-  async create(@Body() body: any) {
-    const promo = await this.promoService.create(body)
-    return { success: true, data: promo, statusCode: HttpStatus.CREATED }
+  create(@Body() dto: CreatePromoDto) {
+    return this.service.create(dto)
+  }
+
+  @Get()
+  list(@Query('active') active?: string) {
+    return this.service.list(active === 'true')
+  }
+
+  @Get(':code')
+  findByCode(@Param('code') code: string) {
+    return this.service.findByCode(code)
+  }
+
+  @Post('validate')
+  validate(@Body() dto: ApplyPromoDto) {
+    return this.service.validate(dto)
+  }
+
+  @Post('apply')
+  apply(@Body() dto: ApplyPromoDto, @Body('referenceId') referenceId?: string) {
+    return this.service.apply(dto, referenceId)
+  }
+
+  @Put(':id/deactivate')
+  deactivate(@Param('id') id: string) {
+    return this.service.deactivate(id)
   }
 }

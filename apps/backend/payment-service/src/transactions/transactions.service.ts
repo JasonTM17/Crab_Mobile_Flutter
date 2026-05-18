@@ -1,86 +1,78 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { TransactionEntity, TransactionType, TransactionStatus } from './entities/transaction.entity'
-import { WalletService } from '../wallet/wallet.service'
+import { Repository, Between, FindOptionsWhere } from 'typeorm'
+import {
+  TransactionEntity,
+  TransactionStatus,
+  TransactionType,
+} from './entities/transaction.entity'
+
+export interface ListOptions {
+  page?: number
+  limit?: number
+  type?: TransactionType
+  status?: TransactionStatus
+  fromDate?: Date
+  toDate?: Date
+}
 
 @Injectable()
 export class TransactionsService {
   constructor(
     @InjectRepository(TransactionEntity)
-    private readonly txRepo: Repository<TransactionEntity>,
-    private readonly walletService: WalletService,
+    private readonly repo: Repository<TransactionEntity>,
   ) {}
 
-  async createPayment(userId: string, amount: number, referenceId?: string, description?: string) {
-    const wallet = await this.walletService.getOrCreate(userId)
-    const balanceBefore = Number(wallet.balance)
+  async listByUser(userId: string, opts: ListOptions = {}) {
+    const page = opts.page ?? 1
+    const limit = opts.limit ?? 20
+    const where: FindOptionsWhere<TransactionEntity> = { userId }
+    if (opts.type) where.type = opts.type
+    if (opts.status) where.status = opts.status
+    if (opts.fromDate && opts.toDate) {
+      where.createdAt = Between(opts.fromDate, opts.toDate)
+    }
 
-    await this.walletService.deduct(userId, amount)
-
-    const tx = this.txRepo.create({
-      wallet_id: wallet.id,
-      user_id: userId,
-      type: TransactionType.PAYMENT,
-      amount,
-      balance_before: balanceBefore,
-      balance_after: balanceBefore - amount,
-      status: TransactionStatus.COMPLETED,
-      reference_id: referenceId,
-      description,
-    })
-    return this.txRepo.save(tx)
-  }
-
-  async createTopUp(userId: string, amount: number, description?: string) {
-    const wallet = await this.walletService.getOrCreate(userId)
-    const balanceBefore = Number(wallet.balance)
-
-    await this.walletService.topUp(userId, amount)
-
-    const tx = this.txRepo.create({
-      wallet_id: wallet.id,
-      user_id: userId,
-      type: TransactionType.TOP_UP,
-      amount,
-      balance_before: balanceBefore,
-      balance_after: balanceBefore + amount,
-      status: TransactionStatus.COMPLETED,
-      description,
-    })
-    return this.txRepo.save(tx)
-  }
-
-  async createRefund(userId: string, amount: number, referenceId: string) {
-    const wallet = await this.walletService.getOrCreate(userId)
-    const balanceBefore = Number(wallet.balance)
-
-    await this.walletService.topUp(userId, amount)
-
-    const tx = this.txRepo.create({
-      wallet_id: wallet.id,
-      user_id: userId,
-      type: TransactionType.REFUND,
-      amount,
-      balance_before: balanceBefore,
-      balance_after: balanceBefore + amount,
-      status: TransactionStatus.COMPLETED,
-      reference_id: referenceId,
-      description: `Refund for ${referenceId}`,
-    })
-    return this.txRepo.save(tx)
-  }
-
-  async getHistory(userId: string, limit = 20, offset = 0) {
-    return this.txRepo.find({
-      where: { user_id: userId },
-      order: { created_at: 'DESC' },
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      skip: (page - 1) * limit,
       take: limit,
-      skip: offset,
+      order: { createdAt: 'DESC' },
+    })
+
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) }
+  }
+
+  async findById(id: string): Promise<TransactionEntity | null> {
+    return this.repo.findOne({ where: { id } })
+  }
+
+  async listByReference(referenceId: string): Promise<TransactionEntity[]> {
+    return this.repo.find({
+      where: { referenceId },
+      order: { createdAt: 'ASC' },
     })
   }
 
-  async getById(id: string) {
-    return this.txRepo.findOneBy({ id })
+  async getSummary(userId: string, fromDate?: Date, toDate?: Date) {
+    const where: FindOptionsWhere<TransactionEntity> = { userId }
+    if (fromDate && toDate) where.createdAt = Between(fromDate, toDate)
+    const txs = await this.repo.find({ where })
+    const summary = {
+      totalIn: 0,
+      totalOut: 0,
+      count: txs.length,
+      byType: {} as Record<string, { count: number; amount: number }>,
+    }
+    for (const tx of txs) {
+      const amt = Number(tx.amount)
+      if (amt > 0) summary.totalIn += amt
+      else summary.totalOut += Math.abs(amt)
+      const t = tx.type
+      if (!summary.byType[t]) summary.byType[t] = { count: 0, amount: 0 }
+      summary.byType[t].count++
+      summary.byType[t].amount += amt
+    }
+    return summary
   }
 }

@@ -1,28 +1,35 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  VersionColumn,
 } from 'typeorm'
 
 @Entity('wallets')
 export class WalletEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string
+  @PrimaryColumn('uuid')
+  userId!: string
 
-  @Column('uuid', { unique: true })
-  user_id!: string
-
-  @Column('decimal', { precision: 15, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
   balance!: number
 
-  @Column({ type: 'boolean', default: true })
-  is_active!: boolean
+  @Column({ default: 'VND' })
+  currency!: string
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  pendingBalance!: number
+
+  @Column({ default: false })
+  frozen!: boolean
+
+  @VersionColumn()
+  version!: number
 
   @CreateDateColumn()
-  created_at!: Date
+  createdAt!: Date
 
   @UpdateDateColumn()
-  updated_at!: Date
+  updatedAt!: Date
 }
