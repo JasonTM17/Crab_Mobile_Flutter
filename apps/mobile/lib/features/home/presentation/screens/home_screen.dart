@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/router/app_router.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
@@ -129,9 +131,7 @@ class _HomeTab extends StatelessWidget {
                   subtitle: 'Book a ride',
                   icon: Icons.directions_car,
                   color: const Color(0xFF00C853),
-                  onTap: () {
-                    // TODO: Navigate to ride
-                  },
+                  onTap: () => context.push(AppRouter.rideBooking),
                 ),
                 ServiceCard(
                   title: 'Food',

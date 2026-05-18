@@ -15,6 +15,8 @@ import '../network/socket_client.dart' as _i2;
 import '../../features/auth/data/repositories/auth_repository.dart' as _i3;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i4;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i5;
+import '../../features/ride/data/repositories/ride_repository.dart' as _i6;
+import '../../features/ride/presentation/bloc/ride_bloc.dart' as _i7;
 
 extension GetItInjectableX on _i174.GetIt {
   Future<_i174.GetIt> init({
@@ -35,6 +37,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i4.AuthBloc(gh<_i3.AuthRepository>()),
     );
     gh.factory<_i5.HomeBloc>(() => _i5.HomeBloc());
+    gh.singleton<_i6.RideRepository>(
+      () => _i6.RideRepository(gh<_i1.DioClient>()),
+    );
+    gh.factory<_i7.RideBloc>(
+      () => _i7.RideBloc(gh<_i6.RideRepository>()),
+    );
     return this;
   }
 }

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/ride/presentation/bloc/ride_bloc.dart';
+import '../../features/ride/presentation/screens/ride_booking_screen.dart';
 import '../constants/api_constants.dart';
+import '../di/injection.dart';
 
 class AppRouter {
   AppRouter._();
@@ -13,6 +17,7 @@ class AppRouter {
   static const String home = '/';
   static const String login = '/login';
   static const String register = '/register';
+  static const String rideBooking = '/ride';
 
   static final _storage = const FlutterSecureStorage();
 
@@ -31,6 +36,13 @@ class AppRouter {
       GoRoute(
         path: register,
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: rideBooking,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<RideBloc>(),
+          child: const RideBookingScreen(),
+        ),
       ),
     ],
   );

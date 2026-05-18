@@ -20,6 +20,13 @@ class ApiConstants {
   // User endpoints
   static const String profile = '/users/me';
 
+  // Ride endpoints
+  static const String rides = '/rides';
+  static const String createRide = '/rides';
+  static const String estimateFare = '/rides/estimate';
+  static const String rideHistory = '/rides/history';
+  static const String activeRide = '/rides/active';
+
   // Socket namespaces
   static const String rideNamespace = '/ride';
   static const String foodNamespace = '/food';
