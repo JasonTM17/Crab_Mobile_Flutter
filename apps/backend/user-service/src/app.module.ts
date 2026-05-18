@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { JwtModule } from '@nestjs/jwt'
-import { PassportModule } from '@nestjs/passport'
-import { UsersModule } from './users/users.module'
-import { UserEntity } from './users/entities/user.entity'
+import { ProfilesModule } from './profiles/profiles.module'
+import { AddressesModule } from './addresses/addresses.module'
+import { VerificationModule } from './verification/verification.module'
+import { HealthController } from './health.controller'
+import { ProfileEntity } from './profiles/entities/profile.entity'
+import { AddressEntity } from './addresses/entities/address.entity'
+import { DriverProfileEntity } from './verification/entities/driver-profile.entity'
+import { MerchantProfileEntity } from './verification/entities/merchant-profile.entity'
+import { VerificationDocEntity } from './verification/entities/verification-doc.entity'
 
 @Module({
   imports: [
@@ -18,22 +23,21 @@ import { UserEntity } from './users/entities/user.entity'
         port: config.get<number>('DB_PORT', 5432),
         username: config.get('DB_USER', 'crab'),
         password: config.get('DB_PASSWORD', 'crab_secret'),
-        database: config.get('DB_NAME', 'crab'),
-        entities: [UserEntity],
+        database: config.get('DB_NAME', 'crab_db'),
+        entities: [
+          ProfileEntity,
+          AddressEntity,
+          DriverProfileEntity,
+          MerchantProfileEntity,
+          VerificationDocEntity,
+        ],
         synchronize: config.get('NODE_ENV') !== 'production',
-        logging: config.get('NODE_ENV') === 'development',
       }),
     }),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET', 'change-me-in-production'),
-        signOptions: { expiresIn: '15m' },
-      }),
-    }),
-    UsersModule,
+    ProfilesModule,
+    AddressesModule,
+    VerificationModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

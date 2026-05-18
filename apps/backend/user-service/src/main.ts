@@ -4,7 +4,6 @@ import { AppModule } from './app.module'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -12,13 +11,10 @@ async function bootstrap() {
       transform: true,
     }),
   )
-
   app.setGlobalPrefix('api/v1')
-  app.enableCors()
-
+  app.enableCors({ origin: '*', credentials: true })
   const port = process.env.PORT ?? 3002
   await app.listen(port)
-  console.log(`User service running on port ${port}`)
+  console.log(`User Service running on port ${port}`)
 }
-
 bootstrap()
