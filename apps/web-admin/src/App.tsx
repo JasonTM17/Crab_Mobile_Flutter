@@ -2,6 +2,13 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import MainLayout from '@/components/layout/MainLayout'
 import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
+import Users from '@/pages/Users'
+import Drivers from '@/pages/Drivers'
+import Rides from '@/pages/Rides'
+import Restaurants from '@/pages/Restaurants'
+import Orders from '@/pages/Orders'
+import Promos from '@/pages/Promos'
+import NotificationBroadcast from '@/pages/NotificationBroadcast'
 import { useAuth } from '@/hooks/useAuth'
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -26,12 +33,14 @@ export default function App() {
         }
       >
         <Route index element={<Dashboard />} />
-        {/* Placeholder routes — pages added in later tasks */}
-        <Route path="users" element={<div className="p-4 text-muted-foreground">Users — coming soon</div>} />
-        <Route path="drivers" element={<div className="p-4 text-muted-foreground">Drivers — coming soon</div>} />
-        <Route path="merchants" element={<div className="p-4 text-muted-foreground">Merchants — coming soon</div>} />
-        <Route path="rides" element={<div className="p-4 text-muted-foreground">Rides — coming soon</div>} />
-        <Route path="orders" element={<div className="p-4 text-muted-foreground">Orders — coming soon</div>} />
+        <Route path="users" element={<Users />} />
+        <Route path="drivers" element={<Drivers />} />
+        <Route path="merchants" element={<Restaurants />} />
+        <Route path="restaurants" element={<Restaurants />} />
+        <Route path="rides" element={<Rides />} />
+        <Route path="orders" element={<Orders />} />
+        <Route path="promos" element={<Promos />} />
+        <Route path="notifications" element={<NotificationBroadcast />} />
         <Route path="payments" element={<div className="p-4 text-muted-foreground">Payments — coming soon</div>} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

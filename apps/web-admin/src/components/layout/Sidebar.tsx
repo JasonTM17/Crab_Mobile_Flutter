@@ -9,6 +9,8 @@ import {
   MapPin,
   ShoppingBag,
   CreditCard,
+  Ticket,
+  Bell,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
@@ -20,6 +22,8 @@ const navItems = [
   { to: '/dashboard/merchants', icon: Store, label: 'Merchants' },
   { to: '/dashboard/rides', icon: MapPin, label: 'Rides' },
   { to: '/dashboard/orders', icon: ShoppingBag, label: 'Orders' },
+  { to: '/dashboard/promos', icon: Ticket, label: 'Promos' },
+  { to: '/dashboard/notifications', icon: Bell, label: 'Notifications' },
   { to: '/dashboard/payments', icon: CreditCard, label: 'Payments' },
 ]
 
