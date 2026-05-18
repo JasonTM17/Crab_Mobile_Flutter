@@ -1,0 +1,73 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      options:
+        - Mobile (Flutter)
+        - Web Admin
+        - Gateway
+        - Auth Service
+        - User Service
+        - Ride Service
+        - Food Service
+        - Payment Service
+        - Chat Service
+        - Notification Service
+        - Rating Service
+        - Infrastructure / DevOps
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug
+      placeholder: When I do X, Y happens instead of Z
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Numbered list of exact steps
+      placeholder: |
+        1. Open the app
+        2. Tap "Book a Ride"
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, app version, device, etc.
+      value: |
+        - OS:
+        - App version:
+        - Device:
+        - Backend deployment (k8s/docker-compose/local):
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Screenshots
+      description: Paste any relevant logs or screenshots. Redact secrets.
+      render: shell
