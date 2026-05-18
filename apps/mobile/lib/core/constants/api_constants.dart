@@ -1,60 +1,48 @@
 class ApiConstants {
-  ApiConstants._();
-
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:3000/api/v1',
+  );
+  static const String socketUrl = String.fromEnvironment(
+    'SOCKET_URL',
     defaultValue: 'http://10.0.2.2:3000',
   );
 
-  static const String wsUrl = String.fromEnvironment(
-    'WS_URL',
-    defaultValue: 'http://10.0.2.2:3000',
-  );
+  // Auth
+  static const String authRegister = '/auth/register';
+  static const String authLogin = '/auth/login';
+  static const String authPhoneLogin = '/auth/login/phone';
+  static const String authPhoneVerify = '/auth/login/phone/verify';
+  static const String authVerifyPhone = '/auth/verify-phone';
+  static const String authPasswordResetRequest = '/auth/password-reset/request';
+  static const String authPasswordResetConfirm = '/auth/password-reset/confirm';
+  static const String authChangePassword = '/auth/change-password';
+  static const String authRefresh = '/auth/refresh';
+  static const String authLogout = '/auth/logout';
+  static const String authMe = '/auth/me';
 
-  // Auth endpoints
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String refreshToken = '/auth/refresh';
-  static const String logout = '/auth/logout';
+  // User
+  static const String profile = '/profiles';
+  static const String addresses = '/addresses';
 
-  // User endpoints
-  static const String profile = '/users/me';
-  static const String changePassword = '/users/change-password';
-
-  // Ride endpoints
+  // Ride
   static const String rides = '/rides';
-  static const String driverBase = '/driver';
-  static const String createRide = '/rides';
-  static const String estimateFare = '/rides/estimate';
-  static const String rideHistory = '/rides/history';
-  static const String activeRide = '/rides/active';
+  static const String fareEstimate = '/rides/estimate';
 
-  // Food endpoints
+  // Food
   static const String restaurants = '/restaurants';
   static const String orders = '/orders';
-  static const String orderHistory = '/orders/history';
-  static const String activeOrder = '/orders/active';
 
-  // Chat endpoints
-  static const String conversations = '/chat/conversations';
+  // Payment
+  static const String wallet = '/wallet';
+  static const String transactions = '/transactions';
 
-  // Payment endpoints
-  static const String wallet = '/payment/wallet';
-  static const String transactions = '/payment/transactions';
-  static const String topUp = '/payment/wallet/topup';
-  static const String promos = '/payment/promos';
+  // Chat
+  static const String chats = '/chats';
 
-  // Notification endpoints
+  // Notifications
   static const String notifications = '/notifications';
-  static const String unreadCount = '/notifications/unread-count';
 
-  // Socket namespaces
-  static const String rideNamespace = '/ride';
-  static const String foodNamespace = '/food';
-  static const String chatNamespace = '/chat';
-  static const String notificationNamespace = '/notification';
-
-  // Storage keys
-  static const String accessTokenKey = 'access_token';
-  static const String refreshTokenKey = 'refresh_token';
+  // Ratings
+  static const String ratings = '/ratings';
 }

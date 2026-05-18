@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/di/injection.dart';
-import '../../../../core/router/app_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../widgets/auth_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,149 +16,180 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  bool _usePhone = true;
 
   @override
   void dispose() {
+    _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _onLogin(BuildContext context) {
-    if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthBloc>().add(
-            LoginRequested(
-              emailOrPhone: _emailController.text.trim(),
-              password: _passwordController.text,
-            ),
-          );
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    final bloc = context.read<AuthBloc>();
+    if (_usePhone) {
+      bloc.add(AuthPhoneLoginRequested(phone: _phoneController.text.trim()));
+    } else {
+      bloc.add(AuthEmailLoginRequested(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      ));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<AuthBloc>(),
-      child: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            context.go(AppRouter.home);
-          } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return Scaffold(
-            body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 48),
-                      Text(
-                        'Welcome back',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Sign in to your account',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 40),
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'Email or Phone',
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email or phone';
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          context.go('/home');
+        } else if (state.status == AuthStatus.otpSent &&
+            state.pendingPhone != null) {
+          context.push('/otp?phone=${state.pendingPhone}');
+        } else if (state.status == AuthStatus.error && state.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final loading = state.status == AuthStatus.loading;
+        return Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 32),
+                    const Icon(Icons.local_taxi,
+                        size: 64, color: Color(0xFF00B14F)),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Welcome back',
+                      style: Theme.of(context).textTheme.displayMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Sign in to continue',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    SegmentedButton<bool>(
+                      segments: const [
+                        ButtonSegment(
+                            value: true,
+                            label: Text('Phone'),
+                            icon: Icon(Icons.phone)),
+                        ButtonSegment(
+                            value: false,
+                            label: Text('Email'),
+                            icon: Icon(Icons.email)),
+                      ],
+                      selected: {_usePhone},
+                      onSelectionChanged: (s) =>
+                          setState(() => _usePhone = s.first),
+                    ),
+                    const SizedBox(height: 24),
+                    if (_usePhone)
+                      AuthTextField(
+                        controller: _phoneController,
+                        label: 'Phone Number',
+                        hint: '+84 901 234 567',
+                        prefixIcon: Icons.phone,
+                        keyboardType: TextInputType.phone,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Phone required';
                           }
+                          if (!RegExp(r'^\+?[1-9]\d{7,14}$')
+                              .hasMatch(v.trim())) {
+                            return 'Invalid phone number';
+                          }
+                          return null;
+                        },
+                      )
+                    else ...[
+                      AuthTextField(
+                        controller: _emailController,
+                        label: 'Email',
+                        hint: 'you@example.com',
+                        prefixIcon: Icons.email,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Email required';
+                          }
+                          if (!v.contains('@')) return 'Invalid email';
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
+                      AuthTextField(
                         controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
+                        label: 'Password',
+                        prefixIcon: Icons.lock,
+                        obscureText: true,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Password required';
+                          if (v.length < 8) return 'Min 8 characters';
                           return null;
                         },
                       ),
-                      const SizedBox(height: 32),
-                      ElevatedButton(
-                        onPressed: state is AuthLoading
-                            ? null
-                            : () => _onLogin(context),
-                        child: state is AuthLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text('Sign In'),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Don't have an account? "),
-                          TextButton(
-                            onPressed: () => context.go(AppRouter.register),
-                            child: const Text('Sign Up'),
-                          ),
-                        ],
-                      ),
                     ],
-                  ),
+                    const SizedBox(height: 8),
+                    if (!_usePhone)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => context.push('/forgot-password'),
+                          child: const Text('Forgot password?'),
+                        ),
+                      ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: loading ? null : _submit,
+                      child: loading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(_usePhone ? 'Send OTP' : 'Sign In'),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Don't have an account? "),
+                        TextButton(
+                          onPressed: () => context.push('/register'),
+                          child: const Text('Sign Up'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

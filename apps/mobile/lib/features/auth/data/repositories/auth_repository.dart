@@ -1,98 +1,106 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/api_constants.dart';
-import '../../../../core/network/dio_client.dart';
-import '../models/user_model.dart';
+import '../../../../shared/services/auth_storage.dart';
+import '../models/auth_models.dart';
 
-@singleton
 class AuthRepository {
-  final DioClient _dioClient;
-  final FlutterSecureStorage _storage;
+  final Dio dio;
+  final AuthStorage storage;
 
-  AuthRepository(this._dioClient)
-      : _storage = const FlutterSecureStorage();
+  AuthRepository({required this.dio, required this.storage});
 
-  Future<UserModel> login({
-    required String emailOrPhone,
-    required String password,
-  }) async {
-    final response = await _dioClient.dio.post(
-      ApiConstants.login,
-      data: {
-        'emailOrPhone': emailOrPhone,
-        'password': password,
-      },
-    );
-
-    await _saveTokens(response.data);
-    return UserModel.fromJson(response.data['user'] as Map<String, dynamic>);
-  }
-
-  Future<UserModel> register({
-    required String name,
+  Future<AuthResponse> register({
     required String email,
     required String phone,
     required String password,
+    required String firstName,
+    required String lastName,
   }) async {
-    final response = await _dioClient.dio.post(
-      ApiConstants.register,
-      data: {
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'password': password,
-      },
-    );
-
-    await _saveTokens(response.data);
-    return UserModel.fromJson(response.data['user'] as Map<String, dynamic>);
+    final response = await dio.post(ApiConstants.authRegister, data: {
+      'email': email,
+      'phone': phone,
+      'password': password,
+      'firstName': firstName,
+      'lastName': lastName,
+    });
+    final auth = AuthResponse.fromJson(response.data as Map<String, dynamic>);
+    await _persistAuth(auth);
+    return auth;
   }
 
-  Future<UserModel> refreshToken() async {
-    final token = await _storage.read(key: ApiConstants.refreshTokenKey);
-    if (token == null) throw Exception('No refresh token');
+  Future<AuthResponse> login(String email, String password) async {
+    final response = await dio.post(ApiConstants.authLogin, data: {
+      'email': email,
+      'password': password,
+    });
+    final auth = AuthResponse.fromJson(response.data as Map<String, dynamic>);
+    await _persistAuth(auth);
+    return auth;
+  }
 
-    final response = await _dioClient.dio.post(
-      ApiConstants.refreshToken,
-      data: {'refreshToken': token},
+  Future<void> requestPhoneLogin(String phone) async {
+    await dio.post(ApiConstants.authPhoneLogin, data: {'phone': phone});
+  }
+
+  Future<AuthResponse> verifyPhoneLogin(String phone, String code) async {
+    final response = await dio.post(
+      ApiConstants.authPhoneVerify,
+      data: {'phone': phone, 'code': code},
     );
+    final auth = AuthResponse.fromJson(response.data as Map<String, dynamic>);
+    await _persistAuth(auth);
+    return auth;
+  }
 
-    await _saveTokens(response.data);
-    return UserModel.fromJson(response.data['user'] as Map<String, dynamic>);
+  Future<void> verifyPhone(String phone, String code) async {
+    await dio.post(
+      ApiConstants.authVerifyPhone,
+      data: {'phone': phone, 'code': code},
+    );
+  }
+
+  Future<void> requestPasswordReset(String phone) async {
+    await dio.post(
+      ApiConstants.authPasswordResetRequest,
+      data: {'phone': phone},
+    );
+  }
+
+  Future<void> confirmPasswordReset(
+    String phone,
+    String code,
+    String newPassword,
+  ) async {
+    await dio.post(
+      ApiConstants.authPasswordResetConfirm,
+      data: {'phone': phone, 'code': code, 'newPassword': newPassword},
+    );
   }
 
   Future<void> logout() async {
-    try {
-      await _dioClient.dio.post(ApiConstants.logout);
-    } on DioException catch (_) {
-      // Ignore errors on logout
-    } finally {
-      await _storage.deleteAll();
-    }
-  }
-
-  Future<bool> isAuthenticated() async {
-    final token = await _storage.read(key: ApiConstants.accessTokenKey);
-    return token != null && token.isNotEmpty;
-  }
-
-  Future<void> _saveTokens(Map<String, dynamic> data) async {
-    final accessToken = data['accessToken'] as String?;
-    final refreshToken = data['refreshToken'] as String?;
-
-    if (accessToken != null) {
-      await _storage.write(
-        key: ApiConstants.accessTokenKey,
-        value: accessToken,
-      );
-    }
+    final refreshToken = await storage.getRefreshToken();
     if (refreshToken != null) {
-      await _storage.write(
-        key: ApiConstants.refreshTokenKey,
-        value: refreshToken,
-      );
+      try {
+        await dio.post(
+          ApiConstants.authLogout,
+          data: {'refresh_token': refreshToken},
+        );
+      } catch (_) {}
     }
+    await storage.clear();
+  }
+
+  Future<UserModel> me() async {
+    final response = await dio.get(ApiConstants.authMe);
+    return UserModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> _persistAuth(AuthResponse auth) async {
+    await storage.saveTokens(
+      accessToken: auth.tokens.accessToken,
+      refreshToken: auth.tokens.refreshToken,
+    );
+    await storage.saveUser(userId: auth.user.id, role: auth.user.role);
   }
 }

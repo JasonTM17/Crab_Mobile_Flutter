@@ -1,40 +1,41 @@
 import 'package:equatable/equatable.dart';
+import '../../data/models/auth_models.dart';
 
-import '../../data/models/user_model.dart';
+enum AuthStatus { initial, loading, authenticated, unauthenticated, otpSent, error }
 
-abstract class AuthState extends Equatable {
-  const AuthState();
+class AuthState extends Equatable {
+  final AuthStatus status;
+  final UserModel? user;
+  final String? error;
+  final String? pendingPhone;
+  final bool requiresPhoneVerification;
+
+  const AuthState({
+    this.status = AuthStatus.initial,
+    this.user,
+    this.error,
+    this.pendingPhone,
+    this.requiresPhoneVerification = false,
+  });
+
+  AuthState copyWith({
+    AuthStatus? status,
+    UserModel? user,
+    String? error,
+    String? pendingPhone,
+    bool? requiresPhoneVerification,
+  }) {
+    return AuthState(
+      status: status ?? this.status,
+      user: user ?? this.user,
+      error: error,
+      pendingPhone: pendingPhone ?? this.pendingPhone,
+      requiresPhoneVerification:
+          requiresPhoneVerification ?? this.requiresPhoneVerification,
+    );
+  }
 
   @override
-  List<Object?> get props => [];
-}
-
-class AuthInitial extends AuthState {
-  const AuthInitial();
-}
-
-class AuthLoading extends AuthState {
-  const AuthLoading();
-}
-
-class AuthAuthenticated extends AuthState {
-  final UserModel user;
-
-  const AuthAuthenticated({required this.user});
-
-  @override
-  List<Object?> get props => [user];
-}
-
-class AuthUnauthenticated extends AuthState {
-  const AuthUnauthenticated();
-}
-
-class AuthError extends AuthState {
-  final String message;
-
-  const AuthError({required this.message});
-
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props =>
+      [status, user, error, pendingPhone, requiresPhoneVerification];
 }
