@@ -1,50 +1,52 @@
-import { Controller, Get, Post, Param, Query, Body, HttpStatus } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { RestaurantsService } from './restaurants.service'
-import { RestaurantCategory } from './schemas/restaurant.schema'
+import {
+  CreateRestaurantDto,
+  UpdateRestaurantDto,
+  SearchRestaurantsDto,
+} from './dto/restaurant.dto'
 
 @Controller('restaurants')
 export class RestaurantsController {
-  constructor(private readonly restaurantsService: RestaurantsService) {}
+  constructor(private readonly service: RestaurantsService) {}
 
-  @Get()
-  async findNearby(
-    @Query('lat') lat: string,
-    @Query('lng') lng: string,
-    @Query('radius') radius?: string,
-    @Query('category') category?: RestaurantCategory,
-  ) {
-    const restaurants = await this.restaurantsService.findNearby(
-      parseFloat(lat),
-      parseFloat(lng),
-      radius ? parseFloat(radius) : 5,
-      category,
-    )
-    return { success: true, data: restaurants, statusCode: HttpStatus.OK }
+  @Post()
+  create(@Body() dto: CreateRestaurantDto) {
+    return this.service.create(dto)
   }
 
   @Get('search')
-  async search(
-    @Query('q') query: string,
-    @Query('lat') lat?: string,
-    @Query('lng') lng?: string,
-  ) {
-    const restaurants = await this.restaurantsService.search(
-      query,
-      lat ? parseFloat(lat) : undefined,
-      lng ? parseFloat(lng) : undefined,
-    )
-    return { success: true, data: restaurants, statusCode: HttpStatus.OK }
+  search(@Query() dto: SearchRestaurantsDto) {
+    return this.service.search(dto)
+  }
+
+  @Get('featured')
+  featured(@Query('limit') limit?: string) {
+    return this.service.findFeatured(limit ? +limit : 10)
+  }
+
+  @Get('merchant/:merchantId')
+  byMerchant(@Param('merchantId') merchantId: string) {
+    return this.service.findByMerchant(merchantId)
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string) {
-    const restaurant = await this.restaurantsService.findById(id)
-    return { success: true, data: restaurant, statusCode: HttpStatus.OK }
+  findOne(@Param('id') id: string) {
+    return this.service.findById(id)
   }
 
-  @Post()
-  async create(@Body() body: any) {
-    const restaurant = await this.restaurantsService.create(body)
-    return { success: true, data: restaurant, statusCode: HttpStatus.CREATED }
+  @Put(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateRestaurantDto) {
+    return this.service.update(id, dto)
+  }
+
+  @Put(':id/toggle-open')
+  toggle(@Param('id') id: string, @Body('isOpen') isOpen: boolean) {
+    return this.service.toggleOpen(id, isOpen)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.service.delete(id)
   }
 }

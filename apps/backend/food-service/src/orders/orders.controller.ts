@@ -1,36 +1,57 @@
-import { Controller, Get, Post, Patch, Param, Body, Query, HttpStatus } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { OrdersService } from './orders.service'
-import { CreateOrderDto } from './dto/create-order.dto'
-import { UpdateOrderStatusDto } from './dto/update-order-status.dto'
+import { CreateOrderDto, UpdateOrderStatusDto } from './dto/order.dto'
+import { OrderStatus } from '@crab/common-types'
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly service: OrdersService) {}
 
   @Post()
-  async create(@Body() dto: CreateOrderDto) {
-    const order = await this.ordersService.create(dto)
-    return { success: true, data: order, statusCode: HttpStatus.CREATED }
+  create(@Body() dto: CreateOrderDto) {
+    return this.service.create(dto)
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string) {
-    const order = await this.ordersService.findById(id)
-    return { success: true, data: order, statusCode: HttpStatus.OK }
+  findOne(@Param('id') id: string) {
+    return this.service.findById(id)
   }
 
-  @Get()
-  async findByUser(@Query('user_id') userId: string) {
-    const orders = await this.ordersService.findActiveByUser(userId)
-    return { success: true, data: orders, statusCode: HttpStatus.OK }
+  @Get('customer/:customerId')
+  byCustomer(@Param('customerId') customerId: string, @Query('limit') limit?: string) {
+    return this.service.findByCustomer(customerId, limit ? +limit : 50)
   }
 
-  @Patch(':id/status')
-  async updateStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateOrderStatusDto,
+  @Get('customer/:customerId/active')
+  active(@Param('customerId') customerId: string) {
+    return this.service.findActive(customerId)
+  }
+
+  @Get('restaurant/:restaurantId')
+  byRestaurant(
+    @Param('restaurantId') restaurantId: string,
+    @Query('status') status?: OrderStatus,
   ) {
-    const order = await this.ordersService.updateStatus(id, dto.status, dto.driver_id)
-    return { success: true, data: order, statusCode: HttpStatus.OK }
+    return this.service.findByRestaurant(restaurantId, status)
+  }
+
+  @Get('driver/:driverId')
+  byDriver(@Param('driverId') driverId: string, @Query('limit') limit?: string) {
+    return this.service.findByDriver(driverId, limit ? +limit : 50)
+  }
+
+  @Put(':id/status')
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
+    return this.service.updateStatus(id, dto)
+  }
+
+  @Put(':id/assign-driver')
+  assign(@Param('id') id: string, @Body('driverId') driverId: string) {
+    return this.service.assignDriver(id, driverId)
+  }
+
+  @Get('stats/restaurant/:restaurantId')
+  stats(@Param('restaurantId') restaurantId: string, @Query('days') days?: string) {
+    return this.service.getStats(restaurantId, days ? +days : 30)
   }
 }
