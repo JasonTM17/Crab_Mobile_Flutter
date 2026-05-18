@@ -51,6 +51,36 @@ export class RideEntity {
   @Column('decimal', { precision: 4, scale: 2, default: 1.0 })
   surge_multiplier!: number
 
+  @Column({ default: 'BIKE' })
+  vehicle_type!: string
+
+  @Column({ type: 'timestamp', nullable: true })
+  scheduled_at?: Date
+
+  @Column({ default: false })
+  is_scheduled!: boolean
+
+  @Column({ default: false })
+  sos_triggered!: boolean
+
+  @Column({ type: 'timestamp', nullable: true })
+  sos_at?: Date
+
+  @Column({ nullable: true, type: 'text' })
+  cancellation_reason?: string
+
+  @Column({ nullable: true })
+  payment_method?: string
+
+  @Column({ default: false })
+  paid!: boolean
+
+  @Column({ type: 'timestamp', nullable: true })
+  pickup_time?: Date
+
+  @Column({ type: 'timestamp', nullable: true })
+  start_time?: Date
+
   @CreateDateColumn()
   created_at!: Date
 

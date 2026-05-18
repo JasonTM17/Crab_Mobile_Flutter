@@ -8,6 +8,7 @@ import { MatchingModule } from './matching/matching.module'
 import { FareModule } from './fare/fare.module'
 import { TrackingModule } from './tracking/tracking.module'
 import { RideEntity } from './rides/entities/ride.entity'
+import { HealthController } from './health.controller'
 
 @Module({
   imports: [
@@ -45,5 +46,6 @@ import { RideEntity } from './rides/entities/ride.entity'
     FareModule,
     TrackingModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

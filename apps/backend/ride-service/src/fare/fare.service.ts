@@ -1,58 +1,59 @@
 import { Injectable } from '@nestjs/common'
 
-/**
- * Haversine formula — returns distance in km between two lat/lng points.
- */
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLng = ((lng2 - lng1) * Math.PI) / 180
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+export enum VehicleType {
+  BIKE = 'BIKE',
+  CAR_4 = 'CAR_4',
+  CAR_7 = 'CAR_7',
+  PREMIUM = 'PREMIUM',
+}
+
+export interface FareConfig {
+  baseFare: number
+  perKm: number
+  perMin: number
+  minFare: number
 }
 
 export interface FareEstimate {
+  vehicleType: VehicleType
   distance_km: number
   duration_min: number
   base_fare: number
   distance_fare: number
+  time_fare: number
   surge_multiplier: number
   total_fare: number
 }
 
+const FARE_CONFIG: Record<VehicleType, FareConfig> = {
+  [VehicleType.BIKE]: { baseFare: 10000, perKm: 4000, perMin: 500, minFare: 12000 },
+  [VehicleType.CAR_4]: { baseFare: 20000, perKm: 11000, perMin: 1500, minFare: 25000 },
+  [VehicleType.CAR_7]: { baseFare: 25000, perKm: 13000, perMin: 1800, minFare: 30000 },
+  [VehicleType.PREMIUM]: { baseFare: 40000, perKm: 18000, perMin: 2500, minFare: 50000 },
+}
+
+const AVG_SPEED_KMH = 25 // Vietnam city avg speed
+const EARTH_RADIUS_KM = 6371
+
 @Injectable()
 export class FareService {
-  private readonly BASE_FARE = 12000 // VND
-  private readonly RATE_FIRST_2KM = 5000 // VND/km
-  private readonly RATE_AFTER_2KM = 4000 // VND/km
-  private readonly WAITING_RATE = 500 // VND/min
-  private readonly SURGE_MIN = 1.0
-  private readonly SURGE_MAX = 3.0
-
+  /**
+   * Haversine distance in kilometers.
+   */
   calculateDistance(
-    pickupLat: number,
-    pickupLng: number,
-    dropoffLat: number,
-    dropoffLng: number,
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
   ): number {
-    return haversineKm(pickupLat, pickupLng, dropoffLat, dropoffLng)
-  }
-
-  calculateDistanceFare(distanceKm: number): number {
-    if (distanceKm <= 2) {
-      return distanceKm * this.RATE_FIRST_2KM
-    }
-    return 2 * this.RATE_FIRST_2KM + (distanceKm - 2) * this.RATE_AFTER_2KM
-  }
-
-  calculateSurge(activeRequests: number, availableDrivers: number): number {
-    if (availableDrivers === 0) return this.SURGE_MAX
-    const ratio = activeRequests / availableDrivers
-    return Math.min(Math.max(ratio, this.SURGE_MIN), this.SURGE_MAX)
+    const toRad = (deg: number) => (deg * Math.PI) / 180
+    const dLat = toRad(lat2 - lat1)
+    const dLng = toRad(lng2 - lng1)
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return EARTH_RADIUS_KM * c
   }
 
   estimate(
@@ -61,23 +62,64 @@ export class FareService {
     dropoffLat: number,
     dropoffLng: number,
     surgeMultiplier = 1.0,
-    waitingMinutes = 0,
+    vehicleType: VehicleType = VehicleType.BIKE,
   ): FareEstimate {
-    const distance_km = this.calculateDistance(pickupLat, pickupLng, dropoffLat, dropoffLng)
-    // Rough estimate: avg 30 km/h in city
-    const duration_min = Math.ceil((distance_km / 30) * 60)
-    const distance_fare = this.calculateDistanceFare(distance_km)
-    const waiting_fare = waitingMinutes * this.WAITING_RATE
-    const subtotal = this.BASE_FARE + distance_fare + waiting_fare
-    const total_fare = Math.round(subtotal * surgeMultiplier)
+    const distance_km = this.calculateDistance(
+      pickupLat,
+      pickupLng,
+      dropoffLat,
+      dropoffLng,
+    )
+    const duration_min = (distance_km / AVG_SPEED_KMH) * 60
+
+    const config = FARE_CONFIG[vehicleType]
+    const base_fare = config.baseFare
+    const distance_fare = distance_km * config.perKm
+    const time_fare = duration_min * config.perMin
+    const subtotal = base_fare + distance_fare + time_fare
+    const total = Math.max(subtotal * surgeMultiplier, config.minFare)
 
     return {
+      vehicleType,
       distance_km: Math.round(distance_km * 100) / 100,
-      duration_min,
-      base_fare: this.BASE_FARE,
+      duration_min: Math.round(duration_min),
+      base_fare,
       distance_fare: Math.round(distance_fare),
+      time_fare: Math.round(time_fare),
       surge_multiplier: surgeMultiplier,
-      total_fare,
+      total_fare: Math.round(total),
     }
+  }
+
+  /**
+   * Surge calculation:
+   * - ratio = activeRequests / onlineDrivers
+   * - 1.0 if ratio < 0.5
+   * - 1.2 if 0.5-1.0
+   * - 1.5 if 1.0-2.0
+   * - 2.0 if > 2.0
+   */
+  calculateSurge(activeRequests: number, onlineDrivers: number): number {
+    if (onlineDrivers === 0) return 2.0
+    const ratio = activeRequests / onlineDrivers
+    if (ratio < 0.5) return 1.0
+    if (ratio < 1.0) return 1.2
+    if (ratio < 2.0) return 1.5
+    return 2.0
+  }
+
+  /**
+   * Estimate for all vehicle types at once.
+   */
+  estimateAllTypes(
+    pickupLat: number,
+    pickupLng: number,
+    dropoffLat: number,
+    dropoffLng: number,
+    surgeMultiplier = 1.0,
+  ): FareEstimate[] {
+    return Object.values(VehicleType).map((vt) =>
+      this.estimate(pickupLat, pickupLng, dropoffLat, dropoffLng, surgeMultiplier, vt),
+    )
   }
 }

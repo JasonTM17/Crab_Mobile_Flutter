@@ -5,6 +5,7 @@ import {
   Patch,
   Param,
   Body,
+  Query,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
@@ -12,6 +13,8 @@ import {
 import { RidesService } from './rides.service'
 import { CreateRideDto } from './dto/create-ride.dto'
 import { UpdateRideStatusDto } from './dto/update-ride-status.dto'
+import { CancelRideDto } from './dto/cancel-ride.dto'
+import { SosDto } from './dto/sos.dto'
 
 @Controller('rides')
 export class RidesController {
@@ -43,5 +46,33 @@ export class RidesController {
   ) {
     const ride = await this.ridesService.updateStatus(id, dto)
     return { success: true, data: ride, statusCode: HttpStatus.OK }
+  }
+
+  @Post(':id/cancel')
+  cancel(@Param('id') id: string, @Body() dto: CancelRideDto) {
+    return this.ridesService.cancelRide(id, dto.reason)
+  }
+
+  @Post(':id/sos')
+  sos(@Param('id') id: string, @Body() dto: SosDto) {
+    return this.ridesService.triggerSos(id, dto.latitude, dto.longitude)
+  }
+
+  @Get('active/driver/:driverId')
+  activeForDriver(@Param('driverId') driverId: string) {
+    return this.ridesService.findActiveByDriver(driverId)
+  }
+
+  @Get('active/rider/:riderId')
+  activeForRider(@Param('riderId') riderId: string) {
+    return this.ridesService.findActiveByRider(riderId)
+  }
+
+  @Get('stats/driver/:driverId')
+  driverStats(
+    @Param('driverId') driverId: string,
+    @Query('days') days?: string,
+  ) {
+    return this.ridesService.getStats(driverId, days ? +days : 7)
   }
 }

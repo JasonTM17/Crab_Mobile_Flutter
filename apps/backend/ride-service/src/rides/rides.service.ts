@@ -120,4 +120,77 @@ export class RidesService {
 
     return this.findById(id)
   }
+
+  async cancelRide(id: string, reason?: string): Promise<RideEntity> {
+    const ride = await this.findById(id)
+    if (ride.status === RideStatus.COMPLETED) {
+      throw new Error('Cannot cancel completed ride')
+    }
+    await this.rideRepository.update(id, {
+      status: RideStatus.CANCELLED,
+      cancellation_reason: reason,
+    })
+    if (ride.driver_id) {
+      await this.driversService.setDriverStatus(ride.driver_id, DriverStatus.ONLINE)
+    }
+    this.logger.log(`Ride ${id} cancelled: ${reason ?? 'no reason'}`)
+    return this.findById(id)
+  }
+
+  async triggerSos(id: string, lat?: number, lng?: number): Promise<RideEntity> {
+    const ride = await this.findById(id)
+    await this.rideRepository.update(id, {
+      sos_triggered: true,
+      sos_at: new Date(),
+    })
+    this.logger.warn(`SOS triggered for ride ${id} at ${lat},${lng}`)
+    // In production: notify emergency contacts, admin, possibly police
+    return this.findById(id)
+  }
+
+  async findActiveByDriver(driverId: string): Promise<RideEntity | null> {
+    return this.rideRepository.findOne({
+      where: [
+        { driver_id: driverId, status: RideStatus.MATCHED },
+        { driver_id: driverId, status: RideStatus.PICKUP },
+        { driver_id: driverId, status: RideStatus.IN_PROGRESS },
+      ],
+      order: { created_at: 'DESC' },
+    })
+  }
+
+  async findActiveByRider(riderId: string): Promise<RideEntity | null> {
+    return this.rideRepository.findOne({
+      where: [
+        { rider_id: riderId, status: RideStatus.REQUESTED },
+        { rider_id: riderId, status: RideStatus.MATCHED },
+        { rider_id: riderId, status: RideStatus.PICKUP },
+        { rider_id: riderId, status: RideStatus.IN_PROGRESS },
+      ],
+      order: { created_at: 'DESC' },
+    })
+  }
+
+  async getStats(driverId: string, days = 7) {
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+    const rides = await this.rideRepository
+      .createQueryBuilder('ride')
+      .where('ride.driver_id = :driverId', { driverId })
+      .andWhere('ride.status = :status', { status: RideStatus.COMPLETED })
+      .andWhere('ride.completed_at >= :since', { since })
+      .getMany()
+
+    const totalEarnings = rides.reduce((sum: number, r: RideEntity) => sum + Number(r.fare ?? 0), 0)
+    const totalRides = rides.length
+    const totalDistance = rides.reduce((sum: number, r: RideEntity) => sum + Number(r.distance_km ?? 0), 0)
+
+    return {
+      driverId,
+      days,
+      totalRides,
+      totalEarnings,
+      totalDistance: Math.round(totalDistance * 100) / 100,
+      avgFarePerRide: totalRides > 0 ? Math.round(totalEarnings / totalRides) : 0,
+    }
+  }
 }
