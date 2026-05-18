@@ -1,0 +1,300 @@
+# syntax: docker compose -f docker-compose.prod.yml up -d
+version: "3.9"
+
+x-restart: &restart
+  restart: unless-stopped
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  # ─── Infrastructure ───────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    <<: [*restart, *logging]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-crab}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: ${POSTGRES_DB:-crab_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crab}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [crab]
+
+  mongodb:
+    image: mongo:7
+    <<: [*restart, *logging]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-crab}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?required}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [crab]
+
+  redis:
+    image: redis:7-alpine
+    <<: [*restart, *logging]
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "1gb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [crab]
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    <<: [*restart, *logging]
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-crab}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?required}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks: [crab]
+
+  minio:
+    image: minio/minio:latest
+    <<: [*restart, *logging]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-crab_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:?required}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks: [crab]
+
+  # ─── Backend Services ─────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/backend/gateway/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/gateway:${TAG:-latest}
+    <<: [*restart, *logging]
+    deploy:
+      replicas: 2
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:?required}
+      REDIS_URL: redis://redis:6379
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      RIDE_SERVICE_URL: http://ride-service:3003
+      FOOD_SERVICE_URL: http://food-service:3004
+      PAYMENT_SERVICE_URL: http://payment-service:3005
+      CHAT_SERVICE_URL: http://chat-service:3006
+      NOTIFICATION_SERVICE_URL: http://notification-service:3007
+      RATING_SERVICE_URL: http://rating-service:3008
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks: [crab]
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/backend/auth-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/auth-service:${TAG:-latest}
+    <<: [*restart, *logging]
+    deploy:
+      replicas: 2
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-crab}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:-crab_db}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?required}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [crab]
+
+  user-service:
+    build:
+      context: .
+      dockerfile: apps/backend/user-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/user-service:${TAG:-latest}
+    <<: [*restart, *logging]
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DB_HOST: postgres
+      DB_USER: ${POSTGRES_USER:-crab}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:-crab_db}
+      MINIO_ENDPOINT: minio
+      MINIO_ACCESS_KEY: ${MINIO_USER:-crab_minio}
+      MINIO_SECRET_KEY: ${MINIO_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [crab]
+
+  ride-service:
+    build:
+      context: .
+      dockerfile: apps/backend/ride-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/ride-service:${TAG:-latest}
+    <<: [*restart, *logging]
+    deploy:
+      replicas: 3
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DB_HOST: postgres
+      DB_USER: ${POSTGRES_USER:-crab}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:-crab_db}
+      MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_rides?authSource=admin
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+      mongodb: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks: [crab]
+
+  food-service:
+    build:
+      context: .
+      dockerfile: apps/backend/food-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/food-service:${TAG:-latest}
+    <<: [*restart, *logging]
+    deploy:
+      replicas: 2
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      DB_HOST: postgres
+      DB_USER: ${POSTGRES_USER:-crab}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:-crab_db}
+      MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_food?authSource=admin
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+      mongodb: { condition: service_healthy }
+    networks: [crab]
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: apps/backend/payment-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/payment-service:${TAG:-latest}
+    <<: [*restart, *logging]
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      DB_HOST: postgres
+      DB_USER: ${POSTGRES_USER:-crab}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:-crab_db}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [crab]
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: apps/backend/chat-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/chat-service:${TAG:-latest}
+    <<: [*restart, *logging]
+    environment:
+      NODE_ENV: production
+      PORT: 3006
+      MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_chat?authSource=admin
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      mongodb: { condition: service_healthy }
+    networks: [crab]
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/backend/notification-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/notification-service:${TAG:-latest}
+    <<: [*restart, *logging]
+    environment:
+      NODE_ENV: production
+      PORT: 3007
+      MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_notifications?authSource=admin
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      mongodb: { condition: service_healthy }
+    networks: [crab]
+
+  rating-service:
+    build:
+      context: .
+      dockerfile: apps/backend/rating-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/rating-service:${TAG:-latest}
+    <<: [*restart, *logging]
+    environment:
+      NODE_ENV: production
+      PORT: 3008
+      DB_HOST: postgres
+      DB_USER: ${POSTGRES_USER:-crab}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:-crab_db}
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [crab]
+
+  web-admin:
+    build:
+      context: .
+      dockerfile: apps/web-admin/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-crab}/web-admin:${TAG:-latest}
+    <<: [*restart, *logging]
+    ports:
+      - "8080:80"
+    networks: [crab]
+
+  # ─── Reverse Proxy ────────────────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    <<: [*restart, *logging]
+    ports:
+      - "80:80"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - gateway
+      - web-admin
+    networks: [crab]
+
+volumes:
+  postgres_data:
+  mongo_data:
+  redis_data:
+  rabbitmq_data:
+  minio_data:
+
+networks:
+  crab:
+    driver: bridge
