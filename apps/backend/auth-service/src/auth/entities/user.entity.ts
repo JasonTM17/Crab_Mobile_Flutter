@@ -38,6 +38,21 @@ export class UserEntity {
   @Column({ nullable: true })
   avatarUrl?: string
 
+  @Column({ default: false })
+  phoneVerified!: boolean
+
+  @Column({ default: false })
+  emailVerified!: boolean
+
+  @Column({ type: 'timestamp', nullable: true })
+  lockedUntil?: Date
+
+  @Column({ default: 0 })
+  failedLoginCount!: number
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastLoginAt?: Date
+
   @OneToMany(() => RefreshTokenEntity, (token: RefreshTokenEntity) => token.user, { cascade: true })
   refreshTokens!: RefreshTokenEntity[]
 
