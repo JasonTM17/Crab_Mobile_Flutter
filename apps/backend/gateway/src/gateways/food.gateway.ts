@@ -6,8 +6,8 @@ import {
   ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  UseGuards,
 } from '@nestjs/websockets'
+import { UseGuards } from '@nestjs/common'
 import { Server, Socket } from 'socket.io'
 import { WsJwtGuard } from '../common/guards/ws-jwt.guard'
 import type { OrderPlacedPayload, OrderStatusPayload } from '@crab/socket-events'
