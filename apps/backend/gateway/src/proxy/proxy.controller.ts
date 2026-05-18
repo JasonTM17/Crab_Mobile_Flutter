@@ -1,83 +1,200 @@
 import {
+  All,
   Controller,
-  Post,
-  Get,
-  Put,
+  Req,
+  Res,
   Body,
-  Param,
-  Headers,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
+  HttpException,
+  Get,
 } from '@nestjs/common'
-import { AuthGuard } from '@nestjs/passport'
-import { ProxyService } from './proxy.service'
+import type { Request, Response } from 'express'
+import { ProxyService, ServiceName } from './proxy.service'
 
-@Controller('auth')
-export class AuthProxyController {
+@Controller()
+export class ProxyController {
   constructor(private readonly proxy: ProxyService) {}
 
-  @Post('register')
-  async register(@Body() body: unknown) {
-    return this.proxy.forwardToAuth('/api/v1/auth/register', 'POST', body)
+  @Get('proxy/health')
+  health() {
+    return {
+      gateway: 'ok',
+      circuits: this.proxy.getCircuitStatus(),
+      timestamp: new Date().toISOString(),
+    }
   }
 
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(@Body() body: unknown) {
-    return this.proxy.forwardToAuth('/api/v1/auth/login', 'POST', body)
+  @All('auth/*')
+  async auth(@Req() req: Request, @Res() res: Response, @Body() body: unknown) {
+    return this.handle('auth', req, res, body)
   }
 
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  async refresh(@Body() body: unknown) {
-    return this.proxy.forwardToAuth('/api/v1/auth/refresh', 'POST', body)
-  }
-
-  @Post('logout')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard('jwt'))
-  async logout(
+  @All('profiles/*')
+  async profiles(
+    @Req() req: Request,
+    @Res() res: Response,
     @Body() body: unknown,
-    @Headers('authorization') auth: string,
   ) {
-    return this.proxy.forwardToAuth('/api/v1/auth/logout', 'POST', body, {
-      authorization: auth,
-    })
-  }
-}
-
-@Controller('users')
-export class UserProxyController {
-  constructor(private readonly proxy: ProxyService) {}
-
-  @Get('me')
-  @UseGuards(AuthGuard('jwt'))
-  async getProfile(@Headers('authorization') auth: string) {
-    return this.proxy.forwardToUser('/api/v1/users/me', 'GET', undefined, {
-      authorization: auth,
-    })
+    return this.handle('user', req, res, body)
   }
 
-  @Put('me')
-  @UseGuards(AuthGuard('jwt'))
-  async updateProfile(
+  @All('addresses/*')
+  async addresses(
+    @Req() req: Request,
+    @Res() res: Response,
     @Body() body: unknown,
-    @Headers('authorization') auth: string,
   ) {
-    return this.proxy.forwardToUser('/api/v1/users/me', 'PUT', body, {
-      authorization: auth,
-    })
+    return this.handle('user', req, res, body)
   }
 
-  @Get(':id')
-  @UseGuards(AuthGuard('jwt'))
-  async getUserById(
-    @Param('id') id: string,
-    @Headers('authorization') auth: string,
+  @All('verification/*')
+  async verification(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
   ) {
-    return this.proxy.forwardToUser(`/api/v1/users/${id}`, 'GET', undefined, {
-      authorization: auth,
-    })
+    return this.handle('user', req, res, body)
+  }
+
+  @All('rides/*')
+  async rides(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('ride', req, res, body)
+  }
+
+  @All('drivers/*')
+  async drivers(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('ride', req, res, body)
+  }
+
+  @All('restaurants/*')
+  async restaurants(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('food', req, res, body)
+  }
+
+  @All('orders/*')
+  async orders(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('food', req, res, body)
+  }
+
+  @All('menus/*')
+  async menus(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('food', req, res, body)
+  }
+
+  @All('wallet/*')
+  async wallet(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('payment', req, res, body)
+  }
+
+  @All('transactions/*')
+  async transactions(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('payment', req, res, body)
+  }
+
+  @All('promo/*')
+  async promo(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('payment', req, res, body)
+  }
+
+  @All('chats/*')
+  async chats(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('chat', req, res, body)
+  }
+
+  @All('notifications/*')
+  async notifications(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('notification', req, res, body)
+  }
+
+  @All('ratings/*')
+  async ratings(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('rating', req, res, body)
+  }
+
+  private async handle(
+    service: ServiceName,
+    req: Request,
+    res: Response,
+    body: unknown,
+  ) {
+    try {
+      const path = req.path.replace(/^\/api\/v1/, '')
+      const headers: Record<string, string> = {}
+      if (req.headers.authorization) {
+        headers['Authorization'] = req.headers.authorization as string
+      }
+      if (req.headers['x-user-id']) {
+        headers['X-User-Id'] = req.headers['x-user-id'] as string
+      }
+      const data = await this.proxy.forward(
+        service,
+        req.method,
+        path,
+        body,
+        headers,
+      )
+      res.json(data)
+    } catch (err: unknown) {
+      const e = err as {
+        status?: number
+        message?: string
+        data?: unknown
+      }
+      if (e.status) {
+        res.status(e.status).json({
+          message: e.message,
+          ...(typeof e.data === 'object' && e.data !== null
+            ? (e.data as Record<string, unknown>)
+            : {}),
+        })
+      } else if (err instanceof HttpException) {
+        res.status(err.getStatus()).json(err.getResponse())
+      } else {
+        res.status(503).json({ message: 'Service unavailable' })
+      }
+    }
   }
 }

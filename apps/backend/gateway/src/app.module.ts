@@ -3,7 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { HttpModule } from '@nestjs/axios'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
-import { ThrottlerModule } from '@nestjs/throttler'
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'
+import { APP_GUARD } from '@nestjs/core'
 import configuration from './config/configuration'
 import { AuthModule } from './auth/auth.module'
 import { ProxyModule } from './proxy/proxy.module'
@@ -12,6 +13,7 @@ import { FoodGateway } from './gateways/food.gateway'
 import { ChatGateway } from './gateways/chat.gateway'
 import { NotificationGateway } from './gateways/notification.gateway'
 import { HealthController } from './health/health.controller'
+import { throttlerConfig } from './common/throttler/throttler.config'
 
 @Module({
   imports: [
@@ -19,16 +21,7 @@ import { HealthController } from './health/health.controller'
       isGlobal: true,
       load: [configuration],
     }),
-    ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => [
-        {
-          ttl: config.get<number>('throttle.ttl', 60000),
-          limit: config.get<number>('throttle.limit', 100),
-        },
-      ],
-    }),
+    ThrottlerModule.forRoot(throttlerConfig),
     HttpModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -50,6 +43,12 @@ import { HealthController } from './health/health.controller'
     ProxyModule,
   ],
   controllers: [HealthController],
-  providers: [RideGateway, FoodGateway, ChatGateway, NotificationGateway],
+  providers: [
+    RideGateway,
+    FoodGateway,
+    ChatGateway,
+    NotificationGateway,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}

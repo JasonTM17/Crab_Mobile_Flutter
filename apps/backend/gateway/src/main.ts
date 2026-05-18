@@ -1,15 +1,27 @@
 import { NestFactory } from '@nestjs/core'
-import { ValidationPipe } from '@nestjs/common'
+import { ValidationPipe, Logger } from '@nestjs/common'
+import helmet from 'helmet'
 import { AppModule } from './app.module'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
+import { RedisIoAdapter } from './common/adapters/redis-io.adapter'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const logger = new Logger('Bootstrap')
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: true,
+    logger: ['error', 'warn', 'log'],
+  })
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // disable for WebSocket
+    }),
+  )
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false, // gateway pass-through, less strict
       transform: true,
     }),
   )
@@ -18,13 +30,21 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1')
   app.enableCors({
-    origin: process.env.CORS_ORIGIN ?? '*',
+    origin: process.env.CORS_ORIGIN?.split(',') ?? '*',
     credentials: true,
   })
 
+  // Redis adapter for Socket.IO multi-instance scaling
+  const redisAdapter = new RedisIoAdapter(app)
+  await redisAdapter.connectToRedis()
+  app.useWebSocketAdapter(redisAdapter)
+
+  // Graceful shutdown
+  app.enableShutdownHooks()
+
   const port = process.env.PORT ?? 3000
   await app.listen(port)
-  console.log(`API Gateway running on port ${port}`)
+  logger.log(`Gateway running on port ${port}`)
 }
 
 bootstrap()
