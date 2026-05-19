@@ -55,6 +55,30 @@ playwright_browser_navigate http://localhost:5174
 playwright_browser_take_screenshot --fullPage --type png
 ```
 
+## Mobile Viewport (390x812 - iPhone)
+
+The web admin is also responsive. Same screens captured at iPhone-sized viewport:
+
+### Mobile Dashboard
+![Mobile Dashboard](admin-mobile-01-dashboard.png)
+
+### Mobile Login
+![Mobile Login](admin-mobile-02-login.png)
+
+### Mobile Users
+![Mobile Users](admin-mobile-03-users.png)
+
+### Mobile Drivers
+![Mobile Drivers](admin-mobile-04-drivers.png)
+
+### Mobile Rides
+![Mobile Rides](admin-mobile-05-rides.png)
+
+### Mobile Orders
+![Mobile Orders](admin-mobile-06-orders.png)
+
+---
+
 ## Mobile (Flutter) Screenshots
 
 Mobile screenshots are best captured via:
