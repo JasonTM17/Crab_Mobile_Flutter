@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,7 +37,22 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
-    loginMutation.mutate({ email, password })
+    loginMutation.mutate(
+      { email, password },
+      {
+        onError: (err: Error) => {
+          if (err.message?.includes('admin')) {
+            toast.error('Access denied', {
+              description: 'This account does not have admin privileges.',
+            })
+          } else {
+            toast.error('Login failed', {
+              description: 'Invalid email or password. Please try again.',
+            })
+          }
+        },
+      },
+    )
   }
 
   return (

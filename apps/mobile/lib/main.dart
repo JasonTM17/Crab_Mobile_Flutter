@@ -7,6 +7,8 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
+import 'features/payment/data/repositories/payment_repository.dart';
+import 'features/payment/presentation/bloc/payment_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,9 @@ class CrabApp extends StatelessWidget {
         BlocProvider<AuthBloc>(
           create: (_) => AuthBloc(repository: sl<AuthRepository>())
             ..add(const AuthCheckRequested()),
+        ),
+        BlocProvider<PaymentBloc>(
+          create: (_) => PaymentBloc(sl<PaymentRepository>()),
         ),
       ],
       child: MaterialApp.router(

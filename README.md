@@ -355,15 +355,15 @@ crab/
 | MongoDB 7 | 27017 | `mongo:7` |
 | Redis 7 | 6379 | `redis:7-alpine` |
 | MinIO | 9000/9001 | `minio/minio` |
-| API Gateway | 3000 | `ghcr.io/jasontm17/crab-gateway` |
-| Auth Service | 3001 | `ghcr.io/jasontm17/crab-auth-service` |
-| User Service | 3002 | `ghcr.io/jasontm17/crab-user-service` |
-| Ride Service | 3003 | `ghcr.io/jasontm17/crab-ride-service` |
-| Food Service | 3004 | `ghcr.io/jasontm17/crab-food-service` |
-| Payment Service | 3005 | `ghcr.io/jasontm17/crab-payment-service` |
-| Chat Service | 3006 | `ghcr.io/jasontm17/crab-chat-service` |
-| Notification Service | 3007 | `ghcr.io/jasontm17/crab-notification-service` |
-| Rating Service | 3008 | `ghcr.io/jasontm17/crab-rating-service` |
+| API Gateway | 3000 | `jasontm17/gateway` |
+| Auth Service | 3001 | `jasontm17/auth-service` |
+| User Service | 3002 | `jasontm17/user-service` |
+| Ride Service | 3003 | `jasontm17/ride-service` |
+| Food Service | 3004 | `jasontm17/food-service` |
+| Payment Service | 3005 | `jasontm17/payment-service` |
+| Chat Service | 3006 | `jasontm17/chat-service` |
+| Notification Service | 3007 | `jasontm17/notification-service` |
+| Rating Service | 3008 | `jasontm17/rating-service` |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

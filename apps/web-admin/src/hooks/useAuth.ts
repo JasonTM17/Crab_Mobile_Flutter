@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import api from '@/lib/axios'
 import type { LoginRequest, LoginResponse } from '@/types/auth'
 
+const ALLOWED_ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN']
+
 export function useAuth() {
   const navigate = useNavigate()
 
@@ -12,6 +14,11 @@ export function useAuth() {
       return data
     },
     onSuccess: (data) => {
+      const role = data.user?.role
+      if (!role || !ALLOWED_ADMIN_ROLES.includes(role)) {
+        // Reject non-admin users
+        throw new Error('Account does not have admin access')
+      }
       localStorage.setItem('access_token', data.tokens.access_token)
       localStorage.setItem('refresh_token', data.tokens.refresh_token)
       localStorage.setItem('user', JSON.stringify(data.user))
@@ -26,8 +33,6 @@ export function useAuth() {
     navigate('/login')
   }
 
-  const isAuthenticated = !!localStorage.getItem('access_token')
-
   const currentUser = (() => {
     try {
       const raw = localStorage.getItem('user')
@@ -36,6 +41,11 @@ export function useAuth() {
       return null
     }
   })()
+
+  const isAuthenticated =
+    !!localStorage.getItem('access_token') &&
+    !!currentUser &&
+    ALLOWED_ADMIN_ROLES.includes(currentUser.role)
 
   return {
     loginMutation,

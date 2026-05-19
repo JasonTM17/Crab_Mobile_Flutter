@@ -98,9 +98,9 @@ git tag v1.0.0
 git push origin v1.0.0
 
 # Images published to:
-# ghcr.io/jasontm17/crab-gateway:v1.0.0
-# ghcr.io/jasontm17/crab-auth-service:v1.0.0
-# ghcr.io/jasontm17/crab-user-service:v1.0.0
+# jasontm17/gateway:v1.0.0
+# jasontm17/auth-service:v1.0.0
+# jasontm17/user-service:v1.0.0
 # ... (all 9 services + web-admin)
 ```
 

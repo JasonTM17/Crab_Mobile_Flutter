@@ -45,6 +45,6 @@ pnpm --filter @crab/web-admin dev
 ## Docker
 
 ```bash
-docker build -t ghcr.io/jasontm17/crab-web-admin .
-docker run -p 80:80 ghcr.io/jasontm17/crab-web-admin
+docker build -f apps/web-admin/Dockerfile -t jasontm17/web-admin .
+docker run -p 80:80 jasontm17/web-admin
 ```
