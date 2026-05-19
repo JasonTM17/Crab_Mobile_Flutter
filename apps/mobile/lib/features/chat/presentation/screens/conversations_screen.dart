@@ -7,8 +7,22 @@ import '../bloc/chat_event.dart';
 import '../bloc/chat_state.dart';
 import 'chat_detail_screen.dart';
 
-class ConversationsScreen extends StatelessWidget {
+class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
+
+  @override
+  State<ConversationsScreen> createState() => _ConversationsScreenState();
+}
+
+class _ConversationsScreenState extends State<ConversationsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Defer to after first frame so the bloc is ready in scope
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChatBloc>().add(const LoadConversations());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -162,10 +162,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/food/restaurant/:id',
-        builder: (_, state) => RestaurantMenuScreen(
-          // restaurantId surfaced via query for now
-          key: ValueKey(state.pathParameters['id']),
-        ),
+        builder: (_, state) => const RestaurantMenuScreen(),
       ),
       GoRoute(
         path: '/food/restaurant/:id/info',
