@@ -24,7 +24,7 @@ dependencies:
 
   # Networking
   dio: ^5.7.0
-  socket_io_client: ^2.0.3+1
+  socket_io_client: ^3.1.4
 
   # Storage
   flutter_secure_storage: ^9.2.2
