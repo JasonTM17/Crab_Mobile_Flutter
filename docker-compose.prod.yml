@@ -83,7 +83,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/gateway/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/gateway:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/gateway:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
       replicas: 2
@@ -112,7 +112,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/auth-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/auth-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/auth-service:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
       replicas: 2
@@ -138,7 +138,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/user-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/user-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/user-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
@@ -159,7 +159,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/ride-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/ride-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/ride-service:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
       replicas: 3
@@ -182,7 +182,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/food-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/food-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/food-service:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
       replicas: 2
@@ -204,7 +204,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/payment-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/payment-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/payment-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
@@ -222,37 +222,43 @@ services:
     build:
       context: .
       dockerfile: apps/backend/chat-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/chat-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/chat-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
       PORT: 3006
       MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_chat?authSource=admin
       REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
       mongodb: { condition: service_healthy }
+      redis: { condition: service_healthy }
     networks: [crab]
 
   notification-service:
     build:
       context: .
       dockerfile: apps/backend/notification-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/notification-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/notification-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
       PORT: 3007
       MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_notifications?authSource=admin
       REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
+      FCM_CREDENTIALS_JSON: ${FCM_CREDENTIALS_JSON:-}
     depends_on:
       mongodb: { condition: service_healthy }
+      redis: { condition: service_healthy }
     networks: [crab]
 
   rating-service:
     build:
       context: .
       dockerfile: apps/backend/rating-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/rating-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/rating-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
@@ -269,10 +275,8 @@ services:
     build:
       context: .
       dockerfile: apps/web-admin/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-crab}/web-admin:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/web-admin:${TAG:-latest}
     <<: [*restart, *logging]
-    ports:
-      - "8080:80"
     networks: [crab]
 
   # ─── Reverse Proxy ────────────────────────────────────────────

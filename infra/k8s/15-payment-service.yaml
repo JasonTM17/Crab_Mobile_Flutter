@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: payment-service
-          image: crab/payment-service:latest
+          image: jasontm17/payment-service:latest
           ports: [{ containerPort: 3005 }]
           envFrom:
             - configMapRef: { name: crab-config }

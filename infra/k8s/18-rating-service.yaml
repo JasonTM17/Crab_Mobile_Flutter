@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: rating-service
-          image: crab/rating-service:latest
+          image: jasontm17/rating-service:latest
           ports: [{ containerPort: 3008 }]
           envFrom:
             - configMapRef: { name: crab-config }

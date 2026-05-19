@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: food-service
-          image: crab/food-service:latest
+          image: jasontm17/food-service:latest
           ports: [{ containerPort: 3004 }]
           envFrom:
             - configMapRef: { name: crab-config }

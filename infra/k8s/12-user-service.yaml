@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: crab/user-service:latest
+          image: jasontm17/user-service:latest
           ports: [{ containerPort: 3002 }]
           envFrom:
             - configMapRef: { name: crab-config }

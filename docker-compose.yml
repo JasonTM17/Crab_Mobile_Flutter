@@ -1,13 +1,18 @@
-version: '3.8'
+# Root docker-compose.yml — full local stack with build contexts pointing to repo root.
+# For dev convenience. Production: docker-compose.prod.yml. Monitoring: docker-compose.monitoring.yml.
+#
+#   docker compose up -d
+#
+# Health endpoints excluded from global prefix in main.ts → wget http://<host>:<port>/health works.
 
 services:
-  # Infrastructure
+  # ─── Infrastructure ───────────────────────────────────────────
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: crab
       POSTGRES_PASSWORD: crab_secret
-      POSTGRES_DB: crab
+      POSTGRES_DB: crab_db
     ports:
       - '5432:5432'
     volumes:
@@ -16,10 +21,11 @@ services:
       test: ['CMD-SHELL', 'pg_isready -U crab']
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+    networks: [crab]
 
   mongodb:
-    image: mongo:6
+    image: mongo:7
     environment:
       MONGO_INITDB_ROOT_USERNAME: crab
       MONGO_INITDB_ROOT_PASSWORD: crab_secret
@@ -29,9 +35,10 @@ services:
       - mongo_data:/data/db
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh --quiet
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+    networks: [crab]
 
   redis:
     image: redis:7-alpine
@@ -43,238 +50,251 @@ services:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+    networks: [crab]
 
-  # Backend Services
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: crab_minio
+      MINIO_ROOT_PASSWORD: crab_minio_secret
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks: [crab]
+
+  # ─── Backend Services ─────────────────────────────────────────
   gateway:
     build:
-      context: ./apps/backend/gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/gateway/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/gateway:${TAG:-latest}
     ports:
       - '3000:3000'
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - JWT_SECRET=crab-jwt-secret-key
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - AUTH_SERVICE_URL=http://auth-service:3001
-      - USER_SERVICE_URL=http://user-service:3002
-      - RIDE_SERVICE_URL=http://ride-service:3003
-      - FOOD_SERVICE_URL=http://food-service:3004
-      - PAYMENT_SERVICE_URL=http://payment-service:3005
-      - CHAT_SERVICE_URL=http://chat-service:3006
-      - NOTIFICATION_SERVICE_URL=http://notification-service:3007
-      - RATING_SERVICE_URL=http://rating-service:3008
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      REDIS_URL: redis://redis:6379
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      RIDE_SERVICE_URL: http://ride-service:3003
+      FOOD_SERVICE_URL: http://food-service:3004
+      PAYMENT_SERVICE_URL: http://payment-service:3005
+      CHAT_SERVICE_URL: http://chat-service:3006
+      NOTIFICATION_SERVICE_URL: http://notification-service:3007
+      RATING_SERVICE_URL: http://rating-service:3008
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
     depends_on:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   auth-service:
     build:
-      context: ./apps/backend/auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/auth-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/auth-service:${TAG:-latest}
     ports:
       - '3001:3001'
     environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - JWT_SECRET=crab-jwt-secret-key
-      - JWT_EXPIRES_IN=15m
-      - JWT_REFRESH_EXPIRES_IN=7d
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=crab
-      - POSTGRES_PASSWORD=crab_secret
-      - POSTGRES_DB=crab
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      DATABASE_URL: postgresql://crab:crab_secret@postgres:5432/crab_db
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_in_production}
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   user-service:
     build:
-      context: ./apps/backend/user-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/user-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/user-service:${TAG:-latest}
     ports:
       - '3002:3002'
     environment:
-      - NODE_ENV=production
-      - PORT=3002
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=crab
-      - POSTGRES_PASSWORD=crab_secret
-      - POSTGRES_DB=crab
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3002
+      DATABASE_URL: postgresql://crab:crab_secret@postgres:5432/crab_db
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: crab_minio
+      MINIO_SECRET_KEY: crab_minio_secret
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   ride-service:
     build:
-      context: ./apps/backend/ride-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/ride-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/ride-service:${TAG:-latest}
     ports:
       - '3003:3003'
     environment:
-      - NODE_ENV=production
-      - PORT=3003
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=crab
-      - POSTGRES_PASSWORD=crab_secret
-      - POSTGRES_DB=crab
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MONGO_URI=mongodb://crab:crab_secret@mongodb:27017/crab?authSource=admin
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3003
+      DATABASE_URL: postgresql://crab:crab_secret@postgres:5432/crab_db
+      MONGODB_URI: mongodb://crab:crab_secret@mongodb:27017/crab_rides?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
       mongodb:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   food-service:
     build:
-      context: ./apps/backend/food-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/food-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/food-service:${TAG:-latest}
     ports:
       - '3004:3004'
     environment:
-      - NODE_ENV=production
-      - PORT=3004
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=crab
-      - POSTGRES_PASSWORD=crab_secret
-      - POSTGRES_DB=crab
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MONGO_URI=mongodb://crab:crab_secret@mongodb:27017/crab?authSource=admin
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3004
+      DATABASE_URL: postgresql://crab:crab_secret@postgres:5432/crab_db
+      MONGODB_URI: mongodb://crab:crab_secret@mongodb:27017/crab_food?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
       mongodb:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   payment-service:
     build:
-      context: ./apps/backend/payment-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/payment-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/payment-service:${TAG:-latest}
     ports:
       - '3005:3005'
     environment:
-      - NODE_ENV=production
-      - PORT=3005
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=crab
-      - POSTGRES_PASSWORD=crab_secret
-      - POSTGRES_DB=crab
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3005
+      DATABASE_URL: postgresql://crab:crab_secret@postgres:5432/crab_db
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   chat-service:
     build:
-      context: ./apps/backend/chat-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/chat-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/chat-service:${TAG:-latest}
     ports:
       - '3006:3006'
     environment:
-      - NODE_ENV=production
-      - PORT=3006
-      - MONGO_URI=mongodb://crab:crab_secret@mongodb:27017/crab?authSource=admin
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_SECRET=crab-jwt-secret-key
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3006
+      MONGODB_URI: mongodb://crab:crab_secret@mongodb:27017/crab_chat?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
     depends_on:
       mongodb:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   notification-service:
     build:
-      context: ./apps/backend/notification-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/notification-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/notification-service:${TAG:-latest}
     ports:
       - '3007:3007'
     environment:
-      - NODE_ENV=production
-      - PORT=3007
-      - MONGO_URI=mongodb://crab:crab_secret@mongodb:27017/crab?authSource=admin
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_SECRET=crab-jwt-secret-key
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3007
+      MONGODB_URI: mongodb://crab:crab_secret@mongodb:27017/crab_notifications?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
     depends_on:
       mongodb:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   rating-service:
     build:
-      context: ./apps/backend/rating-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/rating-service/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/rating-service:${TAG:-latest}
     ports:
       - '3008:3008'
     environment:
-      - NODE_ENV=production
-      - PORT=3008
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=crab
-      - POSTGRES_PASSWORD=crab_secret
-      - POSTGRES_DB=crab
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3008
+      DATABASE_URL: postgresql://crab:crab_secret@postgres:5432/crab_db
+      MONGODB_URI: mongodb://crab:crab_secret@mongodb:27017/crab_ratings?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     restart: unless-stopped
+    networks: [crab]
 
   web-admin:
     build:
-      context: ./apps/web-admin
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web-admin/Dockerfile
+    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/web-admin:${TAG:-latest}
     ports:
       - '5173:80'
     environment:
-      - VITE_API_URL=http://gateway:3000/api/v1
+      VITE_API_URL: http://gateway:3000/api/v1
     depends_on:
       - gateway
     restart: unless-stopped
+    networks: [crab]
 
 volumes:
   postgres_data:
   mongo_data:
   redis_data:
+  minio_data:
 
 networks:
-  default:
+  crab:
+    driver: bridge
     name: crab-network

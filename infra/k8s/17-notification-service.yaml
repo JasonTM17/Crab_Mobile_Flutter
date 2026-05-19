@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: crab/notification-service:latest
+          image: jasontm17/notification-service:latest
           ports: [{ containerPort: 3007 }]
           envFrom:
             - configMapRef: { name: crab-config }

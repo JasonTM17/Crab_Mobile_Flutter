@@ -93,9 +93,7 @@ monitoring-down: ## Stop monitoring stack
 
 # Kubernetes
 k8s-deploy: ## Deploy to Kubernetes
-	kubectl apply -f k8s/namespace.yaml
-	kubectl apply -f k8s/services/
-	kubectl apply -f k8s/ingress.yaml
+	kubectl apply -f infra/k8s/
 
 k8s-status: ## Check Kubernetes deployment status
 	kubectl get pods -n crab
@@ -106,9 +104,7 @@ k8s-logs: ## Follow logs for all pods
 	kubectl logs -f -l tier=backend -n crab --max-log-requests=10
 
 k8s-delete: ## Delete Kubernetes deployment
-	kubectl delete -f k8s/ingress.yaml
-	kubectl delete -f k8s/services/
-	kubectl delete -f k8s/namespace.yaml
+	kubectl delete -f infra/k8s/ --ignore-not-found=true
 
 # Utilities
 clean: ## Clean build artifacts
