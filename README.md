@@ -196,14 +196,29 @@ English | [Tiếng Việt](docs/README_VI.md)
 
 ## Screenshots
 
-> Screenshots and GIFs will be added as features are completed.
+Captured at 1440x900 viewport from the production Vite build via Playwright MCP. See [`docs/screenshots/README.md`](docs/screenshots/README.md) for the full gallery.
+
+### Web Admin Dashboard
 
 | Screen | Description |
 |--------|-------------|
-| ![Login](docs/screenshots/login.png) | Mobile login screen with email/phone authentication |
-| ![Home](docs/screenshots/home.png) | Home screen with ride and food service cards |
-| ![Admin](docs/screenshots/admin-dashboard.png) | Admin dashboard with analytics overview |
-| ![Tracking](docs/gifs/ride-tracking.gif) | Real-time ride tracking with driver movement |
+| ![Login](docs/screenshots/admin-01-login.png) | Phone/email login form with shadcn/ui styling, JWT auth with refresh-token rotation |
+| ![Dashboard](docs/screenshots/admin-02-dashboard.png) | KPI cards (users, rides, revenue, orders) and full sidebar navigation |
+| ![Users](docs/screenshots/admin-03-users.png) | Paginated user table with search, status badges, role tags |
+| ![Drivers](docs/screenshots/admin-04-drivers.png) | Driver verification queue with license info, vehicle details, approve/reject actions |
+| ![Rides](docs/screenshots/admin-05-rides.png) | Real-time rides monitoring with rider/driver IDs, status, fare, distance |
+| ![Orders](docs/screenshots/admin-06-orders.png) | Food delivery orders by restaurant with full status timeline |
+
+### Mobile (Flutter)
+
+Mobile screenshots can be captured via `flutter screenshot` from a running emulator/device. The Flutter app implements:
+
+- Auth flow: phone/email login, OTP verification with auto-advance and 60s resend timer, registration
+- Home: greeting, wallet card, 8-service grid (bike, car, food, mart, express, pay, promos)
+- Ride: pickup/dropoff selection, fare comparison across vehicle types, real-time tracking with chat/cancel/SOS
+- Wallet: balance card, top-up sheet, transaction history
+- Food: restaurant list, categories, popular nearby
+- Profile: avatar, settings, theme, language, logout
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
