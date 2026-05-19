@@ -78,3 +78,7 @@ temp/
 # Kilo private state and plans
 .kilo/
 
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
