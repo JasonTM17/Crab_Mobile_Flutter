@@ -30,6 +30,6 @@ Manages user profiles, preferences, and account settings.
 ## Docker
 
 ```bash
-docker build -t ghcr.io/jasontm17/crab-user-service .
-docker run -p 3002:3002 --env-file .env ghcr.io/jasontm17/crab-user-service
+docker build -f apps/backend/user-service/Dockerfile -t jasontm17/user-service .
+docker run -p 3002:3002 --env-file .env jasontm17/user-service
 ```

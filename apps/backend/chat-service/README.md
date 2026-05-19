@@ -38,6 +38,6 @@ Real-time messaging between riders and drivers using Socket.IO with Redis adapte
 ## Docker
 
 ```bash
-docker build -t ghcr.io/jasontm17/crab-chat-service .
-docker run -p 3006:3006 --env-file .env ghcr.io/jasontm17/crab-chat-service
+docker build -f apps/backend/chat-service/Dockerfile -t jasontm17/chat-service .
+docker run -p 3006:3006 --env-file .env jasontm17/chat-service
 ```

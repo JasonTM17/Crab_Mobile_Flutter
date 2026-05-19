@@ -89,4 +89,7 @@ export class RideEntity {
 
   @Column({ type: 'timestamptz', nullable: true })
   completed_at?: Date
+
+  @Column({ type: 'timestamptz', nullable: true })
+  accepted_at?: Date
 }

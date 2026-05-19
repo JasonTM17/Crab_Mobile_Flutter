@@ -28,8 +28,8 @@ Central entry point for all Crab microservices. Handles routing, authentication,
 ## Docker
 
 ```bash
-docker build -t ghcr.io/jasontm17/crab-gateway .
-docker run -p 3000:3000 --env-file .env ghcr.io/jasontm17/crab-gateway
+docker build -f apps/backend/gateway/Dockerfile -t jasontm17/gateway .
+docker run -p 3000:3000 --env-file .env jasontm17/gateway
 ```
 
 ## Environment Variables

@@ -36,7 +36,12 @@ export class SessionService implements OnModuleInit, OnModuleDestroy {
 
   async createSession(sessionId: string, data: SessionData): Promise<void> {
     const key = `session:${sessionId}`
-    await this.redis.setex(key, SESSION_TTL_SECONDS, JSON.stringify(data))
+    const userIndexKey = `user:${data.userId}:sessions`
+    const pipeline = this.redis.pipeline()
+    pipeline.setex(key, SESSION_TTL_SECONDS, JSON.stringify(data))
+    pipeline.sadd(userIndexKey, sessionId)
+    pipeline.expire(userIndexKey, SESSION_TTL_SECONDS * 2)
+    await pipeline.exec()
   }
 
   async getSession(sessionId: string): Promise<SessionData | null> {
@@ -48,21 +53,30 @@ export class SessionService implements OnModuleInit, OnModuleDestroy {
 
   async deleteSession(sessionId: string): Promise<void> {
     const key = `session:${sessionId}`
-    await this.redis.del(key)
+    const raw = await this.redis.get(key)
+    const pipeline = this.redis.pipeline()
+    pipeline.del(key)
+    if (raw) {
+      try {
+        const data: SessionData = JSON.parse(raw)
+        pipeline.srem(`user:${data.userId}:sessions`, sessionId)
+      } catch {
+        // ignore parse error
+      }
+    }
+    await pipeline.exec()
   }
 
   async deleteAllUserSessions(userId: string): Promise<void> {
-    const pattern = `session:*`
-    const keys = await this.redis.keys(pattern)
-    for (const key of keys) {
-      const raw = await this.redis.get(key)
-      if (raw) {
-        const data: SessionData = JSON.parse(raw)
-        if (data.userId === userId) {
-          await this.redis.del(key)
-        }
-      }
+    const userIndexKey = `user:${userId}:sessions`
+    const sessionIds = await this.redis.smembers(userIndexKey)
+    if (sessionIds.length === 0) return
+    const pipeline = this.redis.pipeline()
+    for (const sid of sessionIds) {
+      pipeline.del(`session:${sid}`)
     }
+    pipeline.del(userIndexKey)
+    await pipeline.exec()
   }
 
   async blacklistToken(jti: string, expiresInSeconds?: number): Promise<void> {

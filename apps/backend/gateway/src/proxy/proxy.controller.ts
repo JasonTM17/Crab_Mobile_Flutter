@@ -6,15 +6,20 @@ import {
   Body,
   HttpException,
   Get,
+  UseGuards,
 } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import { ProxyService, ServiceName } from './proxy.service'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { Public } from '../auth/public.decorator'
 
 @Controller()
+@UseGuards(JwtAuthGuard)
 export class ProxyController {
   constructor(private readonly proxy: ProxyService) {}
 
   @Get('proxy/health')
+  @Public()
   health() {
     return {
       gateway: 'ok',
@@ -24,6 +29,7 @@ export class ProxyController {
   }
 
   @All('auth/*')
+  @Public()
   async auth(@Req() req: Request, @Res() res: Response, @Body() body: unknown) {
     return this.handle('auth', req, res, body)
   }
@@ -136,6 +142,15 @@ export class ProxyController {
     return this.handle('chat', req, res, body)
   }
 
+  @All('messages/*')
+  async messages(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('chat', req, res, body)
+  }
+
   @All('notifications/*')
   async notifications(
     @Req() req: Request,
@@ -143,6 +158,24 @@ export class ProxyController {
     @Body() body: unknown,
   ) {
     return this.handle('notification', req, res, body)
+  }
+
+  @All('preferences/*')
+  async preferences(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('notification', req, res, body)
+  }
+
+  @All('devices/*')
+  async devices(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('auth', req, res, body)
   }
 
   @All('ratings/*')

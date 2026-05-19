@@ -11,7 +11,7 @@ async function bootstrap() {
       transform: true,
     }),
   )
-  app.setGlobalPrefix('api/v1')
+  app.setGlobalPrefix('api/v1', { exclude: ['health', 'metrics'] })
   app.enableCors({ origin: '*', credentials: true })
   const port = process.env.PORT ?? 3002
   await app.listen(port)

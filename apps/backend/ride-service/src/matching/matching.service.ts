@@ -29,6 +29,7 @@ export class MatchingService {
   async findBestDriver(
     pickupLat: number,
     pickupLng: number,
+    excludeDriverIds: string[] = [],
   ): Promise<MatchResult | null> {
     const nearby = await this.driversService.findNearbyDrivers(
       pickupLat,
@@ -36,13 +37,14 @@ export class MatchingService {
       this.SEARCH_RADIUS_M,
     )
 
-    if (nearby.length === 0) {
+    const eligible = nearby.filter((d) => !excludeDriverIds.includes(d.driver_id))
+    if (eligible.length === 0) {
       this.logger.warn(`No drivers found within ${this.SEARCH_RADIUS_M}m of (${pickupLat}, ${pickupLng})`)
       return null
     }
 
     // Compute actual distances using haversine
-    const withDistances = nearby.map((driver) => {
+    const withDistances = eligible.map((driver) => {
       const distKm = this.fareService.calculateDistance(
         pickupLat,
         pickupLng,

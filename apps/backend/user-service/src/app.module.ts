@@ -17,22 +17,29 @@ import { VerificationDocEntity } from './verification/entities/verification-doc.
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
-        username: config.get('DB_USER', 'crab'),
-        password: config.get('DB_PASSWORD', 'crab_secret'),
-        database: config.get('DB_NAME', 'crab_db'),
-        entities: [
-          ProfileEntity,
-          AddressEntity,
-          DriverProfileEntity,
-          MerchantProfileEntity,
-          VerificationDocEntity,
-        ],
-        synchronize: config.get('NODE_ENV') !== 'production',
-      }),
+      useFactory: (config: ConfigService) => {
+        const url = config.get<string>('DATABASE_URL')
+        return {
+          type: 'postgres' as const,
+          ...(url
+            ? { url }
+            : {
+                host: config.get('DB_HOST', 'localhost'),
+                port: config.get<number>('DB_PORT', 5432),
+                username: config.get('DB_USER', 'crab'),
+                password: config.get('DB_PASSWORD', 'crab_secret'),
+                database: config.get('DB_NAME', 'crab_db'),
+              }),
+          entities: [
+            ProfileEntity,
+            AddressEntity,
+            DriverProfileEntity,
+            MerchantProfileEntity,
+            VerificationDocEntity,
+          ],
+          synchronize: config.get('NODE_ENV') !== 'production',
+        }
+      },
     }),
     ProfilesModule,
     AddressesModule,

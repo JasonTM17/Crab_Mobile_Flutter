@@ -134,8 +134,14 @@ export class WalletService {
       throw new BadRequestException('Cannot transfer to yourself')
     }
     return this.dataSource.transaction(async (manager) => {
-      const fromWallet = await this.getOrCreateForUpdate(fromUserId, manager)
-      const toWallet = await this.getOrCreateForUpdate(dto.toUserId, manager)
+      // CRITICAL: lock wallets in deterministic order (smaller userId first) to avoid
+      // deadlock when two transfers in opposite directions run concurrently.
+      const [firstId, secondId] = [fromUserId, dto.toUserId].sort()
+      const firstWallet = await this.getOrCreateForUpdate(firstId, manager)
+      const secondWallet = await this.getOrCreateForUpdate(secondId, manager)
+      const fromWallet = firstId === fromUserId ? firstWallet : secondWallet
+      const toWallet = firstId === fromUserId ? secondWallet : firstWallet
+
       if (fromWallet.frozen || toWallet.frozen) {
         throw new ForbiddenException('Wallet frozen')
       }

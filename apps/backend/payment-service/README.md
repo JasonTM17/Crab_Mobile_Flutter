@@ -26,6 +26,6 @@ Manages digital wallet, transactions, and payment processing.
 ## Docker
 
 ```bash
-docker build -t ghcr.io/jasontm17/crab-payment-service .
-docker run -p 3005:3005 --env-file .env ghcr.io/jasontm17/crab-payment-service
+docker build -f apps/backend/payment-service/Dockerfile -t jasontm17/payment-service .
+docker run -p 3005:3005 --env-file .env jasontm17/payment-service
 ```

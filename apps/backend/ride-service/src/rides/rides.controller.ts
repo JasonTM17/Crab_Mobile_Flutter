@@ -48,6 +48,24 @@ export class RidesController {
     return { success: true, data: ride, statusCode: HttpStatus.OK }
   }
 
+  @Post(':id/accept')
+  async accept(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { driverId: string },
+  ) {
+    const ride = await this.ridesService.acceptRide(id, body.driverId)
+    return { success: true, data: ride, statusCode: HttpStatus.OK }
+  }
+
+  @Post(':id/reject')
+  async reject(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { driverId: string },
+  ) {
+    const ride = await this.ridesService.rejectRide(id, body.driverId)
+    return { success: true, data: ride, statusCode: HttpStatus.OK }
+  }
+
   @Post(':id/cancel')
   cancel(@Param('id') id: string, @Body() dto: CancelRideDto) {
     return this.ridesService.cancelRide(id, dto.reason)

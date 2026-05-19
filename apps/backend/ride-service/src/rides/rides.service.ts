@@ -66,8 +66,49 @@ export class RidesService {
     return saved
   }
 
-  private async matchDriver(ride: RideEntity): Promise<void> {
-    const match = await this.matchingService.findBestDriver(ride.pickup_lat, ride.pickup_lng)
+  async acceptRide(rideId: string, driverId: string): Promise<RideEntity> {
+    const ride = await this.findById(rideId)
+    if (ride.status !== RideStatus.REQUESTED && ride.status !== RideStatus.MATCHED) {
+      throw new Error(`Ride cannot be accepted in status ${ride.status}`)
+    }
+    if (ride.driver_id && ride.driver_id !== driverId) {
+      throw new Error('Ride already assigned to another driver')
+    }
+    await this.rideRepository.update(rideId, {
+      driver_id: driverId,
+      status: RideStatus.MATCHED,
+      accepted_at: new Date(),
+    })
+    await this.driversService.setDriverStatus(driverId, DriverStatus.BUSY)
+    this.logger.log(`Ride ${rideId} accepted by driver ${driverId}`)
+    return this.findById(rideId)
+  }
+
+  async rejectRide(rideId: string, driverId: string): Promise<RideEntity> {
+    const ride = await this.findById(rideId)
+    if (ride.driver_id !== driverId) {
+      throw new Error('Driver not assigned to this ride')
+    }
+    // Reset to REQUESTED and trigger re-matching, excluding this driver
+    await this.rideRepository.update(rideId, {
+      driver_id: null as unknown as string,
+      status: RideStatus.REQUESTED,
+    })
+    await this.driversService.setDriverStatus(driverId, DriverStatus.ONLINE)
+    this.logger.log(`Ride ${rideId} rejected by driver ${driverId}, re-matching`)
+    // Async re-match excluding this driver
+    void this.matchDriver(await this.findById(rideId), [driverId]).catch((err) =>
+      this.logger.error(`Re-match failed for ride ${rideId}: ${err.message}`),
+    )
+    return this.findById(rideId)
+  }
+
+  private async matchDriver(ride: RideEntity, excludeDriverIds: string[] = []): Promise<void> {
+    const match = await this.matchingService.findBestDriver(
+      ride.pickup_lat,
+      ride.pickup_lng,
+      excludeDriverIds,
+    )
     if (!match) {
       this.logger.warn(`No driver found for ride ${ride.id}`)
       return

@@ -28,7 +28,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter())
 
-  app.setGlobalPrefix('api/v1')
+  app.setGlobalPrefix('api/v1', { exclude: ['health', 'metrics'] })
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') ?? '*',
     credentials: true,

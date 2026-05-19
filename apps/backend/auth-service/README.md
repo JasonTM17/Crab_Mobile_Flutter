@@ -27,8 +27,8 @@ Handles user authentication, registration, and token management.
 ## Docker
 
 ```bash
-docker build -t ghcr.io/jasontm17/crab-auth-service .
-docker run -p 3001:3001 --env-file .env ghcr.io/jasontm17/crab-auth-service
+docker build -f apps/backend/auth-service/Dockerfile -t jasontm17/auth-service .
+docker run -p 3001:3001 --env-file .env jasontm17/auth-service
 ```
 
 ## Environment Variables

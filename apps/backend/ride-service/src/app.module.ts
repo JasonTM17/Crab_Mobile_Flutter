@@ -18,17 +18,24 @@ import { HealthController } from './health.controller'
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
-        username: config.get('DB_USER', 'crab'),
-        password: config.get('DB_PASSWORD', 'crab_password'),
-        database: config.get('DB_NAME', 'crab_rides'),
-        entities: [RideEntity],
-        synchronize: config.get('NODE_ENV') !== 'production',
-        logging: config.get('NODE_ENV') === 'development',
-      }),
+      useFactory: (config: ConfigService) => {
+        const url = config.get<string>('DATABASE_URL')
+        return {
+          type: 'postgres' as const,
+          ...(url
+            ? { url }
+            : {
+                host: config.get('DB_HOST', 'localhost'),
+                port: config.get<number>('DB_PORT', 5432),
+                username: config.get('DB_USER', 'crab'),
+                password: config.get('DB_PASSWORD', 'crab_secret'),
+                database: config.get('DB_NAME', 'crab_db'),
+              }),
+          entities: [RideEntity],
+          synchronize: config.get('NODE_ENV') !== 'production',
+          logging: config.get('NODE_ENV') === 'development',
+        }
+      },
     }),
 
     // MongoDB — driver locations (geospatial)
@@ -36,7 +43,10 @@ import { HealthController } from './health.controller'
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        uri: config.get('MONGO_URI', 'mongodb://localhost:27017/crab_rides'),
+        uri:
+          config.get<string>('MONGODB_URI') ||
+          config.get<string>('MONGO_URI') ||
+          'mongodb://localhost:27017/crab_rides',
       }),
     }),
 

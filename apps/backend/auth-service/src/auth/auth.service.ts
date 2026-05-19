@@ -11,6 +11,7 @@ import { Repository } from 'typeorm'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import * as bcrypt from 'bcrypt'
+import * as crypto from 'crypto'
 import { UserRole, UserStatus, JwtPayload } from '@crab/common-types'
 import { UserEntity } from './entities/user.entity'
 import { RefreshTokenEntity } from './entities/refresh-token.entity'
@@ -199,8 +200,9 @@ export class AuthService {
   }
 
   async refresh(rawToken: string) {
+    const tokenHash = this.hashToken(rawToken)
     const record = await this.refreshTokenRepo.findOne({
-      where: { token: rawToken, revoked: false },
+      where: { token: tokenHash, revoked: false },
       relations: ['user'],
     })
 
@@ -216,7 +218,8 @@ export class AuthService {
   }
 
   async logout(rawToken: string) {
-    await this.refreshTokenRepo.update({ token: rawToken }, { revoked: true })
+    const tokenHash = this.hashToken(rawToken)
+    await this.refreshTokenRepo.update({ token: tokenHash }, { revoked: true })
   }
 
   async logoutAll(userId: string) {
@@ -292,13 +295,20 @@ export class AuthService {
     expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_TTL_DAYS)
 
     const tokenRecord = this.refreshTokenRepo.create({
-      token: refresh_token,
+      token: this.hashToken(refresh_token),
       userId: user.id,
       expiresAt,
     })
     await this.refreshTokenRepo.save(tokenRecord)
 
     return { access_token, refresh_token }
+  }
+
+  private hashToken(token: string): string {
+    // Fast deterministic hash for token lookup. SHA-256 is sufficient since
+    // refresh tokens are already high-entropy JWTs; bcrypt would be too slow
+    // for the per-request lookup pattern.
+    return crypto.createHash('sha256').update(token).digest('hex')
   }
 
   private sanitize(user: UserEntity) {

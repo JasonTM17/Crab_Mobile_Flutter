@@ -12,6 +12,7 @@ import {
   NotificationPreferences,
   PreferencesDocument,
 } from '../preferences/schemas/preferences.schema'
+import { FcmService } from './fcm.service'
 
 @Injectable()
 export class NotificationsService {
@@ -22,6 +23,7 @@ export class NotificationsService {
     private readonly model: Model<NotificationDocument>,
     @InjectModel(NotificationPreferences.name)
     private readonly prefsModel: Model<PreferencesDocument>,
+    private readonly fcm: FcmService,
   ) {}
 
   async send(dto: CreateNotificationDto): Promise<NotificationDocument> {
@@ -133,7 +135,32 @@ export class NotificationsService {
 
   private async deliver(notif: NotificationDocument, prefs: PreferencesDocument) {
     if (notif.channels.includes(NotificationChannel.PUSH) && prefs.fcmTokens.length > 0) {
-      this.logger.debug(`[FCM] Would send to ${prefs.fcmTokens.length} tokens`)
+      const result = await this.fcm.sendToTokens(
+        prefs.fcmTokens,
+        {
+          title: notif.title,
+          body: notif.body,
+          imageUrl: notif.imageUrl,
+        },
+        {
+          ...(notif.data ? { ...notif.data } : {}),
+          ...(notif.deepLink ? { deepLink: notif.deepLink } : {}),
+          type: String(notif.type),
+        },
+      )
+      if (result.invalidTokens.length > 0) {
+        // Strip invalid tokens from preferences
+        await this.prefsModel.updateOne(
+          { userId: notif.userId },
+          { $pull: { fcmTokens: { $in: result.invalidTokens } } },
+        )
+        this.logger.debug(
+          `Pruned ${result.invalidTokens.length} invalid FCM tokens for user ${notif.userId}`,
+        )
+      }
+      this.logger.debug(
+        `[FCM] Sent to user ${notif.userId}: ${result.successCount}/${prefs.fcmTokens.length} ok`,
+      )
     }
     notif.delivered = true
     notif.deliveredAt = new Date()

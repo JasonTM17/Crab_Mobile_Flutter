@@ -38,6 +38,6 @@ Manages food delivery operations including restaurants, menus, orders, and deliv
 ## Docker
 
 ```bash
-docker build -t ghcr.io/jasontm17/crab-food-service .
-docker run -p 3004:3004 --env-file .env ghcr.io/jasontm17/crab-food-service
+docker build -f apps/backend/food-service/Dockerfile -t jasontm17/food-service .
+docker run -p 3004:3004 --env-file .env jasontm17/food-service
 ```

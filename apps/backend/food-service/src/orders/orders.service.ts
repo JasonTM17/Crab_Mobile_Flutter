@@ -146,12 +146,30 @@ export class OrdersService {
     })
   }
 
+  // Allowed state transitions for orders. Anything not listed throws 400.
+  private readonly transitions: Record<OrderStatus, OrderStatus[]> = {
+    [OrderStatus.PLACED]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+    [OrderStatus.CONFIRMED]: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
+    [OrderStatus.PREPARING]: [OrderStatus.READY, OrderStatus.CANCELLED],
+    [OrderStatus.READY]: [OrderStatus.PICKED_UP, OrderStatus.CANCELLED],
+    [OrderStatus.PICKED_UP]: [OrderStatus.DELIVERED],
+    [OrderStatus.DELIVERED]: [],
+    [OrderStatus.CANCELLED]: [],
+  }
+
   async updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<OrderEntity> {
     const order = await this.findById(id)
-    const status = dto.status as OrderStatus
-    const updates: Partial<OrderEntity> = { status }
+    const next = dto.status as OrderStatus
+    const allowed = this.transitions[order.status] ?? []
+    if (!allowed.includes(next)) {
+      throw new BadRequestException(
+        `Invalid status transition: ${order.status} → ${next}`,
+      )
+    }
 
-    switch (status) {
+    const updates: Partial<OrderEntity> = { status: next }
+
+    switch (next) {
       case OrderStatus.CONFIRMED:
         updates.confirmedAt = new Date()
         break
@@ -173,7 +191,6 @@ export class OrdersService {
     }
 
     await this.orderRepo.update(id, updates)
-    void order
     return this.findById(id)
   }
 
