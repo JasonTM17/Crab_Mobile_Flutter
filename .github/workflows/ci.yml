@@ -37,8 +37,11 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build common-types first
-        run: pnpm --filter @crab/common-types build
+      - name: Build shared workspace packages first
+        run: |
+          pnpm --filter @crab/common-types build
+          pnpm --filter @crab/socket-events build
+          pnpm --filter @crab/backend-shared build
       - name: Lint
         run: |
           if [ "${{ matrix.service }}" = "common-types" ] || [ "${{ matrix.service }}" = "socket-events" ]; then
@@ -71,6 +74,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @crab/common-types build
+      - run: pnpm --filter @crab/socket-events build
+      - run: pnpm --filter @crab/backend-shared build
       - run: pnpm test || true
 
   flutter:
