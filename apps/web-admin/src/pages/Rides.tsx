@@ -1,16 +1,45 @@
 import { useEffect, useState } from 'react'
+import { MapPin } from 'lucide-react'
 import api from '@/lib/axios'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
+
+interface Ride {
+  id: string
+  rider_id?: string
+  riderId?: string
+  driver_id?: string
+  driverId?: string
+  status: string
+  fare?: number
+  distance_km?: number
+  distanceKm?: number
+  created_at?: string
+  createdAt?: string
+}
 
 export default function Rides() {
-  const [rides, setRides] = useState<any[]>([])
+  const [rides, setRides] = useState<Ride[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  function load() {
+    setLoading(true)
+    setError(null)
     api
       .get('/rides')
       .then((r) => setRides(r.data.data ?? r.data ?? []))
-      .catch(() => setRides([]))
+      .catch(() => {
+        setError('Failed to load rides.')
+        setRides([])
+      })
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    load()
   }, [])
 
   return (
@@ -31,15 +60,38 @@ export default function Rides() {
           </thead>
           <tbody className="divide-y">
             {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={`sk-${i}`}>
+                  {Array.from({ length: 7 }).map((__, j) => (
+                    <td key={j} className="px-6 py-4">
+                      <Skeleton className="h-4 w-20" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : error ? (
               <tr>
-                <td colSpan={7} className="text-center py-8">
-                  Loading...
+                <td colSpan={7}>
+                  <EmptyState
+                    icon={<MapPin className="h-5 w-5" />}
+                    title="Could not load rides"
+                    description={error}
+                    action={
+                      <Button variant="outline" onClick={load}>
+                        Retry
+                      </Button>
+                    }
+                  />
                 </td>
               </tr>
             ) : rides.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                  No rides
+                <td colSpan={7}>
+                  <EmptyState
+                    icon={<MapPin className="h-5 w-5" />}
+                    title="No rides yet"
+                    description="Once riders book trips they'll show up here."
+                  />
                 </td>
               </tr>
             ) : (
@@ -55,15 +107,15 @@ export default function Rides() {
                     {(r.driver_id ?? r.driverId)?.slice(0, 8) ?? '-'}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                      {r.status}
-                    </span>
+                    <Badge variant="info">{r.status}</Badge>
                   </td>
                   <td className="px-6 py-4">{r.fare ?? '-'} VND</td>
-                  <td className="px-6 py-4">{r.distance_km ?? r.distanceKm ?? '-'} km</td>
+                  <td className="px-6 py-4">
+                    {r.distance_km ?? r.distanceKm ?? '-'} km
+                  </td>
                   <td className="px-6 py-4 text-sm">
                     {(r.created_at ?? r.createdAt)
-                      ? new Date(r.created_at ?? r.createdAt).toLocaleString()
+                      ? new Date(r.created_at ?? r.createdAt!).toLocaleString()
                       : '-'}
                   </td>
                 </tr>

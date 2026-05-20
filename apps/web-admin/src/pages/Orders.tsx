@@ -1,18 +1,40 @@
 import { useEffect, useState } from 'react'
+import { ShoppingBag } from 'lucide-react'
 import api from '@/lib/axios'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
+
+interface Order {
+  id: string
+  customer_id?: string
+  customerId?: string
+  status: string
+  total?: number
+  total_amount?: number
+  created_at?: string
+  createdAt?: string
+}
 
 export default function Orders() {
-  const [orders, setOrders] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [restaurantId, setRestaurantId] = useState('')
+  const [hasSearched, setHasSearched] = useState(false)
 
   async function load() {
     if (!restaurantId) return
     setLoading(true)
+    setError(null)
+    setHasSearched(true)
     try {
       const res = await api.get(`/orders/restaurant/${restaurantId}`)
       setOrders(res.data.data ?? res.data ?? [])
     } catch {
+      setError('Failed to load orders for this restaurant.')
       setOrders([])
     } finally {
       setLoading(false)
@@ -28,18 +50,15 @@ export default function Orders() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
         <div className="flex gap-2">
-          <input
+          <Input
             value={restaurantId}
             onChange={(e) => setRestaurantId(e.target.value)}
             placeholder="Restaurant ID"
-            className="px-3 py-2 border rounded bg-background w-72"
+            className="w-72"
           />
-          <button
-            onClick={load}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-          >
+          <Button onClick={load} disabled={!restaurantId}>
             Load
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -56,15 +75,46 @@ export default function Orders() {
           </thead>
           <tbody className="divide-y">
             {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={`sk-${i}`}>
+                  {Array.from({ length: 5 }).map((__, j) => (
+                    <td key={j} className="px-6 py-4">
+                      <Skeleton className="h-4 w-24" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : error ? (
               <tr>
-                <td colSpan={5} className="text-center py-8">
-                  Loading...
+                <td colSpan={5}>
+                  <EmptyState
+                    icon={<ShoppingBag className="h-5 w-5" />}
+                    title="Could not load orders"
+                    description={error}
+                    action={
+                      <Button variant="outline" onClick={load}>
+                        Retry
+                      </Button>
+                    }
+                  />
                 </td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No orders. Enter a restaurant ID to load.
+                <td colSpan={5}>
+                  <EmptyState
+                    icon={<ShoppingBag className="h-5 w-5" />}
+                    title={
+                      hasSearched
+                        ? 'No orders for this restaurant'
+                        : 'Search by restaurant'
+                    }
+                    description={
+                      hasSearched
+                        ? 'Try a different restaurant ID.'
+                        : 'Enter a restaurant ID to load its recent orders.'
+                    }
+                  />
                 </td>
               </tr>
             ) : (
@@ -77,16 +127,14 @@ export default function Orders() {
                     {(o.customer_id ?? o.customerId)?.slice(0, 8)}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                      {o.status}
-                    </span>
+                    <Badge variant="info">{o.status}</Badge>
                   </td>
                   <td className="px-6 py-4">
                     {o.total ?? o.total_amount ?? '-'} VND
                   </td>
                   <td className="px-6 py-4 text-sm">
                     {(o.created_at ?? o.createdAt)
-                      ? new Date(o.created_at ?? o.createdAt).toLocaleString()
+                      ? new Date(o.created_at ?? o.createdAt!).toLocaleString()
                       : '-'}
                   </td>
                 </tr>

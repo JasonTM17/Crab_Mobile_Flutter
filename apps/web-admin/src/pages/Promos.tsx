@@ -1,5 +1,22 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { Ticket } from 'lucide-react'
 import api from '@/lib/axios'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface Promo {
   id: string
@@ -14,53 +31,72 @@ interface Promo {
   totalUsageLimit?: number
 }
 
+const initialForm = {
+  code: '',
+  name: '',
+  description: '',
+  type: 'PERCENTAGE',
+  value: 10,
+  minOrderValue: 0,
+  validFrom: new Date().toISOString().slice(0, 10),
+  validUntil: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+}
+
 export default function Promos() {
   const [promos, setPromos] = useState<Promo[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({
-    code: '',
-    name: '',
-    description: '',
-    type: 'PERCENTAGE',
-    value: 10,
-    minOrderValue: 0,
-    validFrom: new Date().toISOString().slice(0, 10),
-    validUntil: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-  })
+  const [submitting, setSubmitting] = useState(false)
+  const [pendingDeactivate, setPendingDeactivate] = useState<Promo | null>(null)
+  const [form, setForm] = useState(initialForm)
 
   useEffect(() => {
     load()
   }, [])
 
   async function load() {
+    setLoading(true)
+    setError(null)
     try {
       const res = await api.get('/promo')
       setPromos(res.data.data ?? res.data ?? [])
     } catch (e) {
       console.error(e)
+      setError('Could not load promos.')
       setPromos([])
+    } finally {
+      setLoading(false)
     }
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
+    setSubmitting(true)
     try {
       await api.post('/promo', form)
+      toast.success(`Promo ${form.code} created`)
       setShowForm(false)
-      setForm({ ...form, code: '', name: '' })
+      setForm(initialForm)
       load()
     } catch (err: any) {
-      alert(err.response?.data?.message ?? 'Failed')
+      toast.error(err.response?.data?.message ?? 'Failed to create promo')
+    } finally {
+      setSubmitting(false)
     }
   }
 
-  async function deactivate(id: string) {
-    if (!confirm('Deactivate this promo?')) return
+  async function deactivate(promo: Promo) {
+    setSubmitting(true)
     try {
-      await api.put(`/promo/${id}/deactivate`)
+      await api.put(`/promo/${promo.id}/deactivate`)
+      toast.success(`Promo ${promo.code} deactivated`)
+      setPendingDeactivate(null)
       load()
     } catch (e: any) {
-      alert(e.response?.data?.message ?? 'Failed')
+      toast.error(e.response?.data?.message ?? 'Failed to deactivate')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -68,12 +104,9 @@ export default function Promos() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Promo Codes</h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-        >
+        <Button onClick={() => setShowForm(!showForm)}>
           {showForm ? 'Cancel' : '+ New Promo'}
-        </button>
+        </Button>
       </div>
 
       {showForm && (
@@ -81,22 +114,20 @@ export default function Promos() {
           onSubmit={submit}
           className="bg-card p-6 rounded-lg shadow border grid grid-cols-2 gap-4"
         >
-          <input
-            className="px-3 py-2 border rounded bg-background"
+          <Input
             placeholder="Code (e.g. WELCOME50)"
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
             required
           />
-          <input
-            className="px-3 py-2 border rounded bg-background"
+          <Input
             placeholder="Name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
           />
           <select
-            className="px-3 py-2 border rounded bg-background"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={form.type}
             onChange={(e) => setForm({ ...form, type: e.target.value })}
           >
@@ -104,41 +135,38 @@ export default function Promos() {
             <option value="FIXED">Fixed amount</option>
             <option value="FREE_RIDE">Free ride</option>
           </select>
-          <input
+          <Input
             type="number"
-            className="px-3 py-2 border rounded bg-background"
             placeholder="Value"
             value={form.value}
             onChange={(e) => setForm({ ...form, value: +e.target.value })}
             required
           />
-          <input
+          <Input
             type="number"
-            className="px-3 py-2 border rounded bg-background"
             placeholder="Min order value"
             value={form.minOrderValue}
-            onChange={(e) => setForm({ ...form, minOrderValue: +e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, minOrderValue: +e.target.value })
+            }
           />
-          <input
+          <Input
             type="date"
-            className="px-3 py-2 border rounded bg-background"
             value={form.validFrom}
             onChange={(e) => setForm({ ...form, validFrom: e.target.value })}
             required
           />
-          <input
+          <Input
             type="date"
-            className="px-3 py-2 border rounded bg-background"
             value={form.validUntil}
             onChange={(e) => setForm({ ...form, validUntil: e.target.value })}
             required
           />
-          <button
-            type="submit"
-            className="col-span-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-          >
-            Create Promo
-          </button>
+          <div className="col-span-2 flex justify-end">
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Creating…' : 'Create Promo'}
+            </Button>
+          </div>
         </form>
       )}
 
@@ -156,10 +184,44 @@ export default function Promos() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {promos.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={`sk-${i}`}>
+                  {Array.from({ length: 7 }).map((__, j) => (
+                    <td key={j} className="px-6 py-4">
+                      <Skeleton className="h-4 w-20" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : error ? (
               <tr>
-                <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                  No promos
+                <td colSpan={7}>
+                  <EmptyState
+                    icon={<Ticket className="h-5 w-5" />}
+                    title="Could not load promos"
+                    description={error}
+                    action={
+                      <Button onClick={load} variant="outline">
+                        Retry
+                      </Button>
+                    }
+                  />
+                </td>
+              </tr>
+            ) : promos.length === 0 ? (
+              <tr>
+                <td colSpan={7}>
+                  <EmptyState
+                    icon={<Ticket className="h-5 w-5" />}
+                    title="No promos yet"
+                    description="Create your first promo code to incentivise riders and customers."
+                    action={
+                      <Button onClick={() => setShowForm(true)}>
+                        + New Promo
+                      </Button>
+                    }
+                  />
                 </td>
               </tr>
             ) : (
@@ -176,25 +238,24 @@ export default function Promos() {
                     {p.totalUsageLimit ? ` / ${p.totalUsageLimit}` : ''}
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    {p.validUntil ? new Date(p.validUntil).toLocaleDateString() : '-'}
+                    {p.validUntil
+                      ? new Date(p.validUntil).toLocaleDateString()
+                      : '-'}
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 text-xs rounded ${
-                        p.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100'
-                      }`}
-                    >
+                    <Badge variant={p.isActive ? 'success' : 'secondary'}>
                       {p.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-6 py-4 text-right">
                     {p.isActive && (
-                      <button
-                        onClick={() => deactivate(p.id)}
-                        className="text-red-600 hover:underline"
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setPendingDeactivate(p)}
                       >
                         Deactivate
-                      </button>
+                      </Button>
                     )}
                   </td>
                 </tr>
@@ -203,6 +264,33 @@ export default function Promos() {
           </tbody>
         </table>
       </div>
+
+      <AlertDialog
+        open={!!pendingDeactivate}
+        onOpenChange={(open) => !open && setPendingDeactivate(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deactivate promo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDeactivate?.code} will no longer apply to new orders. You
+              can reactivate it later from the API.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={submitting}
+              onClick={(e) => {
+                e.preventDefault()
+                if (pendingDeactivate) deactivate(pendingDeactivate)
+              }}
+            >
+              {submitting ? 'Deactivating…' : 'Deactivate'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
