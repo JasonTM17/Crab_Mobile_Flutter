@@ -1,5 +1,30 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import api from '@/lib/axios'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Car } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface Driver {
   userId: string
@@ -17,6 +42,11 @@ interface Driver {
 export default function Drivers() {
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [pendingApproveId, setPendingApproveId] = useState<string | null>(null)
+  const [pendingRejectId, setPendingRejectId] = useState<string | null>(null)
+  const [rejectionReason, setRejectionReason] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     loadPending()
@@ -24,11 +54,13 @@ export default function Drivers() {
 
   async function loadPending() {
     setLoading(true)
+    setError(null)
     try {
       const res = await api.get('/verification/drivers/admin/pending')
       setDrivers(res.data.data ?? res.data ?? [])
     } catch (e) {
       console.error(e)
+      setError('Failed to load pending verifications.')
       setDrivers([])
     } finally {
       setLoading(false)
@@ -36,23 +68,35 @@ export default function Drivers() {
   }
 
   async function approve(userId: string) {
-    if (!confirm(`Approve driver ${userId}?`)) return
+    setSubmitting(true)
     try {
       await api.put(`/verification/drivers/${userId}/approve`)
+      toast.success('Driver approved')
+      setPendingApproveId(null)
       loadPending()
     } catch (e: any) {
-      alert(e.response?.data?.message ?? 'Failed to approve')
+      toast.error(e.response?.data?.message ?? 'Failed to approve')
+    } finally {
+      setSubmitting(false)
     }
   }
 
-  async function reject(userId: string) {
-    const reason = prompt('Rejection reason:')
-    if (!reason) return
+  async function reject(userId: string, reason: string) {
+    if (!reason.trim()) {
+      toast.error('Rejection reason is required')
+      return
+    }
+    setSubmitting(true)
     try {
       await api.put(`/verification/drivers/${userId}/reject`, { reason })
+      toast.success('Driver rejected')
+      setPendingRejectId(null)
+      setRejectionReason('')
       loadPending()
     } catch (e: any) {
-      alert(e.response?.data?.message ?? 'Failed to reject')
+      toast.error(e.response?.data?.message ?? 'Failed to reject')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -84,15 +128,48 @@ export default function Drivers() {
           </thead>
           <tbody className="divide-y">
             {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={`sk-${i}`}>
+                  <td className="px-6 py-4">
+                    <Skeleton className="h-4 w-24" />
+                  </td>
+                  <td className="px-6 py-4">
+                    <Skeleton className="h-4 w-40" />
+                  </td>
+                  <td className="px-6 py-4">
+                    <Skeleton className="h-4 w-20" />
+                  </td>
+                  <td className="px-6 py-4">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Skeleton className="h-4 w-32 ml-auto" />
+                  </td>
+                </tr>
+              ))
+            ) : error ? (
               <tr>
-                <td colSpan={5} className="text-center py-8">
-                  Loading...
+                <td colSpan={5}>
+                  <EmptyState
+                    icon={<Car className="h-5 w-5" />}
+                    title="Could not load verifications"
+                    description={error}
+                    action={
+                      <Button onClick={loadPending} variant="outline">
+                        Retry
+                      </Button>
+                    }
+                  />
                 </td>
               </tr>
             ) : drivers.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No pending verifications
+                <td colSpan={5}>
+                  <EmptyState
+                    icon={<Car className="h-5 w-5" />}
+                    title="No pending verifications"
+                    description="All driver applications have been processed."
+                  />
                 </td>
               </tr>
             ) : (
@@ -104,23 +181,23 @@ export default function Drivers() {
                   </td>
                   <td className="px-6 py-4 font-mono">{d.vehiclePlate}</td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
-                      {d.verificationStatus}
-                    </span>
+                    <Badge variant="warning">{d.verificationStatus}</Badge>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => approve(d.userId)}
-                      className="text-green-600 hover:underline mr-3"
+                  <td className="px-6 py-4 text-right space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setPendingApproveId(d.userId)}
                     >
                       Approve
-                    </button>
-                    <button
-                      onClick={() => reject(d.userId)}
-                      className="text-red-600 hover:underline"
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => setPendingRejectId(d.userId)}
                     >
                       Reject
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))
@@ -128,6 +205,81 @@ export default function Drivers() {
           </tbody>
         </table>
       </div>
+
+      {/* Approve confirm */}
+      <AlertDialog
+        open={!!pendingApproveId}
+        onOpenChange={(open) => !open && setPendingApproveId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Approve driver?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The driver will be able to start accepting rides immediately.
+              This action can be reversed by suspending the account later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={submitting}
+              onClick={(e) => {
+                e.preventDefault()
+                if (pendingApproveId) approve(pendingApproveId)
+              }}
+            >
+              {submitting ? 'Approving…' : 'Approve'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reject dialog with reason */}
+      <Dialog
+        open={!!pendingRejectId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingRejectId(null)
+            setRejectionReason('')
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject driver application</DialogTitle>
+            <DialogDescription>
+              Provide a clear reason. The driver will see this message.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+            placeholder="e.g. License expired"
+            autoFocus
+          />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPendingRejectId(null)
+                setRejectionReason('')
+              }}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={submitting || !rejectionReason.trim()}
+              onClick={() => {
+                if (pendingRejectId) reject(pendingRejectId, rejectionReason)
+              }}
+            >
+              {submitting ? 'Rejecting…' : 'Reject driver'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
