@@ -43,12 +43,12 @@ class ProfileScreen extends StatelessWidget {
               _Item(
                 icon: Icons.person,
                 label: 'Edit profile',
-                onTap: () {},
+                onTap: () => context.push('/profile/edit'),
               ),
               _Item(
                 icon: Icons.location_on,
                 label: 'Saved addresses',
-                onTap: () {},
+                onTap: () => context.push('/profile/addresses'),
               ),
               _Item(
                 icon: Icons.payment,
@@ -58,27 +58,35 @@ class ProfileScreen extends StatelessWidget {
               _Item(
                 icon: Icons.lock,
                 label: 'Change password',
-                onTap: () {},
+                onTap: () => context.push('/profile/security'),
               ),
               const _SectionTitle('Preferences'),
               _Item(
                 icon: Icons.notifications,
                 label: 'Notifications',
-                onTap: () {},
+                onTap: () => context.push('/notifications'),
               ),
               _Item(
                 icon: Icons.language,
                 label: 'Language',
-                onTap: () {},
+                onTap: () => _comingSoon(context),
               ),
               _Item(
                 icon: Icons.dark_mode,
                 label: 'Theme',
-                onTap: () {},
+                onTap: () => _comingSoon(context),
               ),
               const _SectionTitle('Support'),
-              _Item(icon: Icons.help, label: 'Help center', onTap: () {}),
-              _Item(icon: Icons.info, label: 'About', onTap: () {}),
+              _Item(
+                icon: Icons.help,
+                label: 'Help center',
+                onTap: () => _comingSoon(context),
+              ),
+              _Item(
+                icon: Icons.info,
+                label: 'About',
+                onTap: () => _comingSoon(context),
+              ),
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.all(16),
