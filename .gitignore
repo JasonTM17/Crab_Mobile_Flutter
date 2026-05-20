@@ -75,6 +75,9 @@ temp/
 # OMC (AI tooling state)
 .omc/
 
+# Claude Code session/private state
+.claude/
+
 # Kilo private state and plans
 .kilo/
 
