@@ -4,40 +4,40 @@ import { Document } from 'mongoose'
 @Schema({ timestamps: true })
 export class Review extends Document {
   @Prop({ required: true })
-  userId: string
+  userId!: string
 
   @Prop({ required: true })
-  targetType: string
+  targetType!: string
 
   @Prop({ required: true })
-  targetId: string
+  targetId!: string
 
   @Prop({ required: true, min: 1, max: 5 })
-  score: number
+  score!: number
 
   @Prop()
-  comment: string
+  comment!: string
 
   @Prop({ type: [String], default: [] })
-  tags: string[]
+  tags!: string[]
 
   @Prop({ type: [String], default: [] })
-  imageUrls: string[]
+  imageUrls!: string[]
 
   @Prop()
-  rideId: string
+  rideId!: string
 
   @Prop()
-  orderId: string
+  orderId!: string
 
   @Prop({ default: false })
-  isHidden: boolean
+  isHidden!: boolean
 
   @Prop()
-  replyContent: string
+  replyContent!: string
 
   @Prop()
-  replyAt: Date
+  replyAt!: Date
 }
 
 export const ReviewSchema = SchemaFactory.createForClass(Review)
