@@ -85,7 +85,7 @@ export default function Sidebar() {
               key={to}
               to={to}
               end={to === '/dashboard'}
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 cn(
                   'flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md mx-2 transition-colors',
                   isActive
