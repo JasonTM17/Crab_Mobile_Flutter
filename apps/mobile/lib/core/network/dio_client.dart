@@ -4,6 +4,10 @@ import '../constants/api_constants.dart';
 import '../../shared/services/auth_storage.dart';
 
 class DioClient {
+  final Dio dio;
+
+  DioClient(this.dio);
+
   static Dio create({required AuthStorage authStorage}) {
     final dio = Dio(BaseOptions(
       baseUrl: ApiConstants.baseUrl,
