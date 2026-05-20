@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_gradients.dart';
 import '../../data/models/conversation_model.dart';
 
 class MessageBubble extends StatelessWidget {
@@ -10,27 +11,42 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment:
             isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           Container(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.7,
+              maxWidth: MediaQuery.of(context).size.width * 0.74,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
             decoration: BoxDecoration(
-              color: isMe
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey.shade200,
+              gradient: isMe ? AppGradients.primary : null,
+              color: isMe ? null : cs.surface,
               borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
-                bottomLeft: Radius.circular(isMe ? 16 : 4),
-                bottomRight: Radius.circular(isMe ? 4 : 16),
+                topLeft: const Radius.circular(18),
+                topRight: const Radius.circular(18),
+                bottomLeft: Radius.circular(isMe ? 18 : 4),
+                bottomRight: Radius.circular(isMe ? 4 : 18),
               ),
+              border: isMe
+                  ? null
+                  : Border.all(
+                      color: cs.outlineVariant.withValues(alpha: 0.4),
+                    ),
+              boxShadow: [
+                BoxShadow(
+                  color: isMe
+                      ? cs.primary.withValues(alpha: 0.22)
+                      : Colors.black.withValues(alpha: 0.04),
+                  blurRadius: isMe ? 14 : 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -38,11 +54,12 @@ class MessageBubble extends StatelessWidget {
                 Text(
                   message.content,
                   style: TextStyle(
-                    color: isMe ? Colors.white : Colors.black87,
+                    color: isMe ? Colors.white : cs.onSurface,
                     fontSize: 15,
+                    height: 1.35,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -50,15 +67,22 @@ class MessageBubble extends StatelessWidget {
                       _formatTime(message.createdAt),
                       style: TextStyle(
                         fontSize: 11,
-                        color: isMe ? Colors.white70 : Colors.grey,
+                        fontWeight: FontWeight.w600,
+                        color: isMe
+                            ? Colors.white.withValues(alpha: 0.82)
+                            : cs.onSurfaceVariant,
                       ),
                     ),
                     if (isMe) ...[
                       const SizedBox(width: 4),
                       Icon(
-                        message.isRead ? Icons.done_all : Icons.done,
+                        message.isRead
+                            ? Icons.done_all_rounded
+                            : Icons.done_rounded,
                         size: 14,
-                        color: message.isRead ? Colors.lightBlueAccent : Colors.white70,
+                        color: message.isRead
+                            ? const Color(0xFFB9F4D0)
+                            : Colors.white.withValues(alpha: 0.82),
                       ),
                     ],
                   ],
