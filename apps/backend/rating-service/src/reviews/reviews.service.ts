@@ -39,7 +39,7 @@ export class ReviewsService {
       .exec()
   }
 
-  async reply(reviewId: string, content: string): Promise<Review> {
+  async reply(reviewId: string, content: string): Promise<Review | null> {
     return this.reviewModel.findByIdAndUpdate(
       reviewId,
       { replyContent: content, replyAt: new Date() },
