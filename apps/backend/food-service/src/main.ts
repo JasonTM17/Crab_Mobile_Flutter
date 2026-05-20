@@ -1,8 +1,11 @@
+import { initTracing } from '@crab/backend-shared'
 import { NestFactory } from '@nestjs/core'
-import { ValidationPipe } from '@nestjs/common'
+import { ValidationPipe, Logger } from '@nestjs/common'
 import { AppModule } from './app.module'
 
 async function bootstrap() {
+  await initTracing({ serviceName: 'food-service' })
+  const logger = new Logger('Bootstrap')
   const app = await NestFactory.create(AppModule)
   app.useGlobalPipes(
     new ValidationPipe({
@@ -11,10 +14,13 @@ async function bootstrap() {
       transform: true,
     }),
   )
-  app.setGlobalPrefix('api/v1', { exclude: ['health', 'metrics'] })
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['health', 'healthz', 'readyz', 'metrics'],
+  })
   app.enableCors({ origin: '*', credentials: true })
+  app.enableShutdownHooks()
   const port = process.env.PORT ?? 3004
   await app.listen(port)
-  console.log(`Food Service running on port ${port}`)
+  logger.log(`Food Service running on port ${port}`)
 }
 bootstrap()

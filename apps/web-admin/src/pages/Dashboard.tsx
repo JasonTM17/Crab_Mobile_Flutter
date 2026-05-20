@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Users, Car, ShoppingBag, DollarSign } from 'lucide-react'
+import { Users, Car, ShoppingBag, DollarSign, RefreshCw, Activity, Store } from 'lucide-react'
 import {
   ResponsiveContainer,
   LineChart,
@@ -16,6 +17,11 @@ import {
   Legend,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
+import { getGreeting, formatTime } from '@/lib/utils'
+import { useAuth } from '@/hooks/useAuth'
 import api from '@/lib/axios'
 
 const COLORS = ['#00B14F', '#0EA5E9', '#F59E0B', '#EF4444']
@@ -31,13 +37,10 @@ type DashboardSummary = {
 }
 
 async function fetchDashboard(): Promise<DashboardSummary> {
-  // Try the aggregated admin/dashboard endpoint first; fall back to individual
-  // counts if not available so the page still renders without error.
   try {
     const { data } = await api.get('/admin/dashboard')
     return data?.data ?? data ?? {}
   } catch {
-    // Best-effort fallback — individual endpoints may not all exist yet
     const safe = async <T,>(p: Promise<T>): Promise<T | null> =>
       p.catch(() => null)
     const [users, rides, orders] = await Promise.all([
@@ -55,11 +58,22 @@ async function fetchDashboard(): Promise<DashboardSummary> {
 }
 
 export default function Dashboard() {
-  const { data, isLoading } = useQuery({
+  const { currentUser } = useAuth()
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+  const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['dashboard-summary'],
-    queryFn: fetchDashboard,
+    queryFn: async () => {
+      const result = await fetchDashboard()
+      setLastRefresh(new Date())
+      return result
+    },
     refetchInterval: 30_000,
   })
+
+  const firstName =
+    currentUser?.firstName ??
+    currentUser?.name?.split(' ')?.[0] ??
+    'admin'
 
   const stats = [
     {
@@ -91,11 +105,31 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-        <p className="text-muted-foreground">
-          Here's an overview of your platform.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {getGreeting()}, {firstName}
+          </h2>
+          <p className="text-muted-foreground">
+            Here's an overview of your platform.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-muted-foreground">
+            Last refreshed at {formatTime(lastRefresh)}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`}
+            />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -109,16 +143,20 @@ export default function Dashboard() {
               />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {isLoading
-                  ? '…'
-                  : value == null
+              {isLoading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  {value == null
                     ? '—'
                     : isCurrency
                       ? Number(value).toLocaleString('vi-VN')
                       : Number(value).toLocaleString('en-US')}
-              </div>
-              <p className="text-xs text-muted-foreground">{description}</p>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                {description}
+              </p>
             </CardContent>
           </Card>
         ))}
@@ -130,21 +168,31 @@ export default function Dashboard() {
             <CardTitle>Rides per hour (24h)</CardTitle>
           </CardHeader>
           <CardContent className="h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data?.ridesByHour ?? sampleHours}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="hour" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#00B14F"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+              <Skeleton className="h-full w-full" />
+            ) : !data?.ridesByHour || data.ridesByHour.length === 0 ? (
+              <EmptyState
+                icon={<Activity className="h-5 w-5" />}
+                title="No ride activity yet"
+                description="Once rides come in, the hourly distribution will appear here."
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data.ridesByHour}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="hour" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -153,22 +201,32 @@ export default function Dashboard() {
             <CardTitle>Top restaurants by orders</CardTitle>
           </CardHeader>
           <CardContent className="h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data?.topRestaurants ?? sampleRestaurants}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 11 }}
-                  interval={0}
-                  angle={-15}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="orders" fill="#0EA5E9" />
-              </BarChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+              <Skeleton className="h-full w-full" />
+            ) : !data?.topRestaurants || data.topRestaurants.length === 0 ? (
+              <EmptyState
+                icon={<Store className="h-5 w-5" />}
+                title="No orders yet"
+                description="Top performing restaurants will be ranked here."
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.topRestaurants}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11 }}
+                    interval={0}
+                    angle={-15}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="orders" fill="#0EA5E9" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -178,46 +236,37 @@ export default function Dashboard() {
           <CardTitle>Vehicle type distribution</CardTitle>
         </CardHeader>
         <CardContent className="h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data?.vehicleMix ?? sampleVehicles}
-                dataKey="value"
-                nameKey="type"
-                cx="50%"
-                cy="50%"
-                outerRadius={90}
-                label
-              >
-                {(data?.vehicleMix ?? sampleVehicles).map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Legend />
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {isLoading ? (
+            <Skeleton className="h-full w-full" />
+          ) : !data?.vehicleMix || data.vehicleMix.length === 0 ? (
+            <EmptyState
+              icon={<Car className="h-5 w-5" />}
+              title="No vehicle data"
+              description="Vehicle type distribution will appear once drivers register."
+            />
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data.vehicleMix}
+                  dataKey="value"
+                  nameKey="type"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={90}
+                  label
+                >
+                  {data.vehicleMix.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Legend />
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
     </div>
   )
 }
-
-// Demo fallbacks shown only when backend has no data yet (e.g. dev/empty DB).
-const sampleHours = Array.from({ length: 24 }, (_, h) => ({
-  hour: `${h}:00`,
-  count: Math.max(0, Math.round(20 + 30 * Math.sin((h / 24) * Math.PI * 2))),
-}))
-const sampleRestaurants = [
-  { name: 'Pho Hanoi', orders: 124 },
-  { name: 'Bun Cha 24', orders: 98 },
-  { name: 'Banh Mi Co', orders: 86 },
-  { name: 'Com Tam', orders: 72 },
-  { name: 'Sushi Sen', orders: 60 },
-]
-const sampleVehicles = [
-  { type: 'Bike', value: 540 },
-  { type: 'Car 4', value: 220 },
-  { type: 'Car 7', value: 80 },
-  { type: 'Premium', value: 35 },
-]

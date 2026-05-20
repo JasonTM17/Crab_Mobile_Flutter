@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_gradients.dart';
+import '../../../../core/theme/app_motion.dart';
+import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/gradient_button.dart';
 import '../../data/models/cart_model.dart';
 import '../bloc/food_bloc.dart';
 import '../bloc/food_event.dart';
@@ -63,18 +67,18 @@ class _CartScreenState extends State<CartScreen> {
 
         if (cart == null || cart.isEmpty) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Cart')),
-            body: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.shopping_cart_outlined,
-                      size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('Your cart is empty',
-                      style: TextStyle(color: Colors.grey, fontSize: 16)),
-                ],
+            appBar: AppBar(
+              title: const Text(
+                'Cart',
+                style: TextStyle(fontWeight: FontWeight.w800),
               ),
+              elevation: 0,
+              scrolledUnderElevation: 0,
+            ),
+            body: const EmptyState(
+              icon: Icons.shopping_cart_outlined,
+              title: 'Your cart is empty',
+              subtitle: 'Browse restaurants and add items to get started.',
             ),
           );
         }
@@ -87,14 +91,28 @@ class _CartScreenState extends State<CartScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Your Cart'),
+            title: const Text(
+              'Your cart',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            elevation: 0,
+            scrolledUnderElevation: 0,
             actions: [
-              TextButton(
+              TextButton.icon(
                 onPressed: isPlacing
                     ? null
                     : () => context.read<FoodBloc>().add(const ClearCart()),
-                child: const Text('Clear'),
+                icon: const Icon(Icons.delete_outline_rounded,
+                    size: 18, color: Color(0xFFEF4444)),
+                label: const Text(
+                  'Clear',
+                  style: TextStyle(
+                    color: Color(0xFFEF4444),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
+              const SizedBox(width: 4),
             ],
           ),
           body: SingleChildScrollView(
@@ -104,75 +122,159 @@ class _CartScreenState extends State<CartScreen> {
               children: [
                 // Restaurant name
                 if (cart.restaurantName != null) ...[
-                  Row(
-                    children: [
-                      const Icon(Icons.restaurant, size: 18),
-                      const SizedBox(width: 8),
-                      Text(
-                        cart.restaurantName!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary
+                          .withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.restaurant_rounded,
+                              size: 18, color: Colors.white),
                         ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Ordering from',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                              Text(
+                                cart.restaurantName!,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                ],
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outlineVariant
+                          .withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Column(
+                    children: cart.items
+                        .map((ci) => _CartItemRow(
+                              cartItem: ci,
+                              onAdd: () => context
+                                  .read<FoodBloc>()
+                                  .add(AddToCart(item: ci.item)),
+                              onRemove: () => context.read<FoodBloc>().add(
+                                  RemoveFromCart(itemId: ci.item.id)),
+                            ))
+                        .toList(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Delivery address',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: TextField(
+                    controller: _addressController,
+                    decoration: const InputDecoration(
+                      prefixIcon:
+                          Icon(Icons.location_on_rounded, size: 20),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 14,
+                      ),
+                    ),
+                    maxLines: 2,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Order summary',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      _SummaryRow(
+                        label: 'Subtotal',
+                        value: _formatPrice(cart.subtotal, currency),
+                      ),
+                      const SizedBox(height: 10),
+                      _SummaryRow(
+                        label: 'Delivery fee',
+                        value: _formatPrice(deliveryFee, currency),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Container(
+                          height: 1,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outlineVariant
+                              .withValues(alpha: 0.5),
+                        ),
+                      ),
+                      _SummaryRow(
+                        label: 'Total',
+                        value: _formatPrice(total, currency),
+                        bold: true,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                ],
-                // Cart items
-                ...cart.items.map((ci) => _CartItemRow(
-                      cartItem: ci,
-                      onAdd: () => context
-                          .read<FoodBloc>()
-                          .add(AddToCart(item: ci.item)),
-                      onRemove: () => context
-                          .read<FoodBloc>()
-                          .add(RemoveFromCart(itemId: ci.item.id)),
-                    )),
-                const SizedBox(height: 24),
-                // Delivery address
-                Text(
-                  'Delivery Address',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _addressController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 24),
-                // Order summary
-                Text(
-                  'Order Summary',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                _SummaryRow(
-                  label: 'Subtotal',
-                  value: _formatPrice(cart.subtotal, currency),
-                ),
-                const SizedBox(height: 8),
-                _SummaryRow(
-                  label: 'Delivery fee',
-                  value: _formatPrice(deliveryFee, currency),
-                ),
-                const Divider(height: 24),
-                _SummaryRow(
-                  label: 'Total',
-                  value: _formatPrice(total, currency),
-                  bold: true,
                 ),
                 const SizedBox(height: 32),
               ],
@@ -180,8 +282,11 @@ class _CartScreenState extends State<CartScreen> {
           ),
           bottomNavigationBar: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: FilledButton(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: GradientButton(
+                label: 'Place order · ${_formatPrice(total, currency)}',
+                icon: Icons.flash_on_rounded,
+                height: 56,
                 onPressed: isPlacing
                     ? null
                     : () {
@@ -192,28 +297,7 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                             );
                       },
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: isPlacing
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(
-                        'Place Order · ${_formatPrice(total, currency)}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                loading: isPlacing,
               ),
             ),
           ),
@@ -242,40 +326,57 @@ class _CartItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.4),
+          ),
+        ),
+      ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Qty controls
-          Row(
-            children: [
-              _QtyBtn(icon: Icons.remove, onTap: onRemove),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  '${cartItem.quantity}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+          Container(
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            child: Row(
+              children: [
+                _QtyBtn(icon: Icons.remove_rounded, onTap: onRemove),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    '${cartItem.quantity}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
-              ),
-              _QtyBtn(icon: Icons.add, onTap: onAdd),
-            ],
+                _QtyBtn(icon: Icons.add_rounded, onTap: onAdd),
+              ],
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               cartItem.item.name,
-              style: const TextStyle(fontSize: 15),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Text(
             '${_formatPrice(cartItem.subtotal)} ${cartItem.item.currency}',
             style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w800,
+              color: cs.primary,
             ),
           ),
         ],
@@ -292,17 +393,29 @@ class _QtyBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(6),
+    final cs = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: AnimatedContainer(
+          duration: AppMotion.fast,
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            gradient: AppGradients.primary,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: cs.primary.withValues(alpha: 0.30),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Icon(icon, size: 18, color: Colors.white),
         ),
-        child: Icon(icon, size: 16),
       ),
     );
   }
@@ -321,14 +434,23 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = bold
-        ? const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
-        : null;
+    final theme = Theme.of(context);
+    final labelStyle = bold
+        ? theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)
+        : theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          );
+    final valueStyle = bold
+        ? theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+          )
+        : theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: style),
-        Text(value, style: style),
+        Text(label, style: labelStyle),
+        Text(value, style: valueStyle),
       ],
     );
   }

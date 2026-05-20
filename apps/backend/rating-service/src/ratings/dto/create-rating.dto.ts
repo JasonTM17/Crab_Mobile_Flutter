@@ -2,15 +2,15 @@ import { IsString, IsNumber, Min, Max, IsOptional } from 'class-validator'
 
 export class CreateRatingDto {
   @IsString()
-  targetType: string
+  targetType!: string
 
   @IsString()
-  targetId: string
+  targetId!: string
 
   @IsNumber()
   @Min(1)
   @Max(5)
-  score: number
+  score!: number
 
   @IsOptional()
   @IsString()

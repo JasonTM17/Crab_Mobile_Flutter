@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../shared/utils/error_message.dart';
 import '../../data/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -57,7 +58,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on DioException catch (e) {
       emit(state.copyWith(status: AuthStatus.error, error: _extractError(e)));
     } catch (e) {
-      emit(state.copyWith(status: AuthStatus.error, error: e.toString()));
+      emit(state.copyWith(status: AuthStatus.error, error: mapErrorToMessage(e)));
     }
   }
 
@@ -70,7 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on DioException catch (e) {
       emit(state.copyWith(status: AuthStatus.error, error: _extractError(e)));
     } catch (e) {
-      emit(state.copyWith(status: AuthStatus.error, error: e.toString()));
+      emit(state.copyWith(status: AuthStatus.error, error: mapErrorToMessage(e)));
     }
   }
 

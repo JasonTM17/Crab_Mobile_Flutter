@@ -502,31 +502,31 @@ class _StarRating extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(maxStars, (i) {
-        final filled = i < rating.floor();
-        final half = !filled && i < rating;
-        return Icon(
-          filled
-              ? Icons.star
-              : half
-                  ? Icons.star_half
-                  : Icons.star_border,
-          color: Colors.amber,
-          size: 14,
-        );
-      })
-        ..add(
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(
-              rating.toStringAsFixed(1),
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+      children: <Widget>[
+        ...List.generate(maxStars, (i) {
+          final filled = i < rating.floor();
+          final half = !filled && i < rating;
+          return Icon(
+            filled
+                ? Icons.star
+                : half
+                    ? Icons.star_half
+                    : Icons.star_border,
+            color: Colors.amber,
+            size: 14,
+          );
+        }),
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            rating.toStringAsFixed(1),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
-          ) as Widget,
+          ),
         ),
+      ],
     );
   }
 }

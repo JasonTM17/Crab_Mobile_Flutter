@@ -1,5 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { CreditCard } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
 import api from '@/lib/axios'
 
 type Transaction = {
@@ -22,7 +27,7 @@ async function fetchTransactions(): Promise<Transaction[]> {
 }
 
 export default function Payments() {
-  const { data: transactions = [], isLoading } = useQuery({
+  const { data: transactions = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-transactions'],
     queryFn: fetchTransactions,
     refetchInterval: 30_000,
@@ -51,9 +56,11 @@ export default function Payments() {
             <CardTitle className="text-sm">Total transactions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? '…' : transactions.length}
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{transactions.length}</div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -61,9 +68,11 @@ export default function Payments() {
             <CardTitle className="text-sm">Completed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? '…' : completedCount}
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{completedCount}</div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -71,9 +80,13 @@ export default function Payments() {
             <CardTitle className="text-sm">Total volume (VND)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? '…' : totalVolume.toLocaleString('vi-VN')}
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32" />
+            ) : (
+              <div className="text-2xl font-bold">
+                {totalVolume.toLocaleString('vi-VN')}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -97,15 +110,38 @@ export default function Payments() {
               </thead>
               <tbody>
                 {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={`sk-${i}`} className="border-b last:border-0">
+                      {Array.from({ length: 6 }).map((__, j) => (
+                        <td key={j} className="py-2 pr-4">
+                          <Skeleton className="h-4 w-20" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : isError ? (
                   <tr>
-                    <td className="py-3 text-muted-foreground" colSpan={6}>
-                      Loading…
+                    <td colSpan={6}>
+                      <EmptyState
+                        icon={<CreditCard className="h-5 w-5" />}
+                        title="Could not load transactions"
+                        description="Try refreshing in a moment."
+                        action={
+                          <Button variant="outline" onClick={() => refetch()}>
+                            Retry
+                          </Button>
+                        }
+                      />
                     </td>
                   </tr>
                 ) : transactions.length === 0 ? (
                   <tr>
-                    <td className="py-6 text-muted-foreground text-center" colSpan={6}>
-                      No transactions yet.
+                    <td colSpan={6}>
+                      <EmptyState
+                        icon={<CreditCard className="h-5 w-5" />}
+                        title="No transactions yet"
+                        description="Wallet movements will be recorded here as users transact."
+                      />
                     </td>
                   </tr>
                 ) : (
@@ -124,17 +160,17 @@ export default function Payments() {
                         {Number(t.amount).toLocaleString('vi-VN')}
                       </td>
                       <td className="py-2 pr-4">
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        <Badge
+                          variant={
                             t.status === 'COMPLETED'
-                              ? 'bg-emerald-100 text-emerald-700'
+                              ? 'success'
                               : t.status === 'PENDING'
-                                ? 'bg-amber-100 text-amber-700'
-                                : 'bg-rose-100 text-rose-700'
-                          }`}
+                                ? 'warning'
+                                : 'destructive'
+                          }
                         >
                           {t.status}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="py-2 pr-4 text-muted-foreground">
                         {t.description ?? ''}

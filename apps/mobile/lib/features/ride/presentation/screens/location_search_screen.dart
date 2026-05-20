@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_motion.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../data/models/location_model.dart';
 
 class LocationSearchScreen extends StatefulWidget {
@@ -125,79 +127,121 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final showRecent = _searchController.text.isEmpty;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
         elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: widget.hint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () => _searchController.clear(),
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: AnimatedContainer(
+              duration: AppMotion.fast,
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: _searchController.text.isEmpty
+                      ? Colors.transparent
+                      : cs.primary,
+                  width: 1.4,
                 ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: widget.hint,
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: cs.primary,
+                  ),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => _searchController.clear(),
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                ),
               ),
             ),
           ),
           if (_isSearching)
             const Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
+              padding: EdgeInsets.all(20),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.4),
+                ),
+              ),
             )
           else
             Expanded(
               child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 children: [
                   if (showRecent) ...[
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                      child: Text(
-                        'Recent Locations',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
+                      child: Row(
+                        children: [
+                          Icon(Icons.history_rounded,
+                              size: 16, color: cs.onSurfaceVariant),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Recent locations',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     ..._recentLocations.map(
-                      (loc) => _LocationTile(
-                        location: loc,
-                        icon: Icons.history,
-                        onTap: () => _selectLocation(loc),
+                      (loc) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _LocationTile(
+                          location: loc,
+                          icon: Icons.history_rounded,
+                          onTap: () => _selectLocation(loc),
+                        ),
                       ),
                     ),
                   ] else ...[
                     if (_results.isEmpty)
                       const Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Center(
-                          child: Text('No results found'),
+                        padding: EdgeInsets.only(top: 32),
+                        child: EmptyState(
+                          icon: Icons.search_off_rounded,
+                          title: 'No matches',
+                          subtitle: 'Try a different keyword or address.',
                         ),
                       )
                     else
                       ..._results.map(
-                        (loc) => _LocationTile(
-                          location: loc,
-                          icon: Icons.location_on_outlined,
-                          onTap: () => _selectLocation(loc),
+                        (loc) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _LocationTile(
+                            location: loc,
+                            icon: Icons.location_on_rounded,
+                            onTap: () => _selectLocation(loc),
+                          ),
                         ),
                       ),
                   ],
@@ -224,22 +268,68 @@ class _LocationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.primaryContainer,
-        child: Icon(icon, color: theme.colorScheme.primary, size: 20),
+    final cs = theme.colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: cs.primary, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      location.name ?? 'Unknown',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (location.address != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        location.address!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
+            ],
+          ),
+        ),
       ),
-      title: Text(
-        location.name ?? 'Unknown',
-        style: const TextStyle(fontWeight: FontWeight.w500),
-      ),
-      subtitle: Text(
-        location.address ?? '',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-      ),
-      onTap: onTap,
     );
   }
 }

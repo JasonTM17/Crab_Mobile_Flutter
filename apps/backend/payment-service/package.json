@@ -9,9 +9,11 @@
     "start": "node dist/main",
     "lint": "tsc --noEmit",
     "test": "jest",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@crab/backend-shared": "workspace:*",
     "@crab/common-types": "workspace:*",
     "@nestjs/common": "^11.1.21",
     "@nestjs/config": "^4.0.4",

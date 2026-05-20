@@ -65,6 +65,7 @@ English | [Tiếng Việt](docs/README_VI.md)
 - [Getting Started](#getting-started)
 - [Project Structure](#project-structure)
 - [API Documentation](#api-documentation)
+- [Documentation](#documentation)
 - [Docker Services](#docker-services)
 - [Development](#development)
 - [Roadmap](#roadmap)
@@ -342,6 +343,27 @@ crab/
 | `/food` | order:placed, order:status, order:tracking | Food delivery tracking |
 | `/chat` | chat:message, chat:typing, chat:read | Realtime messaging |
 | `/notification` | notification:new, notification:read | Push notifications |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## Documentation
+
+Full guides live under [`docs/`](docs/). Start with the index for an annotated tour.
+
+| Document | Purpose |
+|----------|---------|
+| [docs/INDEX.md](docs/INDEX.md) | Documentation entry point and reading order |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, service boundaries, data flow |
+| [docs/API.md](docs/API.md) | REST API reference across all services |
+| [docs/REALTIME.md](docs/REALTIME.md) | Socket.IO realtime architecture and Redis adapter |
+| [docs/WEBSOCKET_EVENTS.md](docs/WEBSOCKET_EVENTS.md) | Per-namespace event catalog and payload schemas |
+| [docs/RIDE_MATCHING.md](docs/RIDE_MATCHING.md) | Driver matching algorithm, surge pricing, state machine |
+| [docs/FOOD_DELIVERY.md](docs/FOOD_DELIVERY.md) | Restaurant search, ordering, delivery tracking flow |
+| [docs/DATABASE.md](docs/DATABASE.md) | PostgreSQL + MongoDB schema and indexes |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Docker Compose and Kubernetes deployment guide |
+| [docs/TESTING.md](docs/TESTING.md) | Unit, integration, and load test strategy |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

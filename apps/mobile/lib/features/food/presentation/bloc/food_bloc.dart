@@ -8,6 +8,7 @@ import '../../data/models/menu_item_model.dart';
 import '../../data/models/order_model.dart';
 import '../../data/repositories/food_repository.dart';
 import '../../../../core/network/socket_client.dart';
+import '../../../../shared/utils/error_message.dart';
 import 'food_event.dart';
 import 'food_state.dart';
 
@@ -226,5 +227,5 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
   }
 
   String _parseError(Object e) =>
-      e.toString().replaceAll('Exception: ', '');
+      mapErrorToMessage(e);
 }
