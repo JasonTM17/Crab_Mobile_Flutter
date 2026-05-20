@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_gradients.dart';
+import '../../../../core/theme/app_motion.dart';
+
 class ChatInput extends StatefulWidget {
   final void Function(String text) onSend;
 
@@ -29,60 +32,96 @@ class _ChatInputState extends State<ChatInput> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 8,
-        top: 8,
-        bottom: MediaQuery.of(context).padding.bottom + 8,
+      padding: EdgeInsets.fromLTRB(
+        12,
+        10,
+        10,
+        MediaQuery.of(context).padding.bottom + 10,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: cs.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, -3),
           ),
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.add_circle_outline_rounded, color: cs.primary),
+            tooltip: 'Attach',
+          ),
           Expanded(
-            child: TextField(
-              controller: _controller,
-              textCapitalization: TextCapitalization.sentences,
-              maxLines: 4,
-              minLines: 1,
-              onChanged: (value) {
-                setState(() => _hasText = value.trim().isNotEmpty);
-              },
-              onSubmitted: (_) => _send(),
-              decoration: InputDecoration(
-                hintText: 'Type a message...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: TextField(
+                controller: _controller,
+                textCapitalization: TextCapitalization.sentences,
+                maxLines: 4,
+                minLines: 1,
+                onChanged: (value) =>
+                    setState(() => _hasText = value.trim().isNotEmpty),
+                onSubmitted: (_) => _send(),
+                decoration: const InputDecoration(
+                  hintText: 'Type a message',
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            child: IconButton(
-              onPressed: _hasText ? _send : null,
-              icon: Icon(
-                Icons.send_rounded,
-                color: _hasText
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey.shade400,
+          AnimatedScale(
+            scale: _hasText ? 1.0 : 0.92,
+            duration: AppMotion.fast,
+            child: AnimatedOpacity(
+              opacity: _hasText ? 1.0 : 0.55,
+              duration: AppMotion.fast,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(22),
+                  onTap: _hasText ? _send : null,
+                  child: Ink(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: AppGradients.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: _hasText
+                          ? [
+                              BoxShadow(
+                                color: cs.primary.withValues(alpha: 0.34),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: const Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
