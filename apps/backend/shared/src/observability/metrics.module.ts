@@ -64,13 +64,9 @@ export class MetricsMiddleware implements NestMiddleware {
     const start = process.hrtime.bigint();
 
     res.on('finish', () => {
-      const route =
-        (req as unknown as { route?: { path?: string } }).route?.path ??
-        // Fall back to the raw path stripped of querystring; high cardinality
-        // routes should be normalised in dedicated middleware.
-        req.baseUrl + (req.path ?? '') ??
-        req.originalUrl?.split('?')[0] ??
-        'unknown';
+      const routedPath = (req as unknown as { route?: { path?: string } }).route?.path
+      const fallbackPath = req.originalUrl?.split('?')[0] ?? req.url ?? 'unknown'
+      const route = routedPath ?? fallbackPath
 
       const labels = {
         route,
