@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/utils/error_message.dart';
 import '../../data/models/ride_models.dart';
 import '../../data/repositories/ride_repository.dart';
 
@@ -45,7 +46,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load ride: $e')),
+          SnackBar(content: Text(mapErrorToMessage(e))),
         );
       }
     }
@@ -70,7 +71,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
       if (mounted) context.go('/home');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mapErrorToMessage(e))));
       }
     }
   }

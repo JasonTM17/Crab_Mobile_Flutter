@@ -8,6 +8,7 @@ import '../../data/models/conversation_model.dart';
 import '../../data/repositories/chat_repository.dart';
 import '../../../../core/network/socket_client.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../shared/utils/error_message.dart';
 import 'chat_event.dart';
 import 'chat_state.dart';
 
@@ -45,7 +46,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final conversations = await _chatRepository.getConversations();
       emit(ConversationsLoaded(conversations: conversations));
     } catch (e) {
-      emit(ChatError(message: e.toString()));
+      emit(ChatError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -63,7 +64,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         messages: messages,
       ));
     } catch (e) {
-      emit(ChatError(message: e.toString()));
+      emit(ChatError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -83,7 +84,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ));
       }
     } catch (e) {
-      emit(ChatError(message: e.toString()));
+      emit(ChatError(message: mapErrorToMessage(e)));
     }
   }
 
