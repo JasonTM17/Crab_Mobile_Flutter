@@ -34,6 +34,7 @@
     "@nestjs/cli": "^11.0.21",
     "@nestjs/testing": "^11.1.21",
     "@types/multer": "^2.1.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.14.0",
     "jest": "^30.4.2",
     "ts-jest": "^29.1.4",
