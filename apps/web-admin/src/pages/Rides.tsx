@@ -107,7 +107,7 @@ export default function Rides() {
                     {(r.driver_id ?? r.driverId)?.slice(0, 8) ?? '-'}
                   </td>
                   <td className="px-6 py-4">
-                    <Badge variant="info">{r.status}</Badge>
+                    <RideStatusBadge status={r.status} />
                   </td>
                   <td className="px-6 py-4">{r.fare ?? '-'} VND</td>
                   <td className="px-6 py-4">
@@ -126,4 +126,21 @@ export default function Rides() {
       </div>
     </div>
   )
+}
+
+function RideStatusBadge({ status }: { status: string }) {
+  const variant: Record<
+    string,
+    'success' | 'destructive' | 'secondary' | 'warning' | 'info'
+  > = {
+    COMPLETED: 'success',
+    IN_PROGRESS: 'info',
+    ACCEPTED: 'info',
+    PENDING: 'warning',
+    REQUESTED: 'warning',
+    CANCELLED: 'destructive',
+    CANCELED: 'destructive',
+    FAILED: 'destructive',
+  }
+  return <Badge variant={variant[status] ?? 'secondary'}>{status}</Badge>
 }
