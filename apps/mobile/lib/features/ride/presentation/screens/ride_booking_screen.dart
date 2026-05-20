@@ -192,14 +192,27 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
               ),
-              // Back button
+              // Floating translucent back button
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.92),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.12),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      iconSize: 20,
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
