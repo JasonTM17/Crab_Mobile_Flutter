@@ -127,7 +127,7 @@ export default function Orders() {
                     {(o.customer_id ?? o.customerId)?.slice(0, 8)}
                   </td>
                   <td className="px-6 py-4">
-                    <Badge variant="info">{o.status}</Badge>
+                    <OrderStatusBadge status={o.status} />
                   </td>
                   <td className="px-6 py-4">
                     {o.total ?? o.total_amount ?? '-'} VND
@@ -145,4 +145,23 @@ export default function Orders() {
       </div>
     </div>
   )
+}
+
+function OrderStatusBadge({ status }: { status: string }) {
+  const variant: Record<
+    string,
+    'success' | 'destructive' | 'secondary' | 'warning' | 'info'
+  > = {
+    DELIVERED: 'success',
+    COMPLETED: 'success',
+    PREPARING: 'info',
+    READY: 'info',
+    OUT_FOR_DELIVERY: 'info',
+    PENDING: 'warning',
+    PLACED: 'warning',
+    CANCELLED: 'destructive',
+    CANCELED: 'destructive',
+    REFUNDED: 'destructive',
+  }
+  return <Badge variant={variant[status] ?? 'secondary'}>{status}</Badge>
 }
