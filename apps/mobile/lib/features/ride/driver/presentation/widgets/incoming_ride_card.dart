@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_gradients.dart';
+import '../../../../../shared/widgets/gradient_button.dart';
 import '../bloc/driver_state.dart';
 
 class IncomingRideCard extends StatelessWidget {
@@ -31,15 +33,15 @@ class IncomingRideCard extends StatelessWidget {
     final countdownFraction = countdown / 15.0;
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(14, 14, 14, 18),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.16),
+            blurRadius: 28,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -48,49 +50,59 @@ class IncomingRideCard extends StatelessWidget {
         children: [
           // Header with countdown
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
+            padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
+            decoration: const BoxDecoration(
+              gradient: AppGradients.primary,
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
+                  BorderRadius.vertical(top: Radius.circular(22)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.notifications_active, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'New Ride Request',
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_active_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'New ride request',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     fontSize: 16,
-                    color: theme.colorScheme.onPrimaryContainer,
+                    color: Colors.white,
+                    letterSpacing: -0.2,
                   ),
                 ),
                 const Spacer(),
-                // Circular countdown timer
                 SizedBox(
-                  width: 48,
-                  height: 48,
+                  width: 50,
+                  height: 50,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       CustomPaint(
-                        size: const Size(48, 48),
+                        size: const Size(50, 50),
                         painter: _CountdownPainter(
                           fraction: countdownFraction,
-                          color: countdown <= 5
-                              ? Colors.red
-                              : theme.colorScheme.primary,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
                         '$countdown',
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
                           color: countdown <= 5
-                              ? Colors.red
-                              : theme.colorScheme.primary,
+                              ? const Color(0xFFFCA5A5)
+                              : Colors.white,
                         ),
                       ),
                     ],
@@ -101,93 +113,87 @@ class IncomingRideCard extends StatelessWidget {
           ),
           // Ride details
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
             child: Column(
               children: [
-                // Pickup
                 _AddressRow(
-                  icon: Icons.circle,
-                  iconColor: Colors.green,
+                  icon: Icons.radio_button_checked_rounded,
+                  iconColor: const Color(0xFF22C55E),
                   label: 'Pickup',
                   address: rideRequest.pickupAddress,
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 10),
+                  padding: const EdgeInsets.only(left: 11),
                   child: Container(
-                    height: 20,
+                    height: 22,
                     width: 2,
-                    color: theme.colorScheme.outlineVariant,
+                    color: theme.colorScheme.outlineVariant
+                        .withValues(alpha: 0.5),
                   ),
                 ),
-                // Dropoff
                 _AddressRow(
-                  icon: Icons.location_on,
-                  iconColor: Colors.red,
+                  icon: Icons.location_on_rounded,
+                  iconColor: const Color(0xFFEF4444),
                   label: 'Destination',
                   address: rideRequest.dropoffAddress,
                 ),
                 const SizedBox(height: 16),
-                // Fare and distance
                 Row(
                   children: [
                     Expanded(
                       child: _InfoChip(
-                        icon: Icons.payments_outlined,
+                        icon: Icons.payments_rounded,
                         label:
                             '${_formatFare(rideRequest.estimatedFare)} ${rideRequest.currency}',
-                        color: theme.colorScheme.primaryContainer,
+                        emphasized: true,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: _InfoChip(
-                        icon: Icons.straighten,
+                        icon: Icons.straighten_rounded,
                         label:
                             '${rideRequest.distanceKm.toStringAsFixed(1)} km',
-                        color: theme.colorScheme.secondaryContainer,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                // Accept / Reject buttons
+                const SizedBox(height: 18),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: onReject,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      child: SizedBox(
+                        height: 52,
+                        child: OutlinedButton(
+                          onPressed: onReject,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFFEF4444),
+                            side: const BorderSide(
+                              color: Color(0xFFFECACA),
+                              width: 1.4,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Reject',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 15),
+                          child: const Text(
+                            'Reject',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       flex: 2,
-                      child: FilledButton(
+                      child: GradientButton(
+                        label: 'Accept',
+                        icon: Icons.check_rounded,
+                        height: 52,
                         onPressed: onAccept,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Accept',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 15),
-                        ),
                       ),
                     ),
                   ],
@@ -216,10 +222,15 @@ class _AddressRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: iconColor, size: 16),
-        const SizedBox(width: 10),
+        SizedBox(
+          width: 24,
+          child: Icon(icon, color: iconColor, size: 18),
+        ),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,13 +239,18 @@ class _AddressRow extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 11,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
+              const SizedBox(height: 2),
               Text(
                 address,
                 style: const TextStyle(
-                    fontWeight: FontWeight.w500, fontSize: 14),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -249,28 +265,44 @@ class _AddressRow extends StatelessWidget {
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
-  final Color color;
+  final bool emphasized;
 
   const _InfoChip({
     required this.icon,
     required this.label,
-    required this.color,
+    this.emphasized = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
+        color: emphasized
+            ? cs.primary.withValues(alpha: 0.10)
+            : cs.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: emphasized
+            ? Border.all(color: cs.primary.withValues(alpha: 0.4))
+            : null,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 16),
+          Icon(
+            icon,
+            size: 16,
+            color: emphasized ? cs.primary : cs.onSurfaceVariant,
+          ),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: emphasized ? cs.primary : cs.onSurface,
+            ),
+          ),
         ],
       ),
     );
