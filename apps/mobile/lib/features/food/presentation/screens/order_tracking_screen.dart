@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_gradients.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../data/models/order_model.dart';
 import '../bloc/food_bloc.dart';
 import '../bloc/food_event.dart';
@@ -25,42 +27,58 @@ class OrderTrackingScreen extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Order Tracking'),
+            title: const Text(
+              'Order Tracking',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            elevation: 0,
+            scrolledUnderElevation: 0,
             automaticallyImplyLeading: false,
             actions: [
               if (!isCancelled && !isDelivered)
-                TextButton(
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text('Cancel Order?'),
-                        content: const Text(
-                            'Are you sure you want to cancel this order?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('No'),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      showDialog<void>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          FilledButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              context
-                                  .read<FoodBloc>()
-                                  .add(CancelOrder(orderId: order.id));
-                            },
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.red,
+                          title: const Text('Cancel order?'),
+                          content: const Text(
+                              'You can still cancel before the restaurant accepts. Charges will be refunded.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Keep order'),
                             ),
-                            child: const Text('Cancel Order'),
-                          ),
-                        ],
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                context
+                                    .read<FoodBloc>()
+                                    .add(CancelOrder(orderId: order.id));
+                              },
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFFEF4444),
+                              ),
+                              child: const Text('Cancel order'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.close_rounded,
+                        color: Color(0xFFEF4444), size: 18),
+                    label: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: Color(0xFFEF4444),
+                        fontWeight: FontWeight.w700,
                       ),
-                    );
-                  },
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: Colors.red),
+                    ),
                   ),
                 ),
             ],
@@ -85,19 +103,26 @@ class OrderTrackingScreen extends StatelessWidget {
                 _PriceSummaryCard(order: order),
                 const SizedBox(height: 24),
                 if (isDelivered)
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.check_circle_rounded),
+                        label: const Text(
+                          'Done',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Done',
-                        style: TextStyle(fontSize: 16),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -117,61 +142,97 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isCancelled = order.status == OrderStatus.cancelled;
     final isDelivered = order.status == OrderStatus.delivered;
 
-    Color statusColor;
+    LinearGradient gradient;
+    Color shadowColor;
     IconData statusIcon;
     if (isCancelled) {
-      statusColor = Colors.red;
-      statusIcon = Icons.cancel_outlined;
+      gradient = const LinearGradient(
+        colors: [Color(0xFFEF4444), Color(0xFFFB923C)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+      shadowColor = const Color(0xFFEF4444);
+      statusIcon = Icons.cancel_rounded;
     } else if (isDelivered) {
-      statusColor = Colors.green;
-      statusIcon = Icons.check_circle_outline;
+      gradient = AppGradients.primary;
+      shadowColor = const Color(0xFF00B14F);
+      statusIcon = Icons.check_circle_rounded;
     } else {
-      statusColor = theme.colorScheme.primary;
-      statusIcon = Icons.delivery_dining;
+      gradient = AppGradients.sunset;
+      shadowColor = const Color(0xFFFB923C);
+      statusIcon = Icons.delivery_dining_rounded;
     }
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: shadowColor.withValues(alpha: 0.30),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(statusIcon, color: statusColor, size: 40),
-          const SizedBox(width: 16),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(statusIcon, color: Colors.white, size: 30),
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   order.status.label,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
                   ),
                 ),
-                if (order.estimatedMinutes != null && !isCancelled && !isDelivered) ...[
+                if (order.estimatedMinutes != null &&
+                    !isCancelled &&
+                    !isDelivered) ...[
                   const SizedBox(height: 4),
-                  Text(
-                    'Estimated: ${order.estimatedMinutes} min',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.schedule_rounded,
+                          color: Colors.white, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        'ETA ${order.estimatedMinutes} min',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
-                  'Order #${order.id.substring(0, 8).toUpperCase()}',
+                  '#${order.id.substring(0, 8).toUpperCase()}',
                   style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 13,
+                    color: Colors.white.withValues(alpha: 0.78),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
                   ),
                 ),
               ],
@@ -189,87 +250,186 @@ class _OrderStepper extends StatelessWidget {
   const _OrderStepper({required this.status});
 
   static const _steps = [
-    (OrderStatus.pending, Icons.receipt_outlined, 'Order Placed'),
-    (OrderStatus.confirmed, Icons.check_circle_outline, 'Confirmed'),
-    (OrderStatus.preparing, Icons.restaurant, 'Preparing'),
-    (OrderStatus.outForDelivery, Icons.delivery_dining, 'Out for Delivery'),
-    (OrderStatus.delivered, Icons.home, 'Delivered'),
+    (OrderStatus.pending, Icons.receipt_long_rounded, 'Order Placed'),
+    (OrderStatus.confirmed, Icons.check_circle_rounded, 'Confirmed'),
+    (OrderStatus.preparing, Icons.restaurant_rounded, 'Preparing'),
+    (OrderStatus.outForDelivery, Icons.delivery_dining_rounded, 'Out for Delivery'),
+    (OrderStatus.delivered, Icons.home_rounded, 'Delivered'),
   ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final currentStep = status.step;
 
-    return Column(
-      children: [
-        for (int i = 0; i < _steps.length; i++) ...[
-          Row(
-            children: [
-              // Icon
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: i <= currentStep
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.surfaceContainerHighest,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          for (int i = 0; i < _steps.length; i++) ...[
+            Row(
+              children: [
+                _StepDot(
+                  icon: _steps[i].$2,
+                  done: i < currentStep,
+                  current: i == currentStep,
                 ),
-                child: Icon(
-                  _steps[i].$2,
-                  size: 20,
-                  color: i <= currentStep
-                      ? Colors.white
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                _steps[i].$3,
-                style: TextStyle(
-                  fontWeight: i == currentStep
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  color: i <= currentStep
-                      ? theme.colorScheme.onSurface
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              if (i == currentStep) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    'Current',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: theme.colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                    ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _steps[i].$3,
+                        style: TextStyle(
+                          fontWeight: i == currentStep
+                              ? FontWeight.w800
+                              : i < currentStep
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                          color: i <= currentStep
+                              ? cs.onSurface
+                              : cs.onSurfaceVariant,
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (i == currentStep) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _PulsingDot(color: cs.primary),
+                            const SizedBox(width: 6),
+                            Text(
+                              'In progress',
+                              style: TextStyle(
+                                color: cs.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
-            ],
-          ),
-          if (i < _steps.length - 1)
-            Padding(
-              padding: const EdgeInsets.only(left: 19),
-              child: Container(
-                width: 2,
-                height: 24,
-                color: i < currentStep
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.outlineVariant,
-              ),
             ),
+            if (i < _steps.length - 1)
+              Padding(
+                padding: const EdgeInsets.only(left: 19, top: 4, bottom: 4),
+                child: AnimatedContainer(
+                  duration: AppMotion.normal,
+                  width: 2,
+                  height: 22,
+                  color: i < currentStep
+                      ? cs.primary
+                      : cs.outlineVariant.withValues(alpha: 0.6),
+                ),
+              ),
+          ],
         ],
-      ],
+      ),
+    );
+  }
+}
+
+class _StepDot extends StatelessWidget {
+  const _StepDot({
+    required this.icon,
+    required this.done,
+    required this.current,
+  });
+  final IconData icon;
+  final bool done;
+  final bool current;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: AppMotion.normal,
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        gradient:
+            (done || current) ? AppGradients.primary : null,
+        color: (done || current)
+            ? null
+            : cs.surfaceContainerHighest.withValues(alpha: 0.5),
+        shape: BoxShape.circle,
+        boxShadow: current
+            ? [
+                BoxShadow(
+                  color: cs.primary.withValues(alpha: 0.36),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: Icon(
+        icon,
+        size: 20,
+        color: (done || current)
+            ? Colors.white
+            : cs.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+class _PulsingDot extends StatefulWidget {
+  const _PulsingDot({required this.color});
+  final Color color;
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (_, __) => Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: widget.color.withValues(alpha: 0.5 + 0.5 * _c.value),
+          shape: BoxShape.circle,
+        ),
+      ),
     );
   }
 }
@@ -284,18 +444,32 @@ class _CancelledBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200),
+        color: const Color(0xFFFEF2F2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFECACA)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, color: Colors.red),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.info_rounded,
+                color: Color(0xFFEF4444), size: 20),
+          ),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
-              'Your order has been cancelled. Any charges will be refunded.',
-              style: TextStyle(color: Colors.red),
+              'Your order was cancelled. Any charges will be refunded within 3-5 business days.',
+              style: TextStyle(
+                color: Color(0xFF991B1B),
+                fontWeight: FontWeight.w500,
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -312,59 +486,101 @@ class _OrderDetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.restaurant, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                order.restaurantName,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.restaurant_rounded,
+                    size: 20, color: cs.primary),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  order.restaurantName,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ],
           ),
-          const Divider(height: 20),
+          const SizedBox(height: 14),
           ...order.items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    Text(
-                      '${item.quantity}×',
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cs.primary.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '${item.quantity}×',
+                        style: TextStyle(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(item.name)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
                     Text(
                       _formatPrice(item.subtotal, order.currency),
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
               )),
-          const Divider(height: 16),
+          Divider(
+              color: cs.outlineVariant.withValues(alpha: 0.4), height: 16),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined, size: 16),
+              Icon(Icons.location_on_rounded,
+                  size: 16, color: cs.onSurfaceVariant),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   order.deliveryAddress,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 13,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.35,
                   ),
                 ),
               ),
@@ -396,20 +612,26 @@ class _PriceSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         children: [
           _Row(label: 'Subtotal', value: _fmt(order.subtotal)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           _Row(label: 'Delivery fee', value: _fmt(order.deliveryFee)),
-          const Divider(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Container(
+              height: 1,
+              color: cs.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
           _Row(
             label: 'Total',
             value: _fmt(order.total),
@@ -430,14 +652,23 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = bold
-        ? const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
-        : null;
+    final theme = Theme.of(context);
+    final labelStyle = bold
+        ? theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)
+        : theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          );
+    final valueStyle = bold
+        ? theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+          )
+        : theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: style),
-        Text(value, style: style),
+        Text(label, style: labelStyle),
+        Text(value, style: valueStyle),
       ],
     );
   }

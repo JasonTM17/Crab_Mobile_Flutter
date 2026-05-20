@@ -6,7 +6,10 @@
 |----------|-------------|
 | [Architecture](./ARCHITECTURE.md) | System design, service catalog, communication patterns, security |
 | [API Reference](./API.md) | REST API endpoints for all services with request/response examples |
-| [WebSocket Events](./WEBSOCKET_EVENTS.md) | Real-time event reference for ride, food, chat, notification |
+| [Realtime](./REALTIME.md) | Socket.IO topology, namespaces, lifecycles, replay strategy |
+| [WebSocket Events](./WEBSOCKET_EVENTS.md) | Wire-level event reference for ride, food, chat, notification |
+| [Ride Matching](./RIDE_MATCHING.md) | Queue, scoring, surge, re-match flow, eligibility |
+| [Food Delivery](./FOOD_DELIVERY.md) | Order state machine, dispatch, cancellation, restaurant ops |
 | [Database Schema](./DATABASE.md) | PostgreSQL tables, MongoDB collections, Redis data structures |
 | [Deployment](./DEPLOYMENT.md) | Docker setup, environment variables, scaling, CI/CD |
 | [Testing](./TESTING.md) | Test strategy, examples, load testing, coverage requirements |

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../../core/theme/app_gradients.dart';
+import '../../../../../shared/widgets/gradient_button.dart';
 import '../../../data/models/ride_model.dart';
 import '../bloc/driver_bloc.dart';
 import '../bloc/driver_event.dart';
@@ -92,39 +94,69 @@ class _RideNavigationViewState extends State<RideNavigationView> {
         // Navigation header
         SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
             child: Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: widget.isPickupPhase ? Colors.green : Colors.blue,
-                borderRadius: BorderRadius.circular(12),
+                gradient: widget.isPickupPhase
+                    ? AppGradients.primary
+                    : AppGradients.ocean,
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 8,
+                    color: (widget.isPickupPhase
+                            ? const Color(0xFF00B14F)
+                            : const Color(0xFF3B82F6))
+                        .withValues(alpha: 0.30),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
               child: Row(
                 children: [
-                  Icon(
-                    widget.isPickupPhase
-                        ? Icons.person_pin_circle
-                        : Icons.flag,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.22),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
                       widget.isPickupPhase
-                          ? 'Navigate to pickup'
-                          : 'Navigate to destination',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+                          ? Icons.person_pin_circle_rounded
+                          : Icons.flag_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.isPickupPhase ? 'PICKUP' : 'DROPOFF',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.86),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        Text(
+                          widget.isPickupPhase
+                              ? 'Navigate to pickup'
+                              : 'Navigate to destination',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -144,89 +176,82 @@ class _RideNavigationViewState extends State<RideNavigationView> {
   }
 
   Widget _buildBottomPanel(BuildContext context, ThemeData theme) {
+    final cs = theme.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 12,
-            offset: const Offset(0, -4),
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 18,
+            offset: const Offset(0, -6),
           ),
         ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40,
+                width: 44,
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant,
+                  color: cs.outlineVariant.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              // Pickup address
               _AddressRow(
-                icon: Icons.circle,
-                iconColor: Colors.green,
+                icon: Icons.radio_button_checked_rounded,
+                iconColor: const Color(0xFF22C55E),
+                label: 'Pickup',
                 address: widget.ride.pickup.address ??
                     widget.ride.pickup.name ??
                     'Pickup',
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 10),
+                padding: const EdgeInsets.only(left: 11),
                 child: Container(
-                  height: 16,
+                  height: 18,
                   width: 2,
-                  color: theme.colorScheme.outlineVariant,
+                  color: cs.outlineVariant.withValues(alpha: 0.5),
                 ),
               ),
-              // Dropoff address
               _AddressRow(
-                icon: Icons.location_on,
-                iconColor: Colors.red,
+                icon: Icons.location_on_rounded,
+                iconColor: const Color(0xFFEF4444),
+                label: 'Destination',
                 address: widget.ride.dropoff.address ??
                     widget.ride.dropoff.name ??
                     'Destination',
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () {
-                    if (widget.isPickupPhase) {
-                      context
-                          .read<DriverBloc>()
-                          .add(StartRide(rideId: widget.ride.id));
-                    } else {
-                      context
-                          .read<DriverBloc>()
-                          .add(CompleteRide(rideId: widget.ride.id));
-                    }
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor:
-                        widget.isPickupPhase ? Colors.green : Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    widget.isPickupPhase
-                        ? 'Passenger Picked Up'
-                        : 'Complete Ride',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
-                ),
+              const SizedBox(height: 18),
+              GradientButton(
+                label: widget.isPickupPhase
+                    ? 'Passenger picked up'
+                    : 'Complete ride',
+                icon: widget.isPickupPhase
+                    ? Icons.person_add_alt_1_rounded
+                    : Icons.flag_rounded,
+                gradient: widget.isPickupPhase
+                    ? AppGradients.primary
+                    : AppGradients.ocean,
+                height: 56,
+                onPressed: () {
+                  if (widget.isPickupPhase) {
+                    context
+                        .read<DriverBloc>()
+                        .add(StartRide(rideId: widget.ride.id));
+                  } else {
+                    context
+                        .read<DriverBloc>()
+                        .add(CompleteRide(rideId: widget.ride.id));
+                  }
+                },
               ),
             ],
           ),
@@ -239,26 +264,51 @@ class _RideNavigationViewState extends State<RideNavigationView> {
 class _AddressRow extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
+  final String label;
   final String address;
 
   const _AddressRow({
     required this.icon,
     required this.iconColor,
+    required this.label,
     required this.address,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: iconColor, size: 16),
-        const SizedBox(width: 10),
+        SizedBox(
+          width: 24,
+          child: Icon(icon, color: iconColor, size: 18),
+        ),
+        const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            address,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                address,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ),
       ],

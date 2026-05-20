@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Store } from 'lucide-react'
 import api from '@/lib/axios'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Restaurant {
   id: string
@@ -14,13 +19,23 @@ interface Restaurant {
 export default function Restaurants() {
   const [list, setList] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  function load() {
+    setLoading(true)
+    setError(null)
     api
       .get('/restaurants/search')
       .then((r) => setList(r.data.data ?? r.data ?? []))
-      .catch(() => setList([]))
+      .catch(() => {
+        setError('Failed to load restaurants.')
+        setList([])
+      })
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    load()
   }, [])
 
   return (
@@ -39,15 +54,38 @@ export default function Restaurants() {
           </thead>
           <tbody className="divide-y">
             {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={`sk-${i}`}>
+                  {Array.from({ length: 5 }).map((__, j) => (
+                    <td key={j} className="px-6 py-4">
+                      <Skeleton className="h-4 w-24" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : error ? (
               <tr>
-                <td colSpan={5} className="text-center py-8">
-                  Loading...
+                <td colSpan={5}>
+                  <EmptyState
+                    icon={<Store className="h-5 w-5" />}
+                    title="Could not load restaurants"
+                    description={error}
+                    action={
+                      <Button variant="outline" onClick={load}>
+                        Retry
+                      </Button>
+                    }
+                  />
                 </td>
               </tr>
             ) : list.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No restaurants
+                <td colSpan={5}>
+                  <EmptyState
+                    icon={<Store className="h-5 w-5" />}
+                    title="No restaurants yet"
+                    description="Once partner restaurants onboard, they'll appear here."
+                  />
                 </td>
               </tr>
             ) : (
@@ -58,15 +96,9 @@ export default function Restaurants() {
                   <td className="px-6 py-4 text-sm">{r.cuisineType ?? '-'}</td>
                   <td className="px-6 py-4">★ {r.rating?.toFixed?.(1) ?? '-'}</td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 text-xs rounded ${
-                        r.isOpen
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
+                    <Badge variant={r.isOpen ? 'success' : 'secondary'}>
                       {r.isOpen ? 'Open' : 'Closed'}
-                    </span>
+                    </Badge>
                   </td>
                 </tr>
               ))

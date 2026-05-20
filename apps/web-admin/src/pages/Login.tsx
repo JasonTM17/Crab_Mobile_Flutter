@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Logo } from '@/components/ui/logo'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function Login() {
@@ -60,7 +61,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-2">
-            <span className="text-3xl font-bold text-primary">🦀 Crab</span>
+            <Logo size="lg" />
           </div>
           <CardTitle className="text-2xl text-center">Admin Portal</CardTitle>
           <CardDescription className="text-center">

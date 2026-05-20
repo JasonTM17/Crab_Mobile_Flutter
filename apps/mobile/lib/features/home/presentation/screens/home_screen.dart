@@ -7,6 +7,8 @@ import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../payment/presentation/bloc/payment_bloc.dart';
 import '../../../payment/presentation/bloc/payment_event.dart';
 import '../../../payment/presentation/bloc/payment_state.dart';
+import '../widgets/promo_carousel.dart';
+import '../widgets/saved_places.dart';
 import '../widgets/service_tabs.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -48,7 +50,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 _GreetingHeader(),
                 const SizedBox(height: 16),
                 const _WalletCard(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+                const SavedPlaces(),
+                const SizedBox(height: 20),
                 Text(
                   'Services',
                   style: Theme.of(context).textTheme.titleLarge,
@@ -61,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
-                _PromoBanner(),
+                const PromoCarousel(),
               ],
             ),
           ),
@@ -204,47 +208,10 @@ class _WalletCard extends StatelessWidget {
 }
 
 class _PromoBanner extends StatelessWidget {
+  const _PromoBanner();
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push('/promos'),
-      child: Container(
-        height: 120,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF00B14F), Color(0xFF008F3F)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: const [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '50% OFF',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'First ride with code WELCOME50',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.local_offer, color: Colors.white, size: 64),
-          ],
-        ),
-      ),
-    );
+    return const SizedBox.shrink();
   }
 }

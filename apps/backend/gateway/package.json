@@ -13,6 +13,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@crab/backend-shared": "workspace:*",
     "@crab/common-types": "workspace:*",
     "@crab/socket-events": "workspace:*",
     "@nestjs/axios": "^4.0.1",

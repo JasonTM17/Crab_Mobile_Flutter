@@ -1,3 +1,4 @@
+import { initTracing } from '@crab/backend-shared'
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe, Logger } from '@nestjs/common'
 import helmet from 'helmet'
@@ -6,6 +7,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { RedisIoAdapter } from './common/adapters/redis-io.adapter'
 
 async function bootstrap() {
+  await initTracing({ serviceName: 'gateway' })
   const logger = new Logger('Bootstrap')
   const app = await NestFactory.create(AppModule, {
     bodyParser: true,
@@ -28,7 +30,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter())
 
-  app.setGlobalPrefix('api/v1', { exclude: ['health', 'metrics'] })
+  app.setGlobalPrefix('api/v1', { exclude: ['health', 'healthz', 'readyz', 'metrics'] })
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') ?? '*',
     credentials: true,
