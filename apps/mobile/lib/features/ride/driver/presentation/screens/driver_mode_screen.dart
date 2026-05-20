@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/theme/app_gradients.dart';
+import '../../../../../core/theme/app_motion.dart';
+import '../../../../../shared/widgets/gradient_button.dart';
 import '../bloc/driver_bloc.dart';
 import '../bloc/driver_event.dart';
 import '../bloc/driver_state.dart';
@@ -40,26 +43,40 @@ class DriverModeScreen extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Driver Mode'),
+            title: const Text(
+              'Driver mode',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            elevation: 0,
+            scrolledUnderElevation: 0,
             actions: [
               if (state is DriverOnlineIdle || state is DriverRideRequest)
                 Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.only(right: 12),
                   child: Center(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFF22C55E)
+                            .withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(999),
                       ),
-                      child: const Text(
-                        'ONLINE',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          _LiveDot(),
+                          SizedBox(width: 6),
+                          Text(
+                            'ONLINE',
+                            style: TextStyle(
+                              color: Color(0xFF15803D),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -122,60 +139,50 @@ class _OfflineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(28),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 100,
-              height: 100,
+              width: 116,
+              height: 116,
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
+                color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.local_taxi,
-                size: 48,
-                color: theme.colorScheme.onSurfaceVariant,
+                Icons.local_taxi_rounded,
+                size: 54,
+                color: cs.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 26),
             Text(
-              'You are offline',
+              "You're offline",
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Go online to start receiving ride requests',
+              'Go online to start receiving ride requests in your area.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 15,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: cs.onSurfaceVariant,
+                height: 1.4,
               ),
             ),
-            const SizedBox(height: 40),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: onGoOnline,
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: const Text(
-                  'Go Online',
-                  style: TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
+            const SizedBox(height: 36),
+            GradientButton(
+              label: 'Go online',
+              icon: Icons.power_settings_new_rounded,
+              height: 56,
+              onPressed: onGoOnline,
             ),
           ],
         ),
@@ -217,54 +224,140 @@ class _WaitingViewState extends State<_WaitingView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ScaleTransition(
-            scale: _pulseAnimation,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.15),
-                shape: BoxShape.circle,
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              ScaleTransition(
+                scale: _pulseAnimation,
+                child: Container(
+                  width: 160,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
-              child: const Icon(
-                Icons.local_taxi,
-                size: 56,
-                color: Colors.green,
+              Container(
+                width: 116,
+                height: 116,
+                decoration: BoxDecoration(
+                  gradient: AppGradients.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: cs.primary.withValues(alpha: 0.36),
+                      blurRadius: 26,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.local_taxi_rounded,
+                  size: 54,
+                  color: Colors.white,
+                ),
               ),
-            ),
+            ],
           ),
           const SizedBox(height: 32),
           Text(
-            'Waiting for rides...',
+            'Waiting for rides…',
             style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'You will be notified when a ride is available',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 15,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              "We'll buzz you the moment a nearby request comes in.",
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: cs.onSurfaceVariant,
+                height: 1.4,
+              ),
             ),
           ),
-          const SizedBox(height: 48),
-          TextButton.icon(
+          const SizedBox(height: 40),
+          OutlinedButton.icon(
             onPressed: () =>
                 context.read<DriverBloc>().add(const GoOffline()),
-            icon: const Icon(Icons.power_settings_new, color: Colors.red),
+            icon: const Icon(
+              Icons.power_settings_new_rounded,
+              size: 18,
+              color: Color(0xFFEF4444),
+            ),
             label: const Text(
-              'Go Offline',
-              style: TextStyle(color: Colors.red, fontSize: 15),
+              'Go offline',
+              style: TextStyle(
+                color: Color(0xFFEF4444),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 22,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+              side: const BorderSide(
+                color: Color(0xFFFECACA),
+                width: 1.4,
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LiveDot extends StatefulWidget {
+  const _LiveDot();
+  @override
+  State<_LiveDot> createState() => _LiveDotState();
+}
+
+class _LiveDotState extends State<_LiveDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: AppMotion.normal + const Duration(milliseconds: 600),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (_, __) => Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: const Color(0xFF22C55E)
+              .withValues(alpha: 0.5 + 0.5 * _c.value),
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }
