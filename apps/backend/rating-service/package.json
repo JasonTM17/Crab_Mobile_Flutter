@@ -12,7 +12,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@crab/backend-shared": "workspace:*",
     "@crab/common-types": "workspace:*",
+    "ioredis": "^5.4.1",
     "@nestjs/common": "^11.1.21",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.21",
