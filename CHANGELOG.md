@@ -22,6 +22,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Production Docker Compose with monitoring stack (Prometheus + Grafana + Loki + Promtail + cAdvisor)
 - Kubernetes manifests with HPA, StatefulSets for data layer, nginx ingress
 - GitHub Actions CI matrix + Docker Hub publish workflow
+- Web Admin: shadcn UI primitives (badge, dialog, dropdown, tooltip, skeleton, empty-state, logo, alert-dialog)
+- Web Admin: brand-green theme + restyled Header/Sidebar/Login
+- Web Admin: 8 dashboard pages restyled with EmptyState/Skeleton/Badge primitives
+- Mobile: shared error_message helper for Vietnamese-friendly Dio error mapping
+- Mobile: get_it DI wiring for all repositories + blocs
+- Backend: 7 service unit specs (auth, chat, food, notification, rating, ride, user)
+- Backend: 3 service unit specs (auth.service, rides.service, promo.service)
+- Tests: k6 load test suite (baseline-smoke, ride-flow, order-flow)
+- Docs: REALTIME, RIDE_MATCHING, FOOD_DELIVERY guides
+
+### Changed
+- Mobile: bloc routes catch errors through mapErrorToMessage helper
+- Web Admin: Orders/Rides use semantic Badge variants (success/warning/destructive)
+
+### Fixed
+- pnpm-lock.yaml drift after backend-shared added jest deps
+- CI workflow now builds socket-events + backend-shared before service builds (resolves TS2307)
 
 ### Infrastructure
 - Multi-stage Dockerfiles for all 9 backend services + web-admin (alpine, non-root, healthcheck)
