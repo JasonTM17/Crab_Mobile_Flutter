@@ -9,6 +9,7 @@ import { DriversModule } from './drivers/drivers.module'
 import { MatchingModule } from './matching/matching.module'
 import { FareModule } from './fare/fare.module'
 import { TrackingModule } from './tracking/tracking.module'
+import { MatchingQueueModule } from './matching/matching-queue.module'
 import { RideEntity } from './rides/entities/ride.entity'
 import { HealthController } from './health.controller'
 
@@ -61,6 +62,7 @@ const REDIS_CLIENT = 'RIDE_REDIS_CLIENT'
     MatchingModule,
     FareModule,
     TrackingModule,
+    MatchingQueueModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -5,6 +5,7 @@ import { Redis } from 'ioredis'
 import { ObservabilityModule, ResilienceModule } from '@crab/backend-shared'
 import { NotificationsModule } from './notifications/notifications.module'
 import { PreferencesModule } from './preferences/preferences.module'
+import { NotificationQueueModule } from './notifications/notification-queue.module'
 import { HealthController } from './health.controller'
 
 const REDIS_CLIENT = 'NOTIFICATION_REDIS_CLIENT'
@@ -23,6 +24,7 @@ const REDIS_CLIENT = 'NOTIFICATION_REDIS_CLIENT'
     }),
     NotificationsModule,
     PreferencesModule,
+    NotificationQueueModule,
   ],
   controllers: [HealthController],
   providers: [
