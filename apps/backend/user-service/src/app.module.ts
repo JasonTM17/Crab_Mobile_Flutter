@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { Redis } from 'ioredis'
+import { ObservabilityModule, ResilienceModule } from '@crab/backend-shared'
 import { ProfilesModule } from './profiles/profiles.module'
 import { AddressesModule } from './addresses/addresses.module'
 import { VerificationModule } from './verification/verification.module'
@@ -11,9 +13,13 @@ import { DriverProfileEntity } from './verification/entities/driver-profile.enti
 import { MerchantProfileEntity } from './verification/entities/merchant-profile.entity'
 import { VerificationDocEntity } from './verification/entities/verification-doc.entity'
 
+const REDIS_CLIENT = 'USER_REDIS_CLIENT'
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ObservabilityModule,
+    ResilienceModule.forRoot({ redis: { inject: REDIS_CLIENT } }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -24,11 +30,11 @@ import { VerificationDocEntity } from './verification/entities/verification-doc.
           ...(url
             ? { url }
             : {
-                host: config.get('DB_HOST', 'localhost'),
+                host: config.get<string>('DB_HOST', 'localhost'),
                 port: config.get<number>('DB_PORT', 5432),
-                username: config.get('DB_USER', 'crab'),
-                password: config.get('DB_PASSWORD', 'crab_secret'),
-                database: config.get('DB_NAME', 'crab_db'),
+                username: config.get<string>('DB_USER', 'crab'),
+                password: config.get<string>('DB_PASSWORD', 'crab_secret'),
+                database: config.get<string>('DB_NAME', 'crab_db'),
               }),
           entities: [
             ProfileEntity,
@@ -46,5 +52,12 @@ import { VerificationDocEntity } from './verification/entities/verification-doc.
     VerificationModule,
   ],
   controllers: [HealthController],
+  providers: [
+    {
+      provide: REDIS_CLIENT,
+      useFactory: () => new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379'),
+    },
+  ],
+  exports: [REDIS_CLIENT],
 })
 export class AppModule {}
