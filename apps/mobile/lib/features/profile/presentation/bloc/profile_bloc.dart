@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/api_constants.dart';
+import '../../../../shared/utils/error_message.dart';
 import '../../data/repositories/profile_repository.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
@@ -29,7 +30,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final profile = await _profileRepository.getProfile();
       emit(ProfileLoaded(profile: profile));
     } catch (e) {
-      emit(ProfileError(message: e.toString()));
+      emit(ProfileError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -45,7 +46,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       );
       emit(ProfileUpdated(profile: profile));
     } catch (e) {
-      emit(ProfileError(message: e.toString()));
+      emit(ProfileError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -61,7 +62,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       );
       emit(const PasswordChanged());
     } catch (e) {
-      emit(ProfileError(message: e.toString()));
+      emit(ProfileError(message: mapErrorToMessage(e)));
     }
   }
 

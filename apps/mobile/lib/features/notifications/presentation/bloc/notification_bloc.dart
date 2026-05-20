@@ -6,6 +6,7 @@ import '../../data/models/notification_model.dart';
 import '../../data/repositories/notification_repository.dart';
 import '../../../../core/network/socket_client.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../shared/utils/error_message.dart';
 import 'notification_event.dart';
 import 'notification_state.dart';
 
@@ -47,7 +48,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         unreadCount: unreadCount,
       ));
     } catch (e) {
-      emit(NotificationError(message: e.toString()));
+      emit(NotificationError(message: mapErrorToMessage(e)));
     }
   }
 

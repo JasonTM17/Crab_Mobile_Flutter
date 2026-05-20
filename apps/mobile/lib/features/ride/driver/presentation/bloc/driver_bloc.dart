@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../data/repositories/driver_repository.dart';
+import '../../../../../shared/utils/error_message.dart';
 import 'driver_event.dart';
 import 'driver_state.dart';
 
@@ -173,7 +174,7 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
   }
 
   String _parseError(Object e) {
-    return e.toString().replaceAll('Exception: ', '');
+    return mapErrorToMessage(e);
   }
 
   @override

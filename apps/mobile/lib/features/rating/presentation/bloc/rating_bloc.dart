@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../data/repositories/rating_repository.dart';
+import '../../../../shared/utils/error_message.dart';
 import 'rating_event.dart';
 import 'rating_state.dart';
 
@@ -32,7 +33,7 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
       );
       emit(const RatingSubmitted());
     } catch (e) {
-      emit(RatingError(message: e.toString()));
+      emit(RatingError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -52,7 +53,7 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
       );
       emit(ReviewsLoaded(reviews: reviews, stats: stats));
     } catch (e) {
-      emit(RatingError(message: e.toString()));
+      emit(RatingError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -70,7 +71,7 @@ class RatingBloc extends Bloc<RatingEvent, RatingState> {
         emit(ReviewsLoaded(reviews: currentState.reviews, stats: stats));
       }
     } catch (e) {
-      emit(RatingError(message: e.toString()));
+      emit(RatingError(message: mapErrorToMessage(e)));
     }
   }
 }

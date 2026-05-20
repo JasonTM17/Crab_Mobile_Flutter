@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../shared/utils/error_message.dart';
 import '../../data/models/driver_model.dart';
 import '../../data/models/location_model.dart';
 import '../../data/models/ride_model.dart';
@@ -163,6 +164,6 @@ class RideBloc extends Bloc<RideEvent, RideState> {
   }
 
   String _parseError(Object e) {
-    return e.toString().replaceAll('Exception: ', '');
+    return mapErrorToMessage(e);
   }
 }

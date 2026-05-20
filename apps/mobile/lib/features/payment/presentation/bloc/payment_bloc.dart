@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../data/repositories/payment_repository.dart';
+import '../../../../shared/utils/error_message.dart';
 import 'payment_event.dart';
 import 'payment_state.dart';
 
@@ -27,7 +28,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       final transactions = await _paymentRepository.getTransactions();
       emit(WalletLoaded(wallet: wallet, transactions: transactions));
     } catch (e) {
-      emit(PaymentError(message: e.toString()));
+      emit(PaymentError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -44,7 +45,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         emit(currentState.copyWith(transactions: transactions));
       }
     } catch (e) {
-      emit(PaymentError(message: e.toString()));
+      emit(PaymentError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -60,7 +61,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       );
       emit(TopUpSuccess(wallet: wallet));
     } catch (e) {
-      emit(PaymentError(message: e.toString()));
+      emit(PaymentError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -73,7 +74,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       final promos = await _paymentRepository.getAvailablePromos();
       emit(PromosLoaded(promos: promos));
     } catch (e) {
-      emit(PaymentError(message: e.toString()));
+      emit(PaymentError(message: mapErrorToMessage(e)));
     }
   }
 
@@ -86,7 +87,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       final promo = await _paymentRepository.applyPromo(event.code);
       emit(PromoApplied(promo: promo));
     } catch (e) {
-      emit(PaymentError(message: e.toString()));
+      emit(PaymentError(message: mapErrorToMessage(e)));
     }
   }
 }
