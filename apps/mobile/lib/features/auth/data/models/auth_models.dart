@@ -62,6 +62,7 @@ class AuthResponse {
   factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
         user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
         tokens: AuthTokens.fromJson(json['tokens'] as Map<String, dynamic>),
-        requiresPhoneVerification: json['requiresPhoneVerification'] as bool? ?? false,
+        requiresPhoneVerification:
+            json['requiresPhoneVerification'] as bool? ?? false,
       );
 }

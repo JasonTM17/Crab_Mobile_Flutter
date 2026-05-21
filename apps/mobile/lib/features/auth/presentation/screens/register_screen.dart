@@ -52,8 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final cs = theme.colorScheme;
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state.status == AuthStatus.otpSent &&
-            state.pendingPhone != null) {
+        if (state.status == AuthStatus.otpSent && state.pendingPhone != null) {
           context.push('/otp?phone=${state.pendingPhone}');
         } else if (state.status == AuthStatus.error && state.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -145,10 +144,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       controller: _firstNameController,
                                       label: 'First name',
                                       hint: 'Linh',
-                                      validator: (v) =>
-                                          v == null || v.isEmpty
-                                              ? 'Required'
-                                              : null,
+                                      validator: (v) => v == null || v.isEmpty
+                                          ? 'Required'
+                                          : null,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -157,10 +155,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       controller: _lastNameController,
                                       label: 'Last name',
                                       hint: 'Nguyen',
-                                      validator: (v) =>
-                                          v == null || v.isEmpty
-                                              ? 'Required'
-                                              : null,
+                                      validator: (v) => v == null || v.isEmpty
+                                          ? 'Required'
+                                          : null,
                                     ),
                                   ),
                                 ],
@@ -228,8 +225,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               const SizedBox(height: 8),
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
                                 child: Text(
                                   'By creating an account you accept our Terms of Service and Privacy Policy.',
                                   style: theme.textTheme.bodySmall?.copyWith(
