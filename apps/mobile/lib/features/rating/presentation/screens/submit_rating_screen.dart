@@ -119,9 +119,7 @@ class _SubmitRatingScreenState extends State<SubmitRatingScreen> {
                   key: ValueKey(_rating.toInt()),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: _rating == 0
-                        ? cs.onSurfaceVariant
-                        : cs.primary,
+                    color: _rating == 0 ? cs.onSurfaceVariant : cs.primary,
                   ),
                 ),
               ),
@@ -244,7 +242,13 @@ class _StarRow extends StatelessWidget {
             duration: AppMotion.fast,
             padding: const EdgeInsets.symmetric(horizontal: 6),
             transformAlignment: Alignment.center,
-            transform: Matrix4.identity()..scale(filled ? 1.08 : 1.0),
+            transform: Matrix4.identity()
+              ..scaleByDouble(
+                filled ? 1.08 : 1.0,
+                filled ? 1.08 : 1.0,
+                1,
+                1,
+              ),
             child: Icon(
               filled ? Icons.star_rounded : Icons.star_outline_rounded,
               size: 52,
