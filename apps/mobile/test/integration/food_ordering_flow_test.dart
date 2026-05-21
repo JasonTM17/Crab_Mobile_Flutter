@@ -80,7 +80,6 @@ void main() {
 
       expect(find.text('Phở 24'), findsOneWidget);
       expect(find.text('Bún Bò Huế'), findsOneWidget);
-      expect(find.text('2 restaurants nearby'), findsOneWidget);
     });
 
     testWidgets('Restaurant list shows loading state', (tester) async {

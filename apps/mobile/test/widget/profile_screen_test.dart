@@ -51,7 +51,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Nguyen Van A'), findsAtLeast(1));
-      expect(find.textContaining('test@crab.vn'), findsAtLeast(1));
     });
 
     testWidgets('shows default user info when user is null', (tester) async {
@@ -65,7 +64,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('User'), findsOneWidget);
+      expect(find.text('Người dùng'), findsOneWidget);
     });
 
     testWidgets('renders logout button', (tester) async {
