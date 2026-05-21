@@ -22,28 +22,40 @@ enum VehicleType { bike, car4, car7, premium }
 extension VehicleTypeX on VehicleType {
   String get apiValue {
     switch (this) {
-      case VehicleType.bike: return 'BIKE';
-      case VehicleType.car4: return 'CAR_4';
-      case VehicleType.car7: return 'CAR_7';
-      case VehicleType.premium: return 'PREMIUM';
+      case VehicleType.bike:
+        return 'BIKE';
+      case VehicleType.car4:
+        return 'CAR_4';
+      case VehicleType.car7:
+        return 'CAR_7';
+      case VehicleType.premium:
+        return 'PREMIUM';
     }
   }
 
   String get label {
     switch (this) {
-      case VehicleType.bike: return 'Bike';
-      case VehicleType.car4: return 'Car 4-seat';
-      case VehicleType.car7: return 'Car 7-seat';
-      case VehicleType.premium: return 'Premium';
+      case VehicleType.bike:
+        return 'Bike';
+      case VehicleType.car4:
+        return 'Car 4-seat';
+      case VehicleType.car7:
+        return 'Car 7-seat';
+      case VehicleType.premium:
+        return 'Premium';
     }
   }
 
   String get icon {
     switch (this) {
-      case VehicleType.bike: return 'motorcycle';
-      case VehicleType.car4: return 'directions_car';
-      case VehicleType.car7: return 'airport_shuttle';
-      case VehicleType.premium: return 'car_rental';
+      case VehicleType.bike:
+        return 'motorcycle';
+      case VehicleType.car4:
+        return 'directions_car';
+      case VehicleType.car7:
+        return 'airport_shuttle';
+      case VehicleType.premium:
+        return 'car_rental';
     }
   }
 }
@@ -83,24 +95,37 @@ enum RideStatus { requested, matched, pickup, inProgress, completed, cancelled }
 extension RideStatusX on RideStatus {
   static RideStatus fromString(String s) {
     switch (s) {
-      case 'REQUESTED': return RideStatus.requested;
-      case 'MATCHED': return RideStatus.matched;
-      case 'PICKUP': return RideStatus.pickup;
-      case 'IN_PROGRESS': return RideStatus.inProgress;
-      case 'COMPLETED': return RideStatus.completed;
-      case 'CANCELLED': return RideStatus.cancelled;
-      default: return RideStatus.requested;
+      case 'REQUESTED':
+        return RideStatus.requested;
+      case 'MATCHED':
+        return RideStatus.matched;
+      case 'PICKUP':
+        return RideStatus.pickup;
+      case 'IN_PROGRESS':
+        return RideStatus.inProgress;
+      case 'COMPLETED':
+        return RideStatus.completed;
+      case 'CANCELLED':
+        return RideStatus.cancelled;
+      default:
+        return RideStatus.requested;
     }
   }
 
   String get label {
     switch (this) {
-      case RideStatus.requested: return 'Finding driver...';
-      case RideStatus.matched: return 'Driver assigned';
-      case RideStatus.pickup: return 'Driver arriving';
-      case RideStatus.inProgress: return 'On the way';
-      case RideStatus.completed: return 'Completed';
-      case RideStatus.cancelled: return 'Cancelled';
+      case RideStatus.requested:
+        return 'Finding driver...';
+      case RideStatus.matched:
+        return 'Driver assigned';
+      case RideStatus.pickup:
+        return 'Driver arriving';
+      case RideStatus.inProgress:
+        return 'On the way';
+      case RideStatus.completed:
+        return 'Completed';
+      case RideStatus.cancelled:
+        return 'Cancelled';
     }
   }
 }
@@ -136,7 +161,8 @@ class Ride {
         id: json['id'] as String,
         riderId: json['rider_id'] as String,
         driverId: json['driver_id'] as String?,
-        status: RideStatusX.fromString(json['status'] as String? ?? 'REQUESTED'),
+        status:
+            RideStatusX.fromString(json['status'] as String? ?? 'REQUESTED'),
         pickup: GeoPoint(
           latitude: (json['pickup_lat'] as num).toDouble(),
           longitude: (json['pickup_lng'] as num).toDouble(),
@@ -151,6 +177,7 @@ class Ride {
         distanceKm: (json['distance_km'] as num? ?? 0).toDouble(),
         durationMin: (json['duration_min'] as num? ?? 0).toInt(),
         vehicleType: json['vehicle_type'] as String? ?? 'BIKE',
-        createdAt: DateTime.parse(json['created_at'] as String? ?? DateTime.now().toIso8601String()),
+        createdAt: DateTime.parse(
+            json['created_at'] as String? ?? DateTime.now().toIso8601String()),
       );
 }

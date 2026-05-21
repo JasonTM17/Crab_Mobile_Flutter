@@ -53,8 +53,7 @@ class IncomingRideCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
             decoration: const BoxDecoration(
               gradient: AppGradients.primary,
-              borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(22)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
             ),
             child: Row(
               children: [
@@ -127,8 +126,8 @@ class IncomingRideCard extends StatelessWidget {
                   child: Container(
                     height: 22,
                     width: 2,
-                    color: theme.colorScheme.outlineVariant
-                        .withValues(alpha: 0.5),
+                    color:
+                        theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                   ),
                 ),
                 _AddressRow(
@@ -325,7 +324,7 @@ class _CountdownPainter extends CustomPainter {
       center,
       radius,
       Paint()
-        ..color = color.withOpacity(0.15)
+        ..color = color.withValues(alpha: 0.15)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3,
     );

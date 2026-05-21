@@ -58,13 +58,12 @@ class DriverModeScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF22C55E)
-                            .withValues(alpha: 0.14),
+                        color: const Color(0xFF22C55E).withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           _LiveDot(),
                           SizedBox(width: 6),
                           Text(
@@ -114,8 +113,7 @@ class DriverModeScreen extends StatelessWidget {
   Widget _buildMainContent(BuildContext context, DriverState state) {
     if (state is DriverOffline) {
       return _OfflineView(
-        onGoOnline: () =>
-            context.read<DriverBloc>().add(const GoOnline()),
+        onGoOnline: () => context.read<DriverBloc>().add(const GoOnline()),
       );
     }
 
@@ -288,8 +286,7 @@ class _WaitingViewState extends State<_WaitingView>
           ),
           const SizedBox(height: 40),
           OutlinedButton.icon(
-            onPressed: () =>
-                context.read<DriverBloc>().add(const GoOffline()),
+            onPressed: () => context.read<DriverBloc>().add(const GoOffline()),
             icon: const Icon(
               Icons.power_settings_new_rounded,
               size: 18,
@@ -354,8 +351,8 @@ class _LiveDotState extends State<_LiveDot>
         width: 8,
         height: 8,
         decoration: BoxDecoration(
-          color: const Color(0xFF22C55E)
-              .withValues(alpha: 0.5 + 0.5 * _c.value),
+          color:
+              const Color(0xFF22C55E).withValues(alpha: 0.5 + 0.5 * _c.value),
           shape: BoxShape.circle,
         ),
       ),
