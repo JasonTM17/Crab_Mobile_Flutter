@@ -20,18 +20,22 @@ class _TopUpScreenState extends State<TopUpScreen> {
   String _selectedMethod = 'bank_transfer';
 
   static const _amounts = <double>[
-    50000, 100000, 200000, 500000, 1000000, 2000000,
+    50000,
+    100000,
+    200000,
+    500000,
+    1000000,
+    2000000,
   ];
 
   static const _methods = <_Method>[
     _Method('bank_transfer', 'Bank Transfer', 'Direct from your bank',
         Icons.account_balance_rounded),
-    _Method('momo', 'MoMo', 'Most popular in Vietnam',
-        Icons.phone_android_rounded),
+    _Method(
+        'momo', 'MoMo', 'Most popular in Vietnam', Icons.phone_android_rounded),
     _Method('zalopay', 'ZaloPay', 'Instant top-up via ZaloPay',
         Icons.payment_rounded),
-    _Method('vnpay', 'VNPay', 'Card / QR via VNPay',
-        Icons.credit_card_rounded),
+    _Method('vnpay', 'VNPay', 'Card / QR via VNPay', Icons.credit_card_rounded),
   ];
 
   String _formatVnd(double v) {
@@ -82,7 +86,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
             children: [
               _PreviewCard(amount: _selectedAmount, formatter: _formatVnd),
               const SizedBox(height: 22),
-              _SectionLabel(text: 'Choose amount'),
+              const _SectionLabel(text: 'Choose amount'),
               const SizedBox(height: 12),
               GridView.count(
                 shrinkWrap: true,
@@ -96,21 +100,20 @@ class _TopUpScreenState extends State<TopUpScreen> {
                   return _AmountTile(
                     label: '${(a / 1000).toInt()}K',
                     selected: selected,
-                    onTap: () => setState(
-                        () => _selectedAmount = selected ? null : a),
+                    onTap: () =>
+                        setState(() => _selectedAmount = selected ? null : a),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 24),
-              _SectionLabel(text: 'Payment method'),
+              const _SectionLabel(text: 'Payment method'),
               const SizedBox(height: 12),
               ..._methods.map((m) => Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: _MethodTile(
                       method: m,
                       selected: _selectedMethod == m.id,
-                      onTap: () =>
-                          setState(() => _selectedMethod = m.id),
+                      onTap: () => setState(() => _selectedMethod = m.id),
                     ),
                   )),
               const SizedBox(height: 28),
@@ -360,9 +363,7 @@ class _MethodTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: selected
-                        ? cs.primary
-                        : cs.outlineVariant,
+                    color: selected ? cs.primary : cs.outlineVariant,
                     width: selected ? 7 : 1.6,
                   ),
                   color: cs.surface,

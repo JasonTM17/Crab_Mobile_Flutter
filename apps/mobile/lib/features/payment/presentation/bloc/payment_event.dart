@@ -1,5 +1,3 @@
-import '../../data/models/payment_models.dart';
-
 abstract class PaymentEvent {
   const PaymentEvent();
 }
