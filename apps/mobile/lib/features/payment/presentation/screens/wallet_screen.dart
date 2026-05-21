@@ -114,7 +114,7 @@ class _WalletBody extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                      color: AppColors.borderLight.withOpacity(0.5)),
+                      color: AppColors.borderLight.withValues(alpha: 0.5)),
                 ),
                 child: Column(
                   children: [
@@ -193,7 +193,7 @@ class _BalanceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.4),
+            color: AppColors.primary.withValues(alpha: 0.4),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -217,10 +217,9 @@ class _BalanceCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
+                  color: Colors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(99),
                 ),
                 child: const Text(
@@ -361,7 +360,8 @@ class _ActionPill extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.borderLight.withOpacity(0.5)),
+            border:
+                Border.all(color: AppColors.borderLight.withValues(alpha: 0.5)),
           ),
           child: Column(
             children: [
@@ -369,7 +369,7 @@ class _ActionPill extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.10),
+                  color: AppColors.primary.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 20),
@@ -400,7 +400,7 @@ class _EmptyTransactions extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight.withOpacity(0.5)),
+        border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.5)),
       ),
       child: Column(
         children: [
@@ -408,7 +408,7 @@ class _EmptyTransactions extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.10),
+              color: AppColors.primary.withValues(alpha: 0.10),
               shape: BoxShape.circle,
             ),
             child: const Icon(
