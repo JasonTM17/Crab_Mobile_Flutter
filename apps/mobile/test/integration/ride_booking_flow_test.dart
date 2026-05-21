@@ -74,6 +74,13 @@ void main() {
 
     testWidgets('Shows fare estimate when locations are selected',
         (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       final app = TestApp();
       app.stubDefaults();
       when(() => app.rideBloc.state).thenReturn(const RideIdle(
@@ -88,7 +95,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Fare estimate should be visible
-      expect(find.textContaining('35'), findsAtLeast(1));
+      expect(find.textContaining('42.500'), findsAtLeast(1));
     });
 
     testWidgets('Loading state during ride request', (tester) async {
