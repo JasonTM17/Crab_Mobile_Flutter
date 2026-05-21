@@ -1,12 +1,12 @@
 # API Reference
 
-Base URL: `http://localhost:3000/api`
+Base URL: `http://localhost:3000/api/v1`
 
-All endpoints require `Authorization: Bearer <token>` unless marked as public.
+All endpoints require `Authorization: Bearer <token>` unless marked as public. The Gateway prefixes every downstream service with `/api/v1`; service ports below are reachable directly only inside the Docker network.
 
 ## Authentication Service
 
-### POST /api/auth/register (Public)
+### POST /auth/register (Public)
 
 Register a new user account.
 
@@ -30,7 +30,7 @@ Register a new user account.
 }
 ```
 
-### POST /api/auth/login (Public)
+### POST /auth/login (Public)
 
 Authenticate and receive tokens.
 
@@ -54,7 +54,7 @@ Authenticate and receive tokens.
 }
 ```
 
-### POST /api/auth/refresh
+### POST /auth/refresh
 
 Refresh an expired access token.
 
@@ -69,7 +69,7 @@ Refresh an expired access token.
 }
 ```
 
-### POST /api/auth/logout
+### POST /auth/logout
 
 Invalidate the current refresh token.
 
@@ -78,7 +78,7 @@ Invalidate the current refresh token.
 { "message": "Logged out successfully" }
 ```
 
-### POST /api/auth/forgot-password (Public)
+### POST /auth/forgot-password (Public)
 
 ```json
 // Request
@@ -92,7 +92,7 @@ Invalidate the current refresh token.
 
 ## User Service
 
-### GET /api/users/me
+### GET /users/me
 
 Get current user profile.
 
@@ -111,7 +111,7 @@ Get current user profile.
 }
 ```
 
-### PATCH /api/users/me
+### PATCH /users/me
 
 Update current user profile.
 
@@ -126,7 +126,7 @@ Update current user profile.
 { "id": "uuid", "fullName": "Nguyen Van B", ... }
 ```
 
-### POST /api/users/me/avatar
+### POST /users/me/avatar
 
 Upload avatar (multipart/form-data).
 
@@ -138,7 +138,7 @@ Field: avatar (file, max 5MB, jpg/png)
 { "avatar": "https://storage.example.com/avatars/uuid.jpg" }
 ```
 
-### GET /api/users/:id (Admin)
+### GET /users/:id (Admin)
 
 Get any user by ID (admin only).
 
@@ -146,7 +146,7 @@ Get any user by ID (admin only).
 
 ## Ride Service
 
-### POST /api/rides
+### POST /rides
 
 Request a new ride.
 
@@ -169,7 +169,7 @@ Request a new ride.
 // Response 201
 {
   "id": "uuid",
-  "status": "SEARCHING",
+  "status": "REQUESTED",
   "estimatedFare": 45000,
   "estimatedDuration": 15,
   "pickupLocation": { ... },
@@ -178,11 +178,11 @@ Request a new ride.
 }
 ```
 
-### GET /api/rides/:id
+### GET /rides/:id
 
 Get ride details.
 
-### GET /api/rides/history
+### GET /rides/history
 
 Get ride history for current user.
 
@@ -201,7 +201,7 @@ Get ride history for current user.
 }
 ```
 
-### POST /api/rides/:id/cancel
+### POST /rides/:id/cancel
 
 Cancel an active ride.
 
@@ -215,15 +215,15 @@ Cancel an active ride.
 
 ### Ride Statuses
 
-`SEARCHING` → `ACCEPTED` → `ARRIVING` → `IN_PROGRESS` → `COMPLETED`
+`REQUESTED` → `MATCHED` → `PICKUP` → `IN_PROGRESS` → `COMPLETED`
 
-Alternative: `SEARCHING` → `CANCELLED` | `NO_DRIVER`
+Alternative: any state → `CANCELLED`. The matching queue dispatches drivers; if no driver accepts within the configured timeout the ride is auto-cancelled with reason `NO_DRIVER`.
 
 ---
 
 ## Food Service
 
-### GET /api/food/restaurants
+### GET /food/restaurants
 
 List restaurants near location.
 
@@ -249,7 +249,7 @@ List restaurants near location.
 }
 ```
 
-### GET /api/food/restaurants/:id/menu
+### GET /food/restaurants/:id/menu
 
 Get restaurant menu.
 
@@ -276,7 +276,7 @@ Get restaurant menu.
 }
 ```
 
-### POST /api/food/orders
+### POST /food/orders
 
 Place a food order.
 
@@ -298,7 +298,7 @@ Place a food order.
 // Response 201
 {
   "id": "uuid",
-  "status": "PENDING",
+  "status": "PLACED",
   "items": [ ... ],
   "subtotal": 125000,
   "deliveryFee": 15000,
@@ -309,15 +309,15 @@ Place a food order.
 
 ### Food Order Statuses
 
-`PENDING` → `CONFIRMED` → `PREPARING` → `READY` → `PICKED_UP` → `DELIVERED`
+`PLACED` → `CONFIRMED` → `PREPARING` → `READY` → `PICKED_UP` → `DELIVERED`
 
-Alternative: `PENDING` → `CANCELLED` | `REJECTED`
+Alternative: any non-terminal state → `CANCELLED`.
 
 ---
 
 ## Payment Service
 
-### GET /api/payments/wallet
+### GET /payments/wallet
 
 Get wallet balance.
 
@@ -330,7 +330,7 @@ Get wallet balance.
 }
 ```
 
-### POST /api/payments/topup
+### POST /payments/topup
 
 Top up wallet.
 
@@ -350,7 +350,7 @@ Top up wallet.
 }
 ```
 
-### GET /api/payments/transactions
+### GET /payments/transactions
 
 Get transaction history.
 
@@ -376,7 +376,7 @@ Get transaction history.
 
 ## Chat Service
 
-### GET /api/chat/conversations
+### GET /chat/conversations
 
 List user conversations.
 
@@ -395,7 +395,7 @@ List user conversations.
 }
 ```
 
-### GET /api/chat/conversations/:id/messages
+### GET /chat/conversations/:id/messages
 
 Get messages in a conversation.
 
@@ -421,7 +421,7 @@ Get messages in a conversation.
 
 ## Notification Service
 
-### GET /api/notifications
+### GET /notifications
 
 Get user notifications.
 
@@ -446,7 +446,7 @@ Get user notifications.
 }
 ```
 
-### POST /api/notifications/read
+### POST /notifications/read
 
 Mark notifications as read.
 
@@ -458,7 +458,7 @@ Mark notifications as read.
 { "marked": 2 }
 ```
 
-### POST /api/notifications/fcm-token
+### POST /notifications/fcm-token
 
 Register FCM token for push notifications.
 
@@ -474,7 +474,7 @@ Register FCM token for push notifications.
 
 ## Rating Service
 
-### POST /api/ratings
+### POST /ratings
 
 Submit a rating.
 
@@ -497,7 +497,7 @@ Submit a rating.
 }
 ```
 
-### GET /api/ratings/:targetId
+### GET /ratings/:targetId
 
 Get ratings for a user/restaurant.
 

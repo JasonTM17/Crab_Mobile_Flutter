@@ -1,8 +1,6 @@
 <!-- Back-to-top anchor -->
 <a id="readme-top"></a>
 
-English | [Tiếng Việt](docs/README_VI.md)
-
 ---
 
 <!-- BADGES -->
@@ -357,13 +355,18 @@ Full guides live under [`docs/`](docs/). Start with the index for an annotated t
 | [docs/INDEX.md](docs/INDEX.md) | Documentation entry point and reading order |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, service boundaries, data flow |
 | [docs/API.md](docs/API.md) | REST API reference across all services |
+| [docs/MOBILE.md](docs/MOBILE.md) | Flutter mobile app architecture and feature catalogue |
+| [docs/ADMIN.md](docs/ADMIN.md) | React admin dashboard pages, auth flow, theme |
 | [docs/REALTIME.md](docs/REALTIME.md) | Socket.IO realtime architecture and Redis adapter |
 | [docs/WEBSOCKET_EVENTS.md](docs/WEBSOCKET_EVENTS.md) | Per-namespace event catalog and payload schemas |
 | [docs/RIDE_MATCHING.md](docs/RIDE_MATCHING.md) | Driver matching algorithm, surge pricing, state machine |
 | [docs/FOOD_DELIVERY.md](docs/FOOD_DELIVERY.md) | Restaurant search, ordering, delivery tracking flow |
+| [docs/RATING.md](docs/RATING.md) | Rating model, aggregate flow, API surface |
 | [docs/DATABASE.md](docs/DATABASE.md) | PostgreSQL + MongoDB schema and indexes |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Docker Compose and Kubernetes deployment guide |
+| [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md) | Logs, metrics, traces, monitoring stack |
 | [docs/TESTING.md](docs/TESTING.md) | Unit, integration, and load test strategy |
+| [AGENTS.md](AGENTS.md) | Rules AI coding agents must follow when contributing |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

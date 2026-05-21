@@ -531,7 +531,7 @@ components:
 
     RideStatus:
       type: string
-      enum: [SEARCHING, ACCEPTED, ARRIVING, IN_PROGRESS, COMPLETED, CANCELLED, NO_DRIVER]
+      enum: [REQUESTED, MATCHED, PICKUP, IN_PROGRESS, COMPLETED, CANCELLED]
 
     PaginatedRides:
       type: object
@@ -635,7 +635,7 @@ components:
           format: uuid
         status:
           type: string
-          enum: [PENDING, CONFIRMED, PREPARING, READY, PICKED_UP, DELIVERED, CANCELLED]
+          enum: [PLACED, CONFIRMED, PREPARING, READY, PICKED_UP, DELIVERED, CANCELLED]
         items:
           type: array
           items:
