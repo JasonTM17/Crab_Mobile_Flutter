@@ -12,7 +12,8 @@ class OrderStatusStepper extends StatelessWidget {
     _StepData(OrderStatus.confirmed, 'Confirmed', Icons.check_circle),
     _StepData(OrderStatus.preparing, 'Preparing', Icons.restaurant),
     _StepData(OrderStatus.readyForPickup, 'Ready', Icons.takeout_dining),
-    _StepData(OrderStatus.outForDelivery, 'Out for Delivery', Icons.delivery_dining),
+    _StepData(
+        OrderStatus.outForDelivery, 'Out for Delivery', Icons.delivery_dining),
     _StepData(OrderStatus.delivered, 'Delivered', Icons.home),
   ];
 

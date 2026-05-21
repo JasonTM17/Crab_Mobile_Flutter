@@ -48,17 +48,28 @@ extension OrderStatusLabel on OrderStatus {
   }
 
   static OrderStatus fromString(String value) {
-    switch (value) {
+    switch (value.toUpperCase()) {
+      case 'PLACED':
+      case 'PENDING':
+        return OrderStatus.pending;
+      case 'CONFIRMED':
       case 'confirmed':
         return OrderStatus.confirmed;
+      case 'PREPARING':
       case 'preparing':
         return OrderStatus.preparing;
+      case 'READY':
+      case 'READY_FOR_PICKUP':
       case 'ready_for_pickup':
         return OrderStatus.readyForPickup;
+      case 'PICKED_UP':
+      case 'OUT_FOR_DELIVERY':
       case 'out_for_delivery':
         return OrderStatus.outForDelivery;
+      case 'DELIVERED':
       case 'delivered':
         return OrderStatus.delivered;
+      case 'CANCELLED':
       case 'cancelled':
         return OrderStatus.cancelled;
       default:
@@ -88,9 +99,9 @@ class OrderItemModel {
     return OrderItemModel(
       menuItemId: json['menuItemId'] as String,
       name: json['name'] as String? ?? '',
-      price: (json['price'] as num).toDouble(),
+      price: _asDouble(json['price']),
       quantity: (json['quantity'] as num).toInt(),
-      note: json['note'] as String?,
+      note: json['notes'] as String? ?? json['note'] as String?,
     );
   }
 }
@@ -131,20 +142,22 @@ class OrderModel {
         .toList();
 
     return OrderModel(
-      id: json['id'] as String,
-      restaurantId: json['restaurantId'] as String? ?? '',
+      id: json['id'] as String? ?? json['_id'] as String? ?? '',
+      restaurantId: json['restaurantId'] as String? ??
+          json['restaurant_id'] as String? ??
+          '',
       restaurantName: json['restaurantName'] as String? ?? '',
       items: itemsList,
       status: OrderStatusLabel.fromString(statusStr),
-      subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0,
-      deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0,
-      total: (json['total'] as num?)?.toDouble() ?? 0,
+      subtotal: _asDouble(json['subtotal']),
+      deliveryFee: _asDouble(json['deliveryFee']),
+      total: _asDouble(json['total'] ?? json['totalAmount']),
       currency: json['currency'] as String? ?? 'VND',
       deliveryAddress: json['deliveryAddress'] as String? ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      estimatedMinutes: (json['estimatedMinutes'] as num?)?.toInt(),
+      createdAt: _asDateTime(json['createdAt'] ?? json['created_at']),
+      estimatedMinutes: _asInt(
+        json['estimatedMinutes'] ?? json['estimated_minutes'],
+      ),
     );
   }
 
@@ -164,4 +177,22 @@ class OrderModel {
       estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
     );
   }
+}
+
+double _asDouble(Object? value, [double fallback = 0]) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? fallback;
+  return fallback;
+}
+
+int? _asInt(Object? value) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
+}
+
+DateTime _asDateTime(Object? value) {
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+  return DateTime.now();
 }
