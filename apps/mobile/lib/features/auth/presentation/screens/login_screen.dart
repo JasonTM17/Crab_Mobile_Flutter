@@ -152,9 +152,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               AnimatedSwitcher(
                                 duration: AppMotion.normal,
                                 switchInCurve: AppMotion.standard,
-                                child: _usePhone
-                                    ? _phoneFields()
-                                    : _emailFields(),
+                                child:
+                                    _usePhone ? _phoneFields() : _emailFields(),
                               ),
                               if (!_usePhone)
                                 Align(
@@ -167,8 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               const SizedBox(height: 18),
                               GradientButton(
-                                label:
-                                    _usePhone ? 'Send OTP' : 'Sign In',
+                                label: _usePhone ? 'Send OTP' : 'Sign In',
                                 icon: _usePhone
                                     ? Icons.sms_rounded
                                     : Icons.lock_open_rounded,
@@ -292,8 +290,10 @@ class _MethodToggle extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          _seg(context, 'Phone', Icons.phone_rounded, usePhone, () => onChange(true)),
-          _seg(context, 'Email', Icons.email_rounded, !usePhone, () => onChange(false)),
+          _seg(context, 'Phone', Icons.phone_rounded, usePhone,
+              () => onChange(true)),
+          _seg(context, 'Email', Icons.email_rounded, !usePhone,
+              () => onChange(false)),
         ],
       ),
     );
@@ -325,8 +325,7 @@ class _MethodToggle extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon,
-                  size: 16,
-                  color: active ? cs.primary : cs.onSurfaceVariant),
+                  size: 16, color: active ? cs.primary : cs.onSurfaceVariant),
               const SizedBox(width: 6),
               Text(
                 label,
