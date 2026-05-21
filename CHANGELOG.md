@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User Service: profiles, addresses, driver/merchant verification with document upload tracking
 - Gateway: Redis Socket.IO adapter for multi-instance scaling, circuit breaker pattern, three-tier rate limiting
 - Ride Service: multi-vehicle pricing (BIKE/CAR_4/CAR_7/PREMIUM), ride scheduling, SOS button, driver stats
+- Ride Service: drivers controller with online/offline upsert + GeoJSON location update
 - Payment Service: wallet with pessimistic-write locks, transactions ledger, promo engine
 - Food Service: restaurants with location search, menus with categories, transactional order checkout
 - Chat Service: rooms with unread tracking, messages with read receipts, edit/delete
@@ -25,20 +26,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Web Admin: shadcn UI primitives (badge, dialog, dropdown, tooltip, skeleton, empty-state, logo, alert-dialog)
 - Web Admin: brand-green theme + restyled Header/Sidebar/Login
 - Web Admin: 8 dashboard pages restyled with EmptyState/Skeleton/Badge primitives
+- Web Admin: green-gradient hero on Dashboard greeting
 - Mobile: shared error_message helper for Vietnamese-friendly Dio error mapping
 - Mobile: get_it DI wiring for all repositories + blocs
 - Backend: 7 service unit specs (auth, chat, food, notification, rating, ride, user)
 - Backend: 3 service unit specs (auth.service, rides.service, promo.service)
 - Tests: k6 load test suite (baseline-smoke, ride-flow, order-flow)
 - Docs: REALTIME, RIDE_MATCHING, FOOD_DELIVERY guides
+- Docs: MOBILE.md, ADMIN.md, RATING.md, OBSERVABILITY.md, AGENTS.md
 
 ### Changed
 - Mobile: bloc routes catch errors through mapErrorToMessage helper
 - Web Admin: Orders/Rides use semantic Badge variants (success/warning/destructive)
+- Docs: align API base on /api/v1 across API.md, ARCHITECTURE.md, TESTING.md
+- Docs: reconcile RideStatus and OrderStatus enums to canonical wire vocabulary
+- Docs: rename socket events to wire-level names (ride:status, ride:matched, ride:location, order:status)
+- Docs: regroup INDEX.md by Architecture / Realtime / Apps / Repo with cross-links to root files
+- Docs: mark FOOD_DELIVERY courier dispatch section aspirational
 
 ### Fixed
 - pnpm-lock.yaml drift after backend-shared added jest deps
 - CI workflow now builds socket-events + backend-shared before service builds (resolves TS2307)
+- README: drop dead docs/README_VI.md link
 
 ### Infrastructure
 - Multi-stage Dockerfiles for all 9 backend services + web-admin (alpine, non-root, healthcheck)
