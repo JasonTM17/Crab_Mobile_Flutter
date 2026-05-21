@@ -77,24 +77,24 @@ Chat Service ──Socket.IO──► Notification Service (new message)
 ## Authentication Flow
 
 ```
-1. Client sends credentials to POST /api/auth/login
+1. Client sends credentials to POST /api/v1/auth/login
 2. Gateway forwards to Auth Service
 3. Auth Service validates, returns JWT access + refresh tokens
 4. Client stores tokens securely (Flutter Secure Storage)
 5. Subsequent requests include Bearer token in Authorization header
 6. Gateway validates JWT before routing to downstream services
-7. Token refresh via POST /api/auth/refresh (silent refresh)
+7. Token refresh via POST /api/v1/auth/refresh (silent refresh)
 ```
 
 ## Data Flow: Ride Booking
 
 ```
-1. Rider requests ride via POST /api/rides
-2. Ride Service creates ride record (status: SEARCHING)
+1. Rider requests ride via POST /api/v1/rides
+2. Ride Service creates ride record (status: REQUESTED)
 3. Ride Service broadcasts to nearby drivers via Socket.IO /ride namespace
-4. Driver accepts → Ride Service updates status to ACCEPTED
-5. Real-time GPS tracking via Socket.IO events
-6. Ride completes → Payment Service charges rider wallet
+4. Driver accepts → Ride Service updates status to MATCHED
+5. Driver heads to pickup → status: PICKUP. Real-time GPS tracking via Socket.IO events
+6. Trip starts → status: IN_PROGRESS. Trip completes → status: COMPLETED. Payment Service charges rider wallet
 7. Rating Service prompts both parties for review
 8. Notification Service sends receipt + rating prompt
 ```
@@ -102,13 +102,13 @@ Chat Service ──Socket.IO──► Notification Service (new message)
 ## Data Flow: Food Order
 
 ```
-1. Customer browses restaurants via GET /api/food/restaurants
-2. Customer places order via POST /api/food/orders
-3. Food Service creates order (status: PENDING)
-4. Restaurant confirms → status: PREPARING
-5. Driver assigned → status: PICKED_UP
+1. Customer browses restaurants via GET /api/v1/food/restaurants
+2. Customer places order via POST /api/v1/food/orders
+3. Food Service creates order (status: PLACED)
+4. Restaurant confirms → status: CONFIRMED → PREPARING
+5. Driver assigned + picks up → status: READY → PICKED_UP
 6. Real-time tracking via Socket.IO /food namespace
-7. Delivery confirmed → Payment Service charges
+7. Delivery confirmed → status: DELIVERED. Payment Service charges
 8. Rating prompts sent to customer
 ```
 

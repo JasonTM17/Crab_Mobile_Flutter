@@ -82,6 +82,8 @@ Estimated prep time = `max(item.prep_time_minutes)` from the menu, plus a 2-minu
 
 ### 4. Courier dispatch
 
+> **Status:** Aspirational. The current `food-service` does not yet ship a `DispatchService` or `food-matching` BullMQ worker — orders flow `PLACED → CONFIRMED → PREPARING → READY → PICKED_UP → DELIVERED` driven by restaurant + driver actions on the API. The design below is the planned v1 once the queue lands.
+
 When an order hits `READY` (or 5 minutes before, configurable), `DispatchService` enqueues a `food-matching` BullMQ job with the same shape as ride matching, biased to:
 
 - Couriers within 1 km of the restaurant (smaller radius than rides).

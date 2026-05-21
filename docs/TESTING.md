@@ -207,7 +207,7 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 
 export default function () {
   // Login flow
-  const loginRes = http.post(`${BASE_URL}/api/auth/login`, JSON.stringify({
+  const loginRes = http.post(`${BASE_URL}/api/v1/auth/login`, JSON.stringify({
     email: `user${__VU}@test.com`,
     password: 'TestPass123!',
   }), { headers: { 'Content-Type': 'application/json' } });
@@ -225,12 +225,12 @@ export default function () {
     };
 
     // Get profile
-    const profileRes = http.get(`${BASE_URL}/api/users/me`, { headers });
+    const profileRes = http.get(`${BASE_URL}/api/v1/users/me`, { headers });
     check(profileRes, { 'profile status 200': (r) => r.status === 200 });
 
     // List restaurants
     const restaurantsRes = http.get(
-      `${BASE_URL}/api/food/restaurants?lat=10.77&lng=106.70&radius=5`,
+      `${BASE_URL}/api/v1/food/restaurants?lat=10.77&lng=106.70&radius=5`,
       { headers }
     );
     check(restaurantsRes, { 'restaurants status 200': (r) => r.status === 200 });
@@ -293,7 +293,7 @@ describe('Ride WebSocket (E2E)', () => {
     let rideId: string;
 
     // Driver receives ride request
-    driverSocket.on('ride:new_request', (data) => {
+    driverSocket.on('ride:matched', (data) => {
       rideId = data.rideId;
       expect(data.vehicleType).toBe('car');
       driverSocket.emit('ride:accept', { rideId });
@@ -315,7 +315,7 @@ describe('Ride WebSocket (E2E)', () => {
   });
 
   it('should handle ride cancellation', (done) => {
-    riderSocket.on('ride:status_changed', (data) => {
+    riderSocket.on('ride:status', (data) => {
       expect(data.status).toBe('CANCELLED');
       done();
     });
@@ -334,7 +334,7 @@ import * as request from 'supertest';
 describe('Rate Limiting', () => {
   it('should enforce rate limits (100 req/min)', async () => {
     const requests = Array.from({ length: 105 }, () =>
-      request(app).get('/api/users/me').set('Authorization', `Bearer ${token}`)
+      request(app).get('/api/v1/users/me').set('Authorization', `Bearer ${token}`)
     );
 
     const responses = await Promise.all(requests);
@@ -346,7 +346,7 @@ describe('Rate Limiting', () => {
 
   it('should return rate limit headers', async () => {
     const res = await request(app)
-      .get('/api/users/me')
+      .get('/api/v1/users/me')
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.headers).toHaveProperty('x-ratelimit-limit');
