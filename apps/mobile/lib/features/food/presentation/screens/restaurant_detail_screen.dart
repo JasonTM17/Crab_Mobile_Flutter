@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,283 +15,166 @@ class RestaurantDetailScreen extends StatefulWidget {
   State<RestaurantDetailScreen> createState() => _RestaurantDetailScreenState();
 }
 
-class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
-    with SingleTickerProviderStateMixin {
+class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   bool _favorite = false;
-  late final AnimationController _fabCtrl;
-  int _lastCount = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _fabCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 220),
-      lowerBound: 0.9,
-      upperBound: 1.0,
-      value: 1.0,
-    );
-  }
-
-  @override
-  void dispose() {
-    _fabCtrl.dispose();
-    super.dispose();
-  }
-
-  void _onCartChanged(int newCount) {
-    if (newCount > _lastCount) {
-      _fabCtrl.value = 0.9;
-      _fabCtrl.forward(from: 0.9);
-    }
-    _lastCount = newCount;
+  String _formatVnd(double value) {
+    if (value <= 0) return 'Miễn phí';
+    final thousand = (value / 1000).toStringAsFixed(0);
+    return '$thousand.000đ';
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<FoodBloc, FoodState>(
-      listenWhen: (a, b) =>
-          b is RestaurantMenuLoaded &&
-          (a is! RestaurantMenuLoaded ||
-              a.cart.totalItems != b.cart.totalItems),
-      listener: (context, state) {
-        if (state is RestaurantMenuLoaded) {
-          _onCartChanged(state.cart.totalItems);
-        }
-      },
+    return BlocBuilder<FoodBloc, FoodState>(
       builder: (context, state) {
         if (state is FoodLoading) {
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }
         if (state is! RestaurantMenuLoaded) {
-          return const Scaffold(body: Center(child: Text('Error')));
+          return const Scaffold(body: Center(child: Text('Lỗi tải dữ liệu')));
         }
 
         final restaurant = state.restaurant;
         final categories = state.menuByCategory.keys.toList();
 
-        return DefaultTabController(
-          length: categories.isEmpty ? 1 : categories.length,
-          child: Scaffold(
-            backgroundColor: AppColors.backgroundLight,
-            body: NestedScrollView(
-              headerSliverBuilder: (context, _) => [
-                SliverAppBar(
-                  expandedHeight: 240,
-                  pinned: true,
-                  stretch: true,
-                  backgroundColor: AppColors.backgroundLight,
-                  elevation: 0,
-                  leading: _RoundIconButton(
-                    icon: Icons.arrow_back_ios_new_rounded,
-                    onTap: () => Navigator.pop(context),
+        return Scaffold(
+          backgroundColor: AppColors.backgroundLight,
+          body: NestedScrollView(
+            headerSliverBuilder: (context, _) => [
+              SliverAppBar(
+                expandedHeight: 240,
+                pinned: true,
+                floating: false,
+                stretch: true,
+                backgroundColor: AppColors.surfaceLight,
+                surfaceTintColor: AppColors.surfaceLight,
+                elevation: 0,
+                leading: _RoundIconButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: () => Navigator.pop(context),
+                ),
+                actions: [
+                  _RoundIconButton(
+                    icon: _favorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    iconColor: _favorite ? AppColors.accent : null,
+                    onTap: () => setState(() => _favorite = !_favorite),
                   ),
-                  actions: [
-                    _RoundIconButton(
-                      icon: _favorite
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      iconColor: _favorite ? AppColors.accent : null,
-                      onTap: () => setState(() => _favorite = !_favorite),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  flexibleSpace: FlexibleSpaceBar(
-                    stretchModes: const [
-                      StretchMode.zoomBackground,
-                      StretchMode.fadeTitle,
-                    ],
-                    background: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        if (restaurant.imageUrl != null)
-                          Image.network(
-                            restaurant.imageUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
-                                const _ImageFallback(),
-                          )
-                        else
-                          const _ImageFallback(),
-                        const DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Color(0x44000000),
-                                Color(0xCC000000),
-                              ],
-                              stops: [0.4, 0.7, 1.0],
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 20,
-                          right: 20,
-                          bottom: 16,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                restaurant.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black54,
-                                      blurRadius: 8,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star_rounded,
-                                      color: Colors.amber, size: 18),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${restaurant.rating} · ${restaurant.category}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  const SizedBox(width: 8),
+                ],
+                title: Text(
+                  restaurant.name,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimaryLight,
                   ),
                 ),
-                if (restaurant.description != null)
-                  SliverToBoxAdapter(
-                    child: Container(
-                      color: AppColors.backgroundLight,
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-                      child: Text(
-                        restaurant.description!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondaryLight,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _TabBarDelegate(
-                    TabBar(
-                      isScrollable: true,
-                      indicatorSize: TabBarIndicatorSize.label,
-                      indicatorWeight: 3,
-                      indicatorColor: AppColors.primary,
-                      labelColor: AppColors.primary,
-                      unselectedLabelColor: AppColors.textSecondaryLight,
-                      labelStyle: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 14),
-                      tabs: categories.isEmpty
-                          ? [const Tab(text: 'Menu')]
-                          : categories.map((c) => Tab(text: c)).toList(),
-                    ),
-                  ),
+                centerTitle: false,
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.parallax,
+                  stretchModes: const [StretchMode.zoomBackground],
+                  background: _HeroBackground(imageUrl: restaurant.imageUrl),
+                  title: const SizedBox.shrink(),
                 ),
-              ],
-              body: TabBarView(
-                children: (categories.isEmpty ? ['Menu'] : categories)
-                    .map((category) {
-                  final items = state.menuByCategory[category] ?? [];
-                  if (items.isEmpty) {
-                    return const Center(
+              ),
+            ],
+            body: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+              children: [
+                _InfoCard(
+                  name: restaurant.name,
+                  category: restaurant.category,
+                  description: restaurant.description,
+                  rating: restaurant.rating,
+                  reviews: restaurant.totalReviews,
+                  isOpen: restaurant.isOpen,
+                  deliveryMinutes: restaurant.deliveryTimeMinutes,
+                  minOrderText: _formatVnd(restaurant.minOrderAmount),
+                ),
+                const SizedBox(height: 16),
+                if (categories.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 48),
+                    child: Center(
                       child: Text(
-                        'No items',
-                        style: TextStyle(
-                            color: AppColors.textSecondaryLight),
+                        'Không có món',
+                        style:
+                            TextStyle(color: AppColors.textSecondaryLight),
                       ),
-                    );
-                  }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return _MenuItemTile(
+                    ),
+                  )
+                else
+                  for (final category in categories) ...[
+                    _CategoryHeader(label: category),
+                    const SizedBox(height: 8),
+                    for (final item in state.menuByCategory[category] ?? [])
+                      _MenuItemCard(
                         name: item.name,
-                        priceText:
-                            '${(item.price / 1000).toStringAsFixed(0)}k VND',
+                        priceText: _formatVnd(item.price),
                         imageUrl: item.imageUrl,
                         onAdd: () {
-                          context
-                              .read<FoodBloc>()
-                              .add(AddToCart(item: item));
+                          context.read<FoodBloc>().add(AddToCart(item: item));
                         },
-                      );
-                    },
-                  );
-                }).toList(),
-              ),
+                      ),
+                    const SizedBox(height: 8),
+                  ],
+              ],
             ),
-            floatingActionButton: state.cart.isEmpty
-                ? null
-                : ScaleTransition(
-                    scale: _fabCtrl,
-                    child: FloatingActionButton.extended(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider.value(
-                            value: context.read<FoodBloc>(),
-                            child: const CartScreen(),
+          ),
+          floatingActionButton: state.cart.isEmpty
+              ? null
+              : FloatingActionButton.extended(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<FoodBloc>(),
+                        child: const CartScreen(),
+                      ),
+                    ),
+                  ),
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 6,
+                  icon: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.shopping_bag_rounded),
+                      Positioned(
+                        right: -6,
+                        top: -6,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.accent,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
+                          child: Text(
+                            '${state.cart.totalItems}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ),
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 8,
-                      icon: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          const Icon(Icons.shopping_bag_rounded),
-                          Positioned(
-                            right: -6,
-                            top: -6,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: AppColors.accent,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: const BoxConstraints(
-                                  minWidth: 18, minHeight: 18),
-                              child: Text(
-                                '${state.cart.totalItems}',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      label: const Text('View cart',
-                          style:
-                              TextStyle(fontWeight: FontWeight.w700)),
-                    ),
+                    ],
                   ),
-          ),
+                  label: const Text(
+                    'Xem giỏ hàng',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
         );
       },
     );
@@ -313,7 +197,7 @@ class _RoundIconButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Material(
-        color: Colors.white.withOpacity(0.92),
+        color: Colors.white.withValues(alpha: 0.92),
         shape: const CircleBorder(),
         elevation: 2,
         child: InkWell(
@@ -322,12 +206,53 @@ class _RoundIconButton extends StatelessWidget {
           child: SizedBox(
             width: 40,
             height: 40,
-            child: Icon(icon,
-                size: 18,
-                color: iconColor ?? AppColors.textPrimaryLight),
+            child: Icon(
+              icon,
+              size: 18,
+              color: iconColor ?? AppColors.textPrimaryLight,
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _HeroBackground extends StatelessWidget {
+  final String? imageUrl;
+  const _HeroBackground({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        if (imageUrl != null)
+          CachedNetworkImage(
+            imageUrl: imageUrl!,
+            fit: BoxFit.cover,
+            placeholder: (_, __) => Container(
+              color: AppColors.borderLight.withValues(alpha: 0.4),
+            ),
+            errorWidget: (_, __, ___) => const _ImageFallback(),
+          )
+        else
+          const _ImageFallback(),
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Color(0x33000000),
+                Color(0x88000000),
+              ],
+              stops: [0.5, 0.8, 1.0],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -346,20 +271,171 @@ class _ImageFallback extends StatelessWidget {
         ),
       ),
       child: const Center(
-        child: Icon(Icons.restaurant_rounded,
-            size: 80, color: Colors.white),
+        child: Icon(Icons.restaurant_rounded, size: 80, color: Colors.white),
       ),
     );
   }
 }
 
-class _MenuItemTile extends StatelessWidget {
+class _InfoCard extends StatelessWidget {
+  final String name;
+  final String category;
+  final String? description;
+  final double rating;
+  final int reviews;
+  final bool isOpen;
+  final int deliveryMinutes;
+  final String minOrderText;
+
+  const _InfoCard({
+    required this.name,
+    required this.category,
+    required this.description,
+    required this.rating,
+    required this.reviews,
+    required this.isOpen,
+    required this.deliveryMinutes,
+    required this.minOrderText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            name,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimaryLight,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            category,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondaryLight,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _InfoStat(
+                icon: Icons.star_rounded,
+                iconColor: const Color(0xFFFFC107),
+                label: '${rating.toStringAsFixed(1)} ($reviews)',
+              ),
+              const SizedBox(width: 16),
+              _InfoStat(
+                icon: Icons.access_time_rounded,
+                iconColor: AppColors.textSecondaryLight,
+                label: isOpen ? 'Mở · $deliveryMinutes phút' : 'Đóng cửa',
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.shopping_basket_rounded,
+                  size: 16, color: AppColors.textSecondaryLight),
+              const SizedBox(width: 6),
+              Text(
+                'Đơn tối thiểu $minOrderText',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+            ],
+          ),
+          if (description != null && description!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              height: 1,
+              color: AppColors.borderLight.withValues(alpha: 0.6),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              description!,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: AppColors.textSecondaryLight,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoStat extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+
+  const _InfoStat({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: iconColor),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimaryLight,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CategoryHeader extends StatelessWidget {
+  final String label;
+  const _CategoryHeader({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 16, 4, 4),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textPrimaryLight,
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuItemCard extends StatelessWidget {
   final String name;
   final String priceText;
   final String? imageUrl;
   final VoidCallback onAdd;
 
-  const _MenuItemTile({
+  const _MenuItemCard({
     required this.name,
     required this.priceText,
     required this.imageUrl,
@@ -369,36 +445,31 @@ class _MenuItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderLight.withOpacity(0.5)),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: SizedBox(
-              width: 64,
-              height: 64,
+              width: 72,
+              height: 72,
               child: imageUrl != null
-                  ? Image.network(
-                      imageUrl!,
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: AppColors.backgroundLight,
-                        alignment: Alignment.center,
-                        child: const Icon(Icons.fastfood_rounded,
-                            color: AppColors.textSecondaryLight),
+                      placeholder: (_, __) => Container(
+                        color:
+                            AppColors.borderLight.withValues(alpha: 0.4),
                       ),
+                      errorWidget: (_, __, ___) => const _ItemFallback(),
                     )
-                  : Container(
-                      color: AppColors.backgroundLight,
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.fastfood_rounded,
-                          color: AppColors.textSecondaryLight),
-                    ),
+                  : const _ItemFallback(),
             ),
           ),
           const SizedBox(width: 12),
@@ -409,16 +480,19 @@ class _MenuItemTile extends StatelessWidget {
                 Text(
                   name,
                   style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w700),
-                  maxLines: 1,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   priceText,
                   style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.primary,
                   ),
                 ),
@@ -431,20 +505,18 @@ class _MenuItemTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryLight],
-                ),
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.35),
+                    color: AppColors.primary.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: const Icon(Icons.add_rounded,
-                  color: Colors.white, size: 22),
+                  color: Colors.white, size: 20),
             ),
           ),
         ],
@@ -453,24 +525,16 @@ class _MenuItemTile extends StatelessWidget {
   }
 }
 
-class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
-  _TabBarDelegate(this.tabBar);
+class _ItemFallback extends StatelessWidget {
+  const _ItemFallback();
 
   @override
-  double get minExtent => tabBar.preferredSize.height;
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(BuildContext context) {
     return Container(
       color: AppColors.backgroundLight,
-      child: tabBar,
+      alignment: Alignment.center,
+      child: const Icon(Icons.fastfood_rounded,
+          color: AppColors.textSecondaryLight),
     );
   }
-
-  @override
-  bool shouldRebuild(covariant _TabBarDelegate oldDelegate) => false;
 }
