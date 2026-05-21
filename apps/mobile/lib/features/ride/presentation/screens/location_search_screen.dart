@@ -109,7 +109,8 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       if (!mounted) return;
       final filtered = _mockSearchResults
           .where((loc) =>
-              (loc.name?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+              (loc.name?.toLowerCase().contains(query.toLowerCase()) ??
+                  false) ||
               (loc.address?.toLowerCase().contains(query.toLowerCase()) ??
                   false))
           .toList();

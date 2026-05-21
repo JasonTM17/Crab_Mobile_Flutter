@@ -50,13 +50,14 @@ class RideBloc extends Bloc<RideEvent, RideState> {
         pickup: event.pickup,
         dropoff: event.dropoff,
       );
-      final current =
-          state is RideIdle ? state as RideIdle : const RideIdle();
-      emit(current.copyWith(
-        pickup: event.pickup,
-        dropoff: event.dropoff,
-        fareEstimate: estimate,
-      ));
+      final current = state is RideIdle ? state as RideIdle : const RideIdle();
+      emit(
+        current.copyWith(
+          pickup: event.pickup,
+          dropoff: event.dropoff,
+          fareEstimate: estimate,
+        ),
+      );
     } catch (e) {
       emit(RideError(message: _parseError(e)));
     }
@@ -78,10 +79,7 @@ class RideBloc extends Bloc<RideEvent, RideState> {
     }
   }
 
-  Future<void> _onCancelRide(
-    CancelRide event,
-    Emitter<RideState> emit,
-  ) async {
+  Future<void> _onCancelRide(CancelRide event, Emitter<RideState> emit) async {
     try {
       await _rideRepository.cancelRide(event.rideId);
       emit(const RideIdle());
@@ -90,10 +88,7 @@ class RideBloc extends Bloc<RideEvent, RideState> {
     }
   }
 
-  void _onDriverMatched(
-    DriverMatched event,
-    Emitter<RideState> emit,
-  ) {
+  void _onDriverMatched(DriverMatched event, Emitter<RideState> emit) {
     if (state is RideSearchingDriver) {
       final current = state as RideSearchingDriver;
       final driver = DriverModel.fromJson(event.driverData);
@@ -101,10 +96,7 @@ class RideBloc extends Bloc<RideEvent, RideState> {
     }
   }
 
-  void _onLocationUpdate(
-    LocationUpdate event,
-    Emitter<RideState> emit,
-  ) {
+  void _onLocationUpdate(LocationUpdate event, Emitter<RideState> emit) {
     final driverLocation = LocationModel(
       latitude: event.latitude,
       longitude: event.longitude,
@@ -112,53 +104,50 @@ class RideBloc extends Bloc<RideEvent, RideState> {
 
     if (state is RidePickup) {
       final current = state as RidePickup;
-      emit(RidePickup(
-        ride: current.ride,
-        driver: current.driver,
-        etaMinutes: current.etaMinutes,
-        driverLocation: driverLocation,
-      ));
+      emit(
+        RidePickup(
+          ride: current.ride,
+          driver: current.driver,
+          etaMinutes: current.etaMinutes,
+          driverLocation: driverLocation,
+        ),
+      );
     } else if (state is RideInProgress) {
       final current = state as RideInProgress;
-      emit(RideInProgress(
-        ride: current.ride,
-        driver: current.driver,
-        driverLocation: driverLocation,
-      ));
+      emit(
+        RideInProgress(
+          ride: current.ride,
+          driver: current.driver,
+          driverLocation: driverLocation,
+        ),
+      );
     }
   }
 
-  void _onRideStatusChanged(
-    RideStatusChanged event,
-    Emitter<RideState> emit,
-  ) {
-    switch (event.status) {
-      case 'pickup':
+  void _onRideStatusChanged(RideStatusChanged event, Emitter<RideState> emit) {
+    switch (event.status.toUpperCase()) {
+      case 'PICKUP':
         if (state is RideDriverMatched) {
           final current = state as RideDriverMatched;
-          emit(RidePickup(
-            ride: current.ride,
-            driver: current.driver,
-            etaMinutes: (event.extra?['etaMinutes'] as num?)?.toInt() ?? 5,
-          ));
+          emit(
+            RidePickup(
+              ride: current.ride,
+              driver: current.driver,
+              etaMinutes: (event.extra?['etaMinutes'] as num?)?.toInt() ?? 5,
+            ),
+          );
         }
-      case 'in_progress':
+      case 'IN_PROGRESS':
         if (state is RidePickup) {
           final current = state as RidePickup;
-          emit(RideInProgress(
-            ride: current.ride,
-            driver: current.driver,
-          ));
+          emit(RideInProgress(ride: current.ride, driver: current.driver));
         }
-      case 'cancelled':
+      case 'CANCELLED':
         emit(const RideIdle());
     }
   }
 
-  void _onRideCompleted(
-    RideCompleted event,
-    Emitter<RideState> emit,
-  ) {
+  void _onRideCompleted(RideCompleted event, Emitter<RideState> emit) {
     final summary = RideSummary.fromJson(event.summaryData);
     emit(RideCompletedState(summary: summary));
   }

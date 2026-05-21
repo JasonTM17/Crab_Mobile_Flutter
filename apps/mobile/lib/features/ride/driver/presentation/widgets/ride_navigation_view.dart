@@ -7,7 +7,6 @@ import '../../../../../shared/widgets/gradient_button.dart';
 import '../../../data/models/ride_model.dart';
 import '../bloc/driver_bloc.dart';
 import '../bloc/driver_event.dart';
-import '../bloc/driver_state.dart';
 
 class RideNavigationView extends StatefulWidget {
   final RideModel ride;
@@ -24,8 +23,6 @@ class RideNavigationView extends StatefulWidget {
 }
 
 class _RideNavigationViewState extends State<RideNavigationView> {
-  GoogleMapController? _mapController;
-
   Set<Marker> _buildMarkers() {
     return {
       Marker(
@@ -84,7 +81,6 @@ class _RideNavigationViewState extends State<RideNavigationView> {
             target: LatLng(targetLat, targetLng),
             zoom: 15,
           ),
-          onMapCreated: (c) => _mapController = c,
           markers: _buildMarkers(),
           polylines: _buildPolylines(),
           myLocationEnabled: true,
@@ -96,8 +92,7 @@ class _RideNavigationViewState extends State<RideNavigationView> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 gradient: widget.isPickupPhase
                     ? AppGradients.primary
