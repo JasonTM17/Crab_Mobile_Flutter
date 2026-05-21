@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/models/rating_model.dart';
 import '../bloc/rating_bloc.dart';
 import '../bloc/rating_event.dart';
 import '../bloc/rating_state.dart';
@@ -52,8 +51,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                if (state.stats != null)
-                  RatingStatsCard(stats: state.stats!),
+                if (state.stats != null) RatingStatsCard(stats: state.stats!),
                 const SizedBox(height: 16),
                 if (state.reviews.isEmpty)
                   const Center(
