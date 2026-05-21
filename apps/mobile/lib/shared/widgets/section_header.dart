@@ -68,7 +68,7 @@ class SectionHeader extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 2),
-                  Icon(
+                  const Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
                     color: AppColors.primary,

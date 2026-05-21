@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_gradients.dart';
-import 'empty_state.dart';
 import 'gradient_button.dart';
 
 /// Reusable error state widget following the EmptyState pattern

@@ -55,8 +55,7 @@ class _BadgeDotState extends State<BadgeDot>
 
   @override
   Widget build(BuildContext context) {
-    final dotColor =
-        widget.color ?? Theme.of(context).colorScheme.primary;
+    final dotColor = widget.color ?? Theme.of(context).colorScheme.primary;
 
     final dot = Container(
       width: widget.size,

@@ -37,7 +37,8 @@ class AppTheme {
         surface: AppColors.surfaceLight,
         error: AppColors.error,
       ),
-      textTheme: _textTheme(AppColors.textPrimaryLight, AppColors.textSecondaryLight),
+      textTheme:
+          _textTheme(AppColors.textPrimaryLight, AppColors.textSecondaryLight),
       appBarTheme: const AppBarTheme(
         elevation: 0,
         centerTitle: false,
@@ -50,7 +51,8 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           elevation: 0,
         ),
@@ -58,14 +60,16 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           side: const BorderSide(color: AppColors.borderLight),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceLight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.borderLight),
@@ -106,7 +110,8 @@ class AppTheme {
         surface: AppColors.surfaceDark,
         error: AppColors.error,
       ),
-      textTheme: _textTheme(AppColors.textPrimaryDark, AppColors.textSecondaryDark),
+      textTheme:
+          _textTheme(AppColors.textPrimaryDark, AppColors.textSecondaryDark),
       appBarTheme: const AppBarTheme(
         elevation: 0,
         centerTitle: false,
@@ -118,7 +123,8 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       cardTheme: CardThemeData(
@@ -134,16 +140,23 @@ class AppTheme {
 
   static TextTheme _textTheme(Color primary, Color secondary) {
     return TextTheme(
-      displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: primary),
-      displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: primary),
-      headlineLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: primary),
-      headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: primary),
-      titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: primary),
-      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: primary),
+      displayLarge:
+          TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: primary),
+      displayMedium:
+          TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: primary),
+      headlineLarge:
+          TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: primary),
+      headlineMedium:
+          TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: primary),
+      titleLarge:
+          TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: primary),
+      titleMedium:
+          TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: primary),
       bodyLarge: TextStyle(fontSize: 16, color: primary),
       bodyMedium: TextStyle(fontSize: 14, color: primary),
       bodySmall: TextStyle(fontSize: 12, color: secondary),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: primary),
+      labelLarge:
+          TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: primary),
     );
   }
 }

@@ -31,8 +31,7 @@ class CrabApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>(
-          create: (_) =>
-              sl<AuthBloc>()..add(const AuthCheckRequested()),
+          create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
         ),
         BlocProvider<HomeBloc>(create: (_) => sl<HomeBloc>()),
         BlocProvider<RideBloc>(create: (_) => sl<RideBloc>()),

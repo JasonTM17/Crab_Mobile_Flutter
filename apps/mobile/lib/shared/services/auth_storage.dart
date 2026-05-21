@@ -7,8 +7,10 @@ class AuthStorage {
 
   AuthStorage(this._storage);
 
-  Future<String?> getAccessToken() => _storage.read(key: StorageKeys.accessToken);
-  Future<String?> getRefreshToken() => _storage.read(key: StorageKeys.refreshToken);
+  Future<String?> getAccessToken() =>
+      _storage.read(key: StorageKeys.accessToken);
+  Future<String?> getRefreshToken() =>
+      _storage.read(key: StorageKeys.refreshToken);
   Future<String?> getUserId() => _storage.read(key: StorageKeys.userId);
   Future<String?> getUserRole() => _storage.read(key: StorageKeys.userRole);
 
