@@ -9,14 +9,23 @@ class SavedPlaces extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final places = const [
-      _Place(icon: Icons.home_outlined, label: 'Home', route: '/ride/book?from=home'),
-      _Place(icon: Icons.work_outline, label: 'Work', route: '/ride/book?from=work'),
-      _Place(icon: Icons.favorite_outline, label: 'Saved', route: '/ride/book?from=saved'),
+    const places = [
+      _Place(
+          icon: Icons.home_outlined,
+          label: 'Nhà',
+          route: '/ride/book?from=home'),
+      _Place(
+          icon: Icons.work_outline,
+          label: 'Công ty',
+          route: '/ride/book?from=work'),
+      _Place(
+          icon: Icons.favorite_outline,
+          label: 'Đã lưu',
+          route: '/ride/book?from=saved'),
     ];
 
     return SizedBox(
-      height: 44,
+      height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -25,7 +34,7 @@ class SavedPlaces extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           if (i == places.length) {
-            return _AddChip(isDark: isDark);
+            return const _AddChip();
           }
           return _PlaceChip(place: places[i], isDark: isDark);
         },
@@ -48,7 +57,7 @@ class _PlaceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fill = isDark ? AppColors.surfaceDark : Colors.white;
+    final fill = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
     final border = isDark ? AppColors.borderDark : AppColors.borderLight;
     final fg = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
@@ -56,18 +65,19 @@ class _PlaceChip extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => context.push(place.route),
-        borderRadius: BorderRadius.circular(99),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
             color: fill,
-            borderRadius: BorderRadius.circular(99),
-            border: Border.all(color: border),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: border, width: 1),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(place.icon, size: 16, color: AppColors.primary),
+              Icon(place.icon, size: 18, color: AppColors.primary),
               const SizedBox(width: 6),
               Text(
                 place.label,
@@ -86,44 +96,81 @@ class _PlaceChip extends StatelessWidget {
 }
 
 class _AddChip extends StatelessWidget {
-  const _AddChip({required this.isDark});
-  final bool isDark;
+  const _AddChip();
 
   @override
   Widget build(BuildContext context) {
-    final tint = AppColors.primary.withValues(alpha: 0.10);
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => context.push('/profile'),
-        borderRadius: BorderRadius.circular(99),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: tint,
-            borderRadius: BorderRadius.circular(99),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.30),
-              style: BorderStyle.solid,
-            ),
+        borderRadius: BorderRadius.circular(20),
+        child: CustomPaint(
+          painter: _DashedBorderPainter(
+            color: AppColors.primary.withValues(alpha: 0.45),
+            radius: 20,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(Icons.add, size: 16, color: AppColors.primary),
-              SizedBox(width: 6),
-              Text(
-                'Add place',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+          child: Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            alignment: Alignment.center,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add, size: 18, color: AppColors.primary),
+                SizedBox(width: 6),
+                Text(
+                  'Thêm',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  _DashedBorderPainter({required this.color, required this.radius});
+
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(radius),
+    );
+    final path = Path()..addRRect(rrect);
+
+    const dash = 5.0;
+    const gap = 4.0;
+    for (final metric in path.computeMetrics()) {
+      double distance = 0.0;
+      while (distance < metric.length) {
+        final next = distance + dash;
+        canvas.drawPath(
+          metric.extractPath(distance, next.clamp(0, metric.length)),
+          paint,
+        );
+        distance = next + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedBorderPainter old) =>
+      old.color != color || old.radius != radius;
 }

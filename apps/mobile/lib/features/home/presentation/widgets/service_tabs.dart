@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Multi-service tab UI inspired by Grab/Uber super-app shell.
+import '../../../../core/theme/app_theme.dart';
+
+/// Multi-service tab UI inspired by Grab/Be super-app shell.
 /// Tabs: Mobility / Food & Mart / Express / Pay
 /// Each tab shows a 2x4 grid of service tiles with icons + labels.
 class ServiceTabs extends StatefulWidget {
@@ -15,7 +17,7 @@ class _ServiceTabsState extends State<ServiceTabs>
     with SingleTickerProviderStateMixin {
   late final TabController _controller;
 
-  static const _tabs = ['Mobility', 'Food & Mart', 'Express', 'Pay'];
+  static const _tabs = ['Di chuyển', 'Ăn uống', 'Giao hàng', 'Thanh toán'];
 
   static const _services = <List<_ServiceTile>>[
     [
@@ -23,30 +25,30 @@ class _ServiceTabsState extends State<ServiceTabs>
       _ServiceTile('Car 4', Icons.directions_car, '/ride/book?type=car4'),
       _ServiceTile('Car 7', Icons.airport_shuttle, '/ride/book?type=car7'),
       _ServiceTile('Premium', Icons.star, '/ride/book?type=premium'),
-      _ServiceTile('Schedule', Icons.schedule, '/ride/book?schedule=1'),
-      _ServiceTile('Multi-stop', Icons.alt_route, '/ride/book?stops=1'),
-      _ServiceTile('History', Icons.history, '/ride/history'),
-      _ServiceTile('Driver', Icons.badge, '/driver/dashboard'),
+      _ServiceTile('Đặt lịch', Icons.schedule, '/ride/book?schedule=1'),
+      _ServiceTile('Nhiều điểm', Icons.alt_route, '/ride/book?stops=1'),
+      _ServiceTile('Lịch sử', Icons.history, '/ride/history'),
+      _ServiceTile('Tài xế', Icons.badge, '/driver/dashboard'),
     ],
     [
       _ServiceTile('Food', Icons.restaurant, '/food'),
       _ServiceTile('Mart', Icons.shopping_basket, '/services'),
-      _ServiceTile('Grocery', Icons.local_grocery_store, '/services'),
-      _ServiceTile('Cart', Icons.shopping_cart, '/food/cart'),
-      _ServiceTile('Orders', Icons.receipt_long, '/food/orders'),
-      _ServiceTile('Promos', Icons.local_offer, '/promos'),
+      _ServiceTile('Tạp hoá', Icons.local_grocery_store, '/services'),
+      _ServiceTile('Giỏ hàng', Icons.shopping_cart, '/food/cart'),
+      _ServiceTile('Đơn hàng', Icons.receipt_long, '/food/orders'),
+      _ServiceTile('Khuyến mãi', Icons.local_offer, '/promos'),
     ],
     [
-      _ServiceTile('Send', Icons.send, '/services'),
-      _ServiceTile('Documents', Icons.description, '/services'),
-      _ServiceTile('Track', Icons.local_shipping, '/services'),
+      _ServiceTile('Gửi đồ', Icons.send, '/services'),
+      _ServiceTile('Tài liệu', Icons.description, '/services'),
+      _ServiceTile('Theo dõi', Icons.local_shipping, '/services'),
     ],
     [
-      _ServiceTile('Wallet', Icons.account_balance_wallet, '/wallet'),
-      _ServiceTile('Top up', Icons.add_circle, '/wallet/topup'),
-      _ServiceTile('Transfer', Icons.swap_horiz, '/wallet/transfer'),
-      _ServiceTile('History', Icons.list_alt, '/wallet/transactions'),
-      _ServiceTile('Promos', Icons.local_offer, '/promos'),
+      _ServiceTile('Ví', Icons.account_balance_wallet, '/wallet'),
+      _ServiceTile('Nạp tiền', Icons.add_circle, '/wallet/topup'),
+      _ServiceTile('Chuyển', Icons.swap_horiz, '/wallet/transfer'),
+      _ServiceTile('Lịch sử', Icons.list_alt, '/wallet/transactions'),
+      _ServiceTile('Khuyến mãi', Icons.local_offer, '/promos'),
     ],
   ];
 
@@ -67,28 +69,27 @@ class _ServiceTabsState extends State<ServiceTabs>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: TabBar(
-            controller: _controller,
-            labelColor: const Color(0xFF00B14F),
-            unselectedLabelColor: Colors.black54,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicator: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            isScrollable: true,
-            tabs: _tabs.map((t) => Tab(text: t)).toList(),
+        SizedBox(
+          height: 40,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              return ListView.separated(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: _tabs.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, i) {
+                  final selected = _controller.index == i;
+                  return _TabPill(
+                    label: _tabs[i],
+                    selected: selected,
+                    onTap: () => _controller.animateTo(i),
+                  );
+                },
+              );
+            },
           ),
         ),
         const SizedBox(height: 12),
@@ -102,6 +103,58 @@ class _ServiceTabsState extends State<ServiceTabs>
           ),
         ),
       ],
+    );
+  }
+}
+
+class _TabPill extends StatelessWidget {
+  const _TabPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = selected
+        ? AppColors.primary
+        : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight);
+    final fg = selected
+        ? Colors.white
+        : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight);
+    final border = selected
+        ? AppColors.primary
+        : (isDark ? AppColors.borderDark : AppColors.borderLight);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: border, width: 1),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: fg,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -141,15 +194,15 @@ class _ServiceGridView extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE6F7EE),
-                  borderRadius: BorderRadius.circular(14),
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
                 ),
-                child: Icon(t.icon, color: const Color(0xFF00B14F)),
+                child: Icon(t.icon, color: AppColors.primary),
               ),
               const SizedBox(height: 6),
               Text(
                 t.label,
-                style: const TextStyle(fontSize: 12),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -161,3 +214,4 @@ class _ServiceGridView extends StatelessWidget {
     );
   }
 }
+
