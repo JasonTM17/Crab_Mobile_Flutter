@@ -28,9 +28,11 @@ class ApiConstants {
   // Ride
   static const String rides = '/rides';
   static const String fareEstimate = '/rides/estimate';
+  static const String driverBase = '/drivers';
 
   // Food
   static const String restaurants = '/restaurants';
+  static const String menus = '/menus';
   static const String orders = '/orders';
 
   // Payment
@@ -45,4 +47,10 @@ class ApiConstants {
 
   // Ratings
   static const String ratings = '/ratings';
+
+  // Socket namespaces
+  static const String rideNamespace = '/ride';
+  static const String foodNamespace = '/food';
+  static const String chatNamespace = '/chat';
+  static const String notificationNamespace = '/notification';
 }

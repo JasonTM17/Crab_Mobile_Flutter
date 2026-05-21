@@ -9,7 +9,7 @@ class BrandedSnack {
   static void show(
     BuildContext context, {
     required String message,
-    _SnackKind kind = _SnackKind.info,
+    SnackKind kind = SnackKind.info,
     Duration duration = const Duration(seconds: 3),
     String? actionLabel,
     VoidCallback? onAction,
@@ -56,35 +56,35 @@ class BrandedSnack {
   }
 
   static void success(BuildContext context, String message) =>
-      show(context, message: message, kind: _SnackKind.success);
+      show(context, message: message, kind: SnackKind.success);
 
   static void info(BuildContext context, String message) =>
-      show(context, message: message, kind: _SnackKind.info);
+      show(context, message: message, kind: SnackKind.info);
 
   static void warning(BuildContext context, String message) =>
-      show(context, message: message, kind: _SnackKind.warning);
+      show(context, message: message, kind: SnackKind.warning);
 
   static void error(BuildContext context, String message) =>
-      show(context, message: message, kind: _SnackKind.error);
+      show(context, message: message, kind: SnackKind.error);
 
-  static _Palette _palette(ThemeData theme, _SnackKind kind) {
+  static _Palette _palette(ThemeData theme, SnackKind kind) {
     switch (kind) {
-      case _SnackKind.success:
-        return _Palette(
-          bg: const Color(0xFF15803D),
+      case SnackKind.success:
+        return const _Palette(
+          bg: Color(0xFF15803D),
           icon: Icons.check_circle_rounded,
         );
-      case _SnackKind.warning:
-        return _Palette(
-          bg: const Color(0xFFD97706),
+      case SnackKind.warning:
+        return const _Palette(
+          bg: Color(0xFFD97706),
           icon: Icons.warning_amber_rounded,
         );
-      case _SnackKind.error:
-        return _Palette(
-          bg: const Color(0xFFDC2626),
+      case SnackKind.error:
+        return const _Palette(
+          bg: Color(0xFFDC2626),
           icon: Icons.error_rounded,
         );
-      case _SnackKind.info:
+      case SnackKind.info:
         return _Palette(
           bg: theme.colorScheme.primary,
           icon: Icons.info_rounded,
@@ -93,7 +93,7 @@ class BrandedSnack {
   }
 }
 
-enum _SnackKind { success, info, warning, error }
+enum SnackKind { success, info, warning, error }
 
 class _Palette {
   final Color bg;

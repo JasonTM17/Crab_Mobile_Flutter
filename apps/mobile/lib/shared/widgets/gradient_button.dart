@@ -55,8 +55,8 @@ class _GradientButtonState extends State<GradientButton>
     super.dispose();
   }
 
-  void _down(_) => _controller.forward();
-  void _up(_) => _controller.reverse();
+  void _down(TapDownDetails _) => _controller.forward();
+  void _up(TapUpDetails _) => _controller.reverse();
   void _cancel() => _controller.reverse();
 
   @override

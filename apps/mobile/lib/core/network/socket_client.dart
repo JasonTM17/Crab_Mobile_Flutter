@@ -40,4 +40,10 @@ class SocketClient {
   }
 
   io.Socket? getSocket(String namespace) => _sockets[namespace];
+
+  Future<io.Socket> get rideSocket => connect(ApiConstants.rideNamespace);
+  Future<io.Socket> get foodSocket => connect(ApiConstants.foodNamespace);
+  Future<io.Socket> get chatSocket => connect(ApiConstants.chatNamespace);
+  Future<io.Socket> get notificationSocket =>
+      connect(ApiConstants.notificationNamespace);
 }

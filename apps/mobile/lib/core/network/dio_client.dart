@@ -13,7 +13,10 @@ class DioClient {
       baseUrl: ApiConstants.baseUrl,
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
-      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
     ));
 
     dio.interceptors.add(InterceptorsWrapper(
@@ -34,14 +37,17 @@ class DioClient {
                 '${ApiConstants.baseUrl}${ApiConstants.authRefresh}',
                 data: {'refresh_token': refreshToken},
               );
-              final newAccess = response.data['tokens']['access_token'] as String;
-              final newRefresh = response.data['tokens']['refresh_token'] as String;
+              final newAccess =
+                  response.data['tokens']['access_token'] as String;
+              final newRefresh =
+                  response.data['tokens']['refresh_token'] as String;
               await authStorage.saveTokens(
                 accessToken: newAccess,
                 refreshToken: newRefresh,
               );
               // Retry original request
-              error.requestOptions.headers['Authorization'] = 'Bearer $newAccess';
+              error.requestOptions.headers['Authorization'] =
+                  'Bearer $newAccess';
               final retry = await dio.fetch(error.requestOptions);
               return handler.resolve(retry);
             } catch (_) {
