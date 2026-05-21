@@ -1,55 +1,68 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_theme.dart';
+
+/// Service card used in the home grid: pastel circular icon + label.
 class ServiceCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
+  final String label;
   final IconData icon;
-  final Color color;
+  final Color tint;
   final VoidCallback onTap;
 
   const ServiceCard({
     super.key,
-    required this.title,
-    required this.subtitle,
+    required this.label,
     required this.icon,
-    required this.color,
+    required this.tint,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pastel = tint.withValues(alpha: 0.18);
+
+    return InkWell(
       onTap: onTap,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: pastel,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Container(
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: tint,
+                  shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: color, size: 28),
+                child: Icon(icon, color: Colors.white, size: 24),
               ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
