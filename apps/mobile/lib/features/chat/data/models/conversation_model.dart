@@ -41,12 +41,14 @@ class ConversationModel {
   }
 
   String get otherParticipantName {
-    final other = participants.length > 1 ? participants[1] : participants.first;
+    final other =
+        participants.length > 1 ? participants[1] : participants.first;
     return other.name;
   }
 
   String? get otherParticipantAvatar {
-    final other = participants.length > 1 ? participants[1] : participants.first;
+    final other =
+        participants.length > 1 ? participants[1] : participants.first;
     return other.avatarUrl;
   }
 }

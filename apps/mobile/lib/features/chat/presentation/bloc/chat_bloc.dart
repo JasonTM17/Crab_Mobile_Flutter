@@ -57,7 +57,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(const ChatLoading());
     try {
       await _connectSocket();
-      _chatSocket!.emit('joinConversation', {'conversationId': event.conversationId});
+      _chatSocket!
+          .emit('joinConversation', {'conversationId': event.conversationId});
       final messages = await _chatRepository.getMessages(event.conversationId);
       emit(MessagesLoaded(
         conversationId: event.conversationId,
