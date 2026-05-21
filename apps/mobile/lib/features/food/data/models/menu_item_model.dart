@@ -30,9 +30,11 @@ class MenuItemModel {
       name: json['name'] as String,
       description: json['description'] as String?,
       imageUrl: json['imageUrl'] as String?,
-      price: (json['price'] as num).toDouble(),
+      price: _asDouble(json['discountPrice'] ?? json['price']),
       currency: json['currency'] as String? ?? 'VND',
-      category: json['category'] as String? ?? 'Main',
+      category: json['category'] as String? ??
+          json['categoryId'] as String? ??
+          'Main',
       isAvailable: json['isAvailable'] as bool? ?? true,
       isFeatured: json['isFeatured'] as bool? ?? false,
     );
@@ -50,4 +52,10 @@ class MenuItemModel {
         'isAvailable': isAvailable,
         'isFeatured': isFeatured,
       };
+}
+
+double _asDouble(Object? value, [double fallback = 0]) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? fallback;
+  return fallback;
 }

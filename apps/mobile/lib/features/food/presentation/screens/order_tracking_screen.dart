@@ -8,8 +8,24 @@ import '../bloc/food_bloc.dart';
 import '../bloc/food_event.dart';
 import '../bloc/food_state.dart';
 
-class OrderTrackingScreen extends StatelessWidget {
-  const OrderTrackingScreen({super.key});
+class OrderTrackingScreen extends StatefulWidget {
+  final String? orderId;
+
+  const OrderTrackingScreen({super.key, this.orderId});
+
+  @override
+  State<OrderTrackingScreen> createState() => _OrderTrackingScreenState();
+}
+
+class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final orderId = widget.orderId;
+    if (orderId != null && orderId.isNotEmpty) {
+      context.read<FoodBloc>().add(LoadOrder(orderId: orderId));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +64,8 @@ class OrderTrackingScreen extends StatelessWidget {
                           ),
                           title: const Text('Cancel order?'),
                           content: const Text(
-                              'You can still cancel before the restaurant accepts. Charges will be refunded.'),
+                            'You can still cancel before the restaurant accepts. Charges will be refunded.',
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
@@ -57,9 +74,9 @@ class OrderTrackingScreen extends StatelessWidget {
                             FilledButton(
                               onPressed: () {
                                 Navigator.pop(context);
-                                context
-                                    .read<FoodBloc>()
-                                    .add(CancelOrder(orderId: order.id));
+                                context.read<FoodBloc>().add(
+                                      CancelOrder(orderId: order.id),
+                                    );
                               },
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFFEF4444),
@@ -70,8 +87,11 @@ class OrderTrackingScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.close_rounded,
-                        color: Color(0xFFEF4444), size: 18),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFFEF4444),
+                      size: 18,
+                    ),
                     label: const Text(
                       'Cancel',
                       style: TextStyle(
@@ -211,8 +231,11 @@ class _StatusCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.schedule_rounded,
-                          color: Colors.white, size: 14),
+                      const Icon(
+                        Icons.schedule_rounded,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'ETA ${order.estimatedMinutes} min',
@@ -253,7 +276,11 @@ class _OrderStepper extends StatelessWidget {
     (OrderStatus.pending, Icons.receipt_long_rounded, 'Order Placed'),
     (OrderStatus.confirmed, Icons.check_circle_rounded, 'Confirmed'),
     (OrderStatus.preparing, Icons.restaurant_rounded, 'Preparing'),
-    (OrderStatus.outForDelivery, Icons.delivery_dining_rounded, 'Out for Delivery'),
+    (
+      OrderStatus.outForDelivery,
+      Icons.delivery_dining_rounded,
+      'Out for Delivery',
+    ),
     (OrderStatus.delivered, Icons.home_rounded, 'Delivered'),
   ];
 
@@ -366,8 +393,7 @@ class _StepDot extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        gradient:
-            (done || current) ? AppGradients.primary : null,
+        gradient: (done || current) ? AppGradients.primary : null,
         color: (done || current)
             ? null
             : cs.surfaceContainerHighest.withValues(alpha: 0.5),
@@ -385,9 +411,7 @@ class _StepDot extends StatelessWidget {
       child: Icon(
         icon,
         size: 20,
-        color: (done || current)
-            ? Colors.white
-            : cs.onSurfaceVariant,
+        color: (done || current) ? Colors.white : cs.onSurfaceVariant,
       ),
     );
   }
@@ -458,8 +482,11 @@ class _CancelledBanner extends StatelessWidget {
               color: const Color(0xFFEF4444).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.info_rounded,
-                color: Color(0xFFEF4444), size: 20),
+            child: const Icon(
+              Icons.info_rounded,
+              color: Color(0xFFEF4444),
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -514,8 +541,11 @@ class _OrderDetailsCard extends StatelessWidget {
                   color: cs.primary.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.restaurant_rounded,
-                    size: 20, color: cs.primary),
+                child: Icon(
+                  Icons.restaurant_rounded,
+                  size: 20,
+                  color: cs.primary,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -529,51 +559,52 @@ class _OrderDetailsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          ...order.items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.primary.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        '${item.quantity}×',
-                        style: TextStyle(
-                          color: cs.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                        ),
+          ...order.items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      '${item.quantity}×',
+                      style: TextStyle(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        item.name,
-                        style: theme.textTheme.bodyMedium,
-                      ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(item.name, style: theme.textTheme.bodyMedium),
+                  ),
+                  Text(
+                    _formatPrice(item.subtotal, order.currency),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                    Text(
-                      _formatPrice(item.subtotal, order.currency),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-          Divider(
-              color: cs.outlineVariant.withValues(alpha: 0.4), height: 16),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Divider(color: cs.outlineVariant.withValues(alpha: 0.4), height: 16),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.location_on_rounded,
-                  size: 16, color: cs.onSurfaceVariant),
+              Icon(
+                Icons.location_on_rounded,
+                size: 16,
+                color: cs.onSurfaceVariant,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -632,11 +663,7 @@ class _PriceSummaryCard extends StatelessWidget {
               color: cs.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
-          _Row(
-            label: 'Total',
-            value: _fmt(order.total),
-            bold: true,
-          ),
+          _Row(label: 'Total', value: _fmt(order.total), bold: true),
         ],
       ),
     );

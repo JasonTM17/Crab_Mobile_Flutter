@@ -63,6 +63,15 @@ class LoadOrderHistory extends FoodEvent {
   const LoadOrderHistory();
 }
 
+class LoadOrder extends FoodEvent {
+  final String orderId;
+
+  const LoadOrder({required this.orderId});
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
 class LoadActiveOrder extends FoodEvent {
   const LoadActiveOrder();
 }

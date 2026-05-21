@@ -26,6 +26,7 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
     on<ClearCart>(_onClearCart);
     on<PlaceOrder>(_onPlaceOrder);
     on<LoadOrderHistory>(_onLoadOrderHistory);
+    on<LoadOrder>(_onLoadOrder);
     on<LoadActiveOrder>(_onLoadActiveOrder);
     on<OrderStatusUpdated>(_onOrderStatusUpdated);
     on<CancelOrder>(_onCancelOrder);
@@ -41,10 +42,12 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
       final restaurants = await _foodRepository.getRestaurants(
         category: event.category,
       );
-      emit(RestaurantListLoaded(
-        restaurants: restaurants,
-        selectedCategory: event.category,
-      ));
+      emit(
+        RestaurantListLoaded(
+          restaurants: restaurants,
+          selectedCategory: event.category,
+        ),
+      );
     } catch (e) {
       emit(FoodError(message: _parseError(e)));
     }
@@ -62,12 +65,14 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
       for (final item in items) {
         byCategory.putIfAbsent(item.category, () => []).add(item);
       }
-      emit(RestaurantMenuLoaded(
-        restaurant: event.restaurant,
-        menuItems: items,
-        menuByCategory: byCategory,
-        cart: currentCart,
-      ));
+      emit(
+        RestaurantMenuLoaded(
+          restaurant: event.restaurant,
+          menuItems: items,
+          menuByCategory: byCategory,
+          cart: currentCart,
+        ),
+      );
     } catch (e) {
       emit(FoodError(message: _parseError(e)));
     }
@@ -109,10 +114,7 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
     }
   }
 
-  Future<void> _onPlaceOrder(
-    PlaceOrder event,
-    Emitter<FoodState> emit,
-  ) async {
+  Future<void> _onPlaceOrder(PlaceOrder event, Emitter<FoodState> emit) async {
     final cart = _currentCart;
     if (cart.isEmpty || cart.restaurantId == null) return;
 
@@ -139,6 +141,17 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
     try {
       final orders = await _foodRepository.getOrderHistory();
       emit(OrderHistoryLoaded(orders: orders));
+    } catch (e) {
+      emit(FoodError(message: _parseError(e)));
+    }
+  }
+
+  Future<void> _onLoadOrder(LoadOrder event, Emitter<FoodState> emit) async {
+    emit(const FoodLoading());
+    try {
+      final order = await _foodRepository.getOrder(event.orderId);
+      emit(OrderTracking(order: order));
+      await _subscribeToOrderSocket(order.id);
     } catch (e) {
       emit(FoodError(message: _parseError(e)));
     }
@@ -181,9 +194,9 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
       await _foodRepository.cancelOrder(event.orderId);
       if (state is OrderTracking) {
         final current = (state as OrderTracking).order;
-        emit(OrderTracking(
-          order: current.copyWith(status: OrderStatus.cancelled),
-        ));
+        emit(
+          OrderTracking(order: current.copyWith(status: OrderStatus.cancelled)),
+        );
       }
     } catch (e) {
       emit(FoodError(message: _parseError(e)));
@@ -196,10 +209,12 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
   ) {
     if (state is RestaurantListLoaded) {
       final current = state as RestaurantListLoaded;
-      emit(current.copyWith(
-        selectedCategory: event.category,
-        clearCategory: event.category == null,
-      ));
+      emit(
+        current.copyWith(
+          selectedCategory: event.category,
+          clearCategory: event.category == null,
+        ),
+      );
     }
   }
 
@@ -213,19 +228,21 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
 
   Future<void> _subscribeToOrderSocket(String orderId) async {
     final socket = await _socketClient.foodSocket;
-    socket.emit('subscribe_order', {'orderId': orderId});
-    socket.on('order_status', (data) {
+    socket.emit('order:join', {'orderId': orderId});
+    socket.off('order:status');
+    socket.on('order:status', (data) {
       final d = data as Map<String, dynamic>;
       if (d['orderId'] == orderId) {
-        add(OrderStatusUpdated(
-          orderId: orderId,
-          status: d['status'] as String,
-          estimatedMinutes: (d['estimatedMinutes'] as num?)?.toInt(),
-        ));
+        add(
+          OrderStatusUpdated(
+            orderId: orderId,
+            status: d['status'] as String,
+            estimatedMinutes: (d['estimatedMinutes'] as num?)?.toInt(),
+          ),
+        );
       }
     });
   }
 
-  String _parseError(Object e) =>
-      mapErrorToMessage(e);
+  String _parseError(Object e) => mapErrorToMessage(e);
 }

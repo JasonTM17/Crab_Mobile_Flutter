@@ -80,8 +80,7 @@ class RestaurantMenuScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.star,
-                              color: Colors.amber, size: 16),
+                          const Icon(Icons.star, color: Colors.amber, size: 16),
                           const SizedBox(width: 4),
                           Text(
                             '${restaurant.rating.toStringAsFixed(1)} (${restaurant.totalReviews} reviews)',
@@ -109,9 +108,8 @@ class RestaurantMenuScreen extends StatelessWidget {
                         Text(
                           restaurant.description!,
                           style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -138,8 +136,7 @@ class RestaurantMenuScreen extends StatelessWidget {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final item =
-                            state.menuByCategory[category]![index];
+                        final item = state.menuByCategory[category]![index];
                         final qty = cart.items
                             .where((ci) => ci.item.id == item.id)
                             .fold(0, (sum, ci) => sum + ci.quantity);
@@ -154,8 +151,7 @@ class RestaurantMenuScreen extends StatelessWidget {
                               .add(RemoveFromCart(itemId: item.id)),
                         );
                       },
-                      childCount:
-                          state.menuByCategory[category]!.length,
+                      childCount: state.menuByCategory[category]!.length,
                     ),
                   ),
                 ),
