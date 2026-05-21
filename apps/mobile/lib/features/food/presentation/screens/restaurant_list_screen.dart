@@ -16,14 +16,18 @@ class RestaurantListScreen extends StatefulWidget {
 }
 
 class _RestaurantListScreenState extends State<RestaurantListScreen> {
-  static const _categories = [
-    {'label': 'Near me', 'icon': Icons.near_me_rounded},
-    {'label': 'Promotions', 'icon': Icons.local_offer_rounded},
-    {'label': 'Top rated', 'icon': Icons.star_rounded},
-    {'label': '30 min', 'icon': Icons.bolt_rounded},
+  static const _categories = <String>[
+    'Tất cả',
+    'Việt Nam',
+    'Cà phê',
+    'Đồ ăn nhanh',
+    'Bánh',
+    'Healthy',
+    'Đồ uống',
   ];
 
-  String? _selected;
+  String _selected = 'Tất cả';
+  String _address = '123 Nguyễn Huệ, Quận 1';
 
   @override
   void initState() {
@@ -31,164 +35,180 @@ class _RestaurantListScreenState extends State<RestaurantListScreen> {
     context.read<FoodBloc>().add(const LoadRestaurants());
   }
 
+  void _onPickAddress() async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _AddressPickerSheet(current: _address),
+    );
+    if (result != null && mounted) setState(() => _address = result);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      body: BlocBuilder<FoodBloc, FoodState>(
-        builder: (context, state) {
-          if (state is FoodLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is FoodError) {
-            return _ErrorView(
-              message: state.message,
-              onRetry: () =>
-                  context.read<FoodBloc>().add(const LoadRestaurants()),
-            );
-          }
-          if (state is RestaurantListLoaded) {
-            return _Body(
-              state: state,
-              selectedChip: _selected,
-              onSelectChip: (label) {
-                setState(() => _selected = _selected == label ? null : label);
-              },
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-    );
-  }
-}
-
-class _Body extends StatelessWidget {
-  final RestaurantListLoaded state;
-  final String? selectedChip;
-  final ValueChanged<String> onSelectChip;
-
-  const _Body({
-    required this.state,
-    required this.selectedChip,
-    required this.onSelectChip,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          backgroundColor: AppColors.backgroundLight,
-          pinned: true,
-          expandedHeight: 132,
-          elevation: 0,
-          flexibleSpace: FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.symmetric(
-                horizontal: 20, vertical: 12),
-            title: const Text(
-              'Order Food',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                color: AppColors.textPrimaryLight,
-              ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _LocationPill(address: _address, onTap: _onPickAddress),
+            const SizedBox(height: 8),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: _SearchBar(),
             ),
-            background: Container(color: AppColors.backgroundLight),
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(56),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: _SearchField(),
+            const SizedBox(height: 12),
+            _CategoryChips(
+              categories: _categories,
+              selected: _selected,
+              onSelect: (c) => setState(() => _selected = c),
             ),
-          ),
-        ),
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _ChipBarDelegate(
-            categories: _RestaurantListScreenState._categories,
-            selected: selectedChip,
-            onSelect: onSelectChip,
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-          sliver: SliverToBoxAdapter(
-            child: Text(
-              '${state.restaurants.length} restaurants nearby',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimaryLight,
-              ),
-            ),
-          ),
-        ),
-        if (state.restaurants.isEmpty)
-          const SliverFillRemaining(
-            child: Center(child: Text('No restaurants found')),
-          )
-        else
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            sliver: SliverList.builder(
-              itemCount: state.restaurants.length,
-              itemBuilder: (context, i) => RestaurantCard(
-                restaurant: state.restaurants[i],
-                onTap: () {
-                  context.read<FoodBloc>().add(
-                        LoadRestaurantMenu(
-                          restaurant: state.restaurants[i],
-                        ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: BlocBuilder<FoodBloc, FoodState>(
+                builder: (context, state) {
+                  if (state is FoodLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is FoodError) {
+                    return _ErrorView(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<FoodBloc>()
+                          .add(const LoadRestaurants()),
+                    );
+                  }
+                  if (state is RestaurantListLoaded) {
+                    if (state.restaurants.isEmpty) {
+                      return const Center(
+                        child: Text('Không tìm thấy nhà hàng'),
                       );
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider.value(
-                        value: context.read<FoodBloc>(),
-                        child: const RestaurantMenuScreen(),
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: state.restaurants.length,
+                      itemBuilder: (context, i) => RestaurantCard(
+                        restaurant: state.restaurants[i],
+                        onTap: () {
+                          context.read<FoodBloc>().add(
+                                LoadRestaurantMenu(
+                                  restaurant: state.restaurants[i],
+                                ),
+                              );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<FoodBloc>(),
+                                child: const RestaurantMenuScreen(),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  );
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
             ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _SearchField extends StatelessWidget {
+class _LocationPill extends StatelessWidget {
+  final String address;
+  final VoidCallback onTap;
+
+  const _LocationPill({required this.address, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceLight,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.location_on_rounded,
+                  size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      const TextSpan(
+                        text: 'Giao tới: ',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondaryLight,
+                        ),
+                      ),
+                      TextSpan(
+                        text: address,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded,
+                  size: 20, color: AppColors.textSecondaryLight),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchBar extends StatelessWidget {
+  const _SearchBar();
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      height: 48,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xFFEFF1F4),
+        borderRadius: BorderRadius.circular(24),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.search_rounded,
-              color: AppColors.textSecondaryLight, size: 20),
-          SizedBox(width: 8),
-          Expanded(
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14),
+            child: Icon(Icons.search_rounded,
+                size: 20, color: AppColors.textSecondaryLight),
+          ),
+          const Expanded(
             child: TextField(
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
-                hintText: 'Search restaurants, dishes...',
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                hintText: 'Tìm nhà hàng, món ăn...',
                 hintStyle: TextStyle(
                   color: AppColors.textSecondaryLight,
                   fontSize: 14,
@@ -196,110 +216,142 @@ class _SearchField extends StatelessWidget {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: Material(
+              color: AppColors.surfaceLight,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () {},
+                child: const SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: Icon(Icons.tune_rounded,
+                      size: 18, color: AppColors.textPrimaryLight),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _ChipBarDelegate extends SliverPersistentHeaderDelegate {
-  final List<Map<String, Object>> categories;
-  final String? selected;
+class _CategoryChips extends StatelessWidget {
+  final List<String> categories;
+  final String selected;
   final ValueChanged<String> onSelect;
 
-  _ChipBarDelegate({
+  const _CategoryChips({
     required this.categories,
     required this.selected,
     required this.onSelect,
   });
 
   @override
-  double get minExtent => 56;
-  @override
-  double get maxExtent => 56;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: AppColors.backgroundLight,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView.separated(
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36,
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final c = categories[i];
-          final label = c['label'] as String;
-          final icon = c['icon'] as IconData;
-          final isActive = selected == label;
-          return GestureDetector(
-            onTap: () => onSelect(label),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: isActive
-                    ? const LinearGradient(
-                        colors: [
-                          AppColors.primary,
-                          AppColors.primaryLight,
-                        ],
-                      )
-                    : null,
-                color: isActive ? null : Colors.white,
-                borderRadius: BorderRadius.circular(99),
-                border: Border.all(
-                  color: isActive
-                      ? Colors.transparent
-                      : AppColors.borderLight,
+        child: Row(
+          children: [
+            for (final c in categories)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _CategoryChip(
+                  label: c,
+                  active: c == selected,
+                  onTap: () => onSelect(c),
                 ),
-                boxShadow: isActive
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.4),
-                          blurRadius: 14,
-                          offset: const Offset(0, 6),
-                        ),
-                      ]
-                    : null,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon,
-                      size: 14,
-                      color: isActive
-                          ? Colors.white
-                          : AppColors.textPrimaryLight),
-                  const SizedBox(width: 6),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: isActive
-                          ? Colors.white
-                          : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
+}
+
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  const _CategoryChip({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
-  bool shouldRebuild(covariant _ChipBarDelegate oldDelegate) =>
-      oldDelegate.selected != selected;
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: active ? AppColors.primary : const Color(0xFFEFF1F4),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+            color: active ? Colors.white : AppColors.textSecondaryLight,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddressPickerSheet extends StatelessWidget {
+  final String current;
+  const _AddressPickerSheet({required this.current});
+
+  static const _saved = <String>[
+    '123 Nguyễn Huệ, Quận 1',
+    '88 Lê Lợi, Quận 1',
+    'Vinhomes Central Park, Bình Thạnh',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Chọn địa chỉ giao hàng',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 12),
+            for (final a in _saved)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.place_outlined,
+                    color: AppColors.primary),
+                title: Text(a,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                trailing: a == current
+                    ? const Icon(Icons.check_rounded, color: AppColors.primary)
+                    : null,
+                onTap: () => Navigator.pop(context, a),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _ErrorView extends StatelessWidget {
@@ -320,7 +372,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: 16),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            FilledButton(onPressed: onRetry, child: const Text('Retry')),
+            FilledButton(onPressed: onRetry, child: const Text('Thử lại')),
           ],
         ),
       ),
