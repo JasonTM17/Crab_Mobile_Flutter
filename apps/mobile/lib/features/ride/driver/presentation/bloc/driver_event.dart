@@ -78,3 +78,7 @@ class CountdownTick extends DriverEvent {
   @override
   List<Object?> get props => [remaining];
 }
+
+class ToggleAutoAccept extends DriverEvent {
+  const ToggleAutoAccept();
+}

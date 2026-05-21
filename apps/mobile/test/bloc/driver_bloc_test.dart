@@ -60,9 +60,9 @@ void main() {
 
     group('RideRequestReceived', () {
       blocTest<DriverBloc, DriverState>(
-        'emits DriverRideRequest with countdown',
+        'emits DriverRideRequest with countdown when auto accept is disabled',
         build: () => DriverBloc(mockRepo),
-        seed: () => const DriverOnlineIdle(),
+        seed: () => const DriverOnlineIdle(isAutoAcceptEnabled: false),
         act: (bloc) => bloc.add(const RideRequestReceived(rideRequestData: {
           'id': 'ride-001',
           'pickupAddress': '123 Le Loi',
@@ -75,7 +75,77 @@ void main() {
           'distanceKm': 5.2,
           'currency': 'VND',
         })),
-        expect: () => [isA<DriverRideRequest>()],
+        expect: () => [
+          isA<DriverRideRequest>().having(
+            (s) => s.isAutoAcceptEnabled,
+            'isAutoAcceptEnabled',
+            false,
+          ),
+        ],
+      );
+
+      blocTest<DriverBloc, DriverState>(
+        'auto accepts the ride request and emits DriverNavigatingToPickup when auto accept is enabled',
+        build: () {
+          when(() => mockRepo.acceptRide('ride-001'))
+              .thenAnswer((_) async => tRideModel);
+          return DriverBloc(mockRepo);
+        },
+        seed: () => const DriverOnlineIdle(isAutoAcceptEnabled: true),
+        act: (bloc) => bloc.add(const RideRequestReceived(rideRequestData: {
+          'id': 'ride-001',
+          'pickupAddress': '123 Le Loi',
+          'dropoffAddress': '456 Pasteur',
+          'pickupLat': 10.77,
+          'pickupLng': 106.70,
+          'dropoffLat': 10.80,
+          'dropoffLng': 106.71,
+          'estimatedFare': 42000,
+          'distanceKm': 5.2,
+          'currency': 'VND',
+        })),
+        expect: () => [
+          isA<DriverRideRequest>().having(
+            (s) => s.isAutoAcceptEnabled,
+            'isAutoAcceptEnabled',
+            true,
+          ),
+          isA<DriverNavigatingToPickup>().having(
+            (s) => s.isAutoAcceptEnabled,
+            'isAutoAcceptEnabled',
+            true,
+          ),
+        ],
+      );
+    });
+
+    group('ToggleAutoAccept', () {
+      blocTest<DriverBloc, DriverState>(
+        'toggles isAutoAcceptEnabled from true to false',
+        build: () => DriverBloc(mockRepo),
+        seed: () => const DriverOnlineIdle(isAutoAcceptEnabled: true),
+        act: (bloc) => bloc.add(const ToggleAutoAccept()),
+        expect: () => [
+          isA<DriverOnlineIdle>().having(
+            (s) => s.isAutoAcceptEnabled,
+            'isAutoAcceptEnabled',
+            false,
+          ),
+        ],
+      );
+
+      blocTest<DriverBloc, DriverState>(
+        'toggles isAutoAcceptEnabled from false to true',
+        build: () => DriverBloc(mockRepo),
+        seed: () => const DriverOnlineIdle(isAutoAcceptEnabled: false),
+        act: (bloc) => bloc.add(const ToggleAutoAccept()),
+        expect: () => [
+          isA<DriverOnlineIdle>().having(
+            (s) => s.isAutoAcceptEnabled,
+            'isAutoAcceptEnabled',
+            true,
+          ),
+        ],
       );
     });
 

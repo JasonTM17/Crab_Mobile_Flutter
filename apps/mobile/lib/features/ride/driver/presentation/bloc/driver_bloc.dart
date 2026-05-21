@@ -26,15 +26,19 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     on<CompleteRide>(_onCompleteRide);
     on<UpdateLocation>(_onUpdateLocation);
     on<CountdownTick>(_onCountdownTick);
+    on<ToggleAutoAccept>(_onToggleAutoAccept);
   }
 
   Future<void> _onGoOnline(GoOnline event, Emitter<DriverState> emit) async {
     try {
       await _driverRepository.goOnline();
-      emit(const DriverOnlineIdle());
+      emit(DriverOnlineIdle(isAutoAcceptEnabled: state.isAutoAcceptEnabled));
       _startLocationStreaming();
     } catch (e) {
-      emit(DriverError(message: _parseError(e)));
+      emit(DriverError(
+        message: _parseError(e),
+        isAutoAcceptEnabled: state.isAutoAcceptEnabled,
+      ));
     }
   }
 
@@ -46,7 +50,7 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     } catch (_) {
       // Best-effort offline
     }
-    emit(const DriverOffline());
+    emit(DriverOffline(isAutoAcceptEnabled: state.isAutoAcceptEnabled));
   }
 
   void _onRideRequestReceived(
@@ -58,8 +62,13 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     emit(DriverRideRequest(
       rideRequest: rideRequest,
       countdown: _countdownSeconds,
+      isAutoAcceptEnabled: state.isAutoAcceptEnabled,
     ));
     _startCountdown(rideRequest.id);
+
+    if (state.isAutoAcceptEnabled) {
+      add(AcceptRide(rideId: rideRequest.id));
+    }
   }
 
   Future<void> _onAcceptRide(
@@ -69,9 +78,15 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     _stopCountdown();
     try {
       final ride = await _driverRepository.acceptRide(event.rideId);
-      emit(DriverNavigatingToPickup(ride: ride));
+      emit(DriverNavigatingToPickup(
+        ride: ride,
+        isAutoAcceptEnabled: state.isAutoAcceptEnabled,
+      ));
     } catch (e) {
-      emit(DriverError(message: _parseError(e)));
+      emit(DriverError(
+        message: _parseError(e),
+        isAutoAcceptEnabled: state.isAutoAcceptEnabled,
+      ));
     }
   }
 
@@ -85,7 +100,7 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     } catch (_) {
       // Best-effort reject
     }
-    emit(const DriverOnlineIdle());
+    emit(DriverOnlineIdle(isAutoAcceptEnabled: state.isAutoAcceptEnabled));
   }
 
   Future<void> _onStartRide(
@@ -95,9 +110,15 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     if (state is DriverNavigatingToPickup) {
       try {
         final ride = await _driverRepository.startRide(event.rideId);
-        emit(DriverInRide(ride: ride));
+        emit(DriverInRide(
+          ride: ride,
+          isAutoAcceptEnabled: state.isAutoAcceptEnabled,
+        ));
       } catch (e) {
-        emit(DriverError(message: _parseError(e)));
+        emit(DriverError(
+          message: _parseError(e),
+          isAutoAcceptEnabled: state.isAutoAcceptEnabled,
+        ));
       }
     }
   }
@@ -109,9 +130,12 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     if (state is DriverInRide) {
       try {
         await _driverRepository.completeRide(event.rideId);
-        emit(const DriverOnlineIdle());
+        emit(DriverOnlineIdle(isAutoAcceptEnabled: state.isAutoAcceptEnabled));
       } catch (e) {
-        emit(DriverError(message: _parseError(e)));
+        emit(DriverError(
+          message: _parseError(e),
+          isAutoAcceptEnabled: state.isAutoAcceptEnabled,
+        ));
       }
     }
   }
@@ -175,6 +199,24 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
 
   String _parseError(Object e) {
     return mapErrorToMessage(e);
+  }
+
+  void _onToggleAutoAccept(ToggleAutoAccept event, Emitter<DriverState> emit) {
+    final newValue = !state.isAutoAcceptEnabled;
+    final currentState = state;
+    if (currentState is DriverOffline) {
+      emit(DriverOffline(isAutoAcceptEnabled: newValue));
+    } else if (currentState is DriverOnlineIdle) {
+      emit(DriverOnlineIdle(isAutoAcceptEnabled: newValue));
+    } else if (currentState is DriverRideRequest) {
+      emit(currentState.copyWith(isAutoAcceptEnabled: newValue));
+    } else if (currentState is DriverNavigatingToPickup) {
+      emit(DriverNavigatingToPickup(ride: currentState.ride, isAutoAcceptEnabled: newValue));
+    } else if (currentState is DriverInRide) {
+      emit(DriverInRide(ride: currentState.ride, isAutoAcceptEnabled: newValue));
+    } else if (currentState is DriverError) {
+      emit(DriverError(message: currentState.message, isAutoAcceptEnabled: newValue));
+    }
   }
 
   @override
