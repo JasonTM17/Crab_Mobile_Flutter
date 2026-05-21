@@ -1,57 +1,40 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../data/models/driver_model.dart';
 
-class DriverInfoCard extends StatefulWidget {
+class DriverInfoCard extends StatelessWidget {
   final DriverModel driver;
   final int? etaMinutes;
   final String? statusLabel;
+  final VoidCallback? onCall;
+  final VoidCallback? onChat;
+  final VoidCallback? onCancel;
 
   const DriverInfoCard({
     super.key,
     required this.driver,
     this.etaMinutes,
     this.statusLabel,
+    this.onCall,
+    this.onChat,
+    this.onCancel,
   });
-
-  @override
-  State<DriverInfoCard> createState() => _DriverInfoCardState();
-}
-
-class _DriverInfoCardState extends State<DriverInfoCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseCtrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _pulseCtrl.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final driver = widget.driver;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight.withOpacity(0.6)),
+        border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.6)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -61,68 +44,28 @@ class _DriverInfoCardState extends State<DriverInfoCard>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.statusLabel != null) ...[
+          if (statusLabel != null) ...[
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(99),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _PulsingDot(controller: _pulseCtrl, color: AppColors.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    widget.statusLabel!,
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+              child: Text(
+                statusLabel!,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ),
             const SizedBox(height: 14),
           ],
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.primary.withOpacity(0.12),
-                    backgroundImage: driver.avatar != null
-                        ? NetworkImage(driver.avatar!)
-                        : null,
-                    child: driver.avatar == null
-                        ? Text(
-                            driver.name.isNotEmpty
-                                ? driver.name[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          )
-                        : null,
-                  ),
-                  Positioned(
-                    right: -2,
-                    bottom: -2,
-                    child: _PulsingDot(
-                      controller: _pulseCtrl,
-                      color: AppColors.success,
-                      size: 12,
-                      ringWidth: 2,
-                    ),
-                  ),
-                ],
-              ),
+              _DriverAvatar(driver: driver),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -130,184 +73,219 @@ class _DriverInfoCardState extends State<DriverInfoCard>
                   children: [
                     Text(
                       driver.name,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded,
-                            color: Colors.amber, size: 16),
-                        const SizedBox(width: 2),
-                        Text(
-                          driver.rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 13),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 3,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${driver.totalRides} trips',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      '${driver.vehicle.plate} - ${driver.vehicle.model}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondaryLight,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                width: 56,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundLight,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.borderLight),
+              if (etaMinutes != null)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$etaMinutes phut',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: Icon(
-                  _vehicleIcon(driver.vehicle.type),
-                  size: 22,
-                  color: AppColors.textPrimaryLight,
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _ActionButton(
+                  icon: Icons.phone_rounded,
+                  label: 'Goi',
+                  background: AppColors.primary,
+                  foreground: Colors.white,
+                  onPressed: onCall,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _ActionButton(
+                  icon: Icons.chat_bubble_rounded,
+                  label: 'Nhan tin',
+                  background: AppColors.info,
+                  foreground: Colors.white,
+                  onPressed: onChat,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _ActionButton(
+                  icon: Icons.close_rounded,
+                  label: 'Huy',
+                  background: AppColors.error.withValues(alpha: 0.1),
+                  foreground: AppColors.error,
+                  onPressed: onCancel,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundLight,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.directions_car_filled_outlined,
-                    size: 18, color: theme.colorScheme.onSurfaceVariant),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${driver.vehicle.color} ${driver.vehicle.model}',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w500, fontSize: 13),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: AppColors.borderLight),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    driver.vehicle.plate,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.4,
-                      fontSize: 13,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (widget.etaMinutes != null) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(Icons.access_time_rounded,
-                    size: 16, color: AppColors.primary),
-                const SizedBox(width: 6),
-                Text(
-                  'Arriving in ${widget.etaMinutes} min',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
   }
+}
 
-  IconData _vehicleIcon(String type) {
-    final t = type.toUpperCase();
-    if (t.contains('BIKE') || t.contains('MOTOR')) return Icons.two_wheeler;
-    if (t.contains('PREMIUM')) return Icons.car_rental;
-    if (t.contains('7')) return Icons.airport_shuttle;
-    return Icons.directions_car;
+class _DriverAvatar extends StatelessWidget {
+  final DriverModel driver;
+  const _DriverAvatar({required this.driver});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 72,
+      height: 72,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ClipOval(
+            child: SizedBox(
+              width: 64,
+              height: 64,
+              child: driver.avatar != null && driver.avatar!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: driver.avatar!,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => _AvatarFallback(name: driver.name),
+                      errorWidget: (_, __, ___) =>
+                          _AvatarFallback(name: driver.name),
+                    )
+                  : _AvatarFallback(name: driver.name),
+            ),
+          ),
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFC107),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.star_rounded,
+                      size: 12, color: Colors.white),
+                  const SizedBox(width: 2),
+                  Text(
+                    driver.rating.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class _PulsingDot extends StatelessWidget {
-  final AnimationController controller;
-  final Color color;
-  final double size;
-  final double ringWidth;
+class _AvatarFallback extends StatelessWidget {
+  final String name;
+  const _AvatarFallback({required this.name});
 
-  const _PulsingDot({
-    required this.controller,
-    required this.color,
-    this.size = 8,
-    this.ringWidth = 0,
+  @override
+  Widget build(BuildContext context) {
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    return Container(
+      color: AppColors.primary.withValues(alpha: 0.12),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color background;
+  final Color foreground;
+  final VoidCallback? onPressed;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.background,
+    required this.foreground,
+    this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, _) {
-        final t = controller.value;
-        return SizedBox(
-          width: size + 14,
-          height: size + 14,
-          child: Stack(
-            alignment: Alignment.center,
+    return Material(
+      color: background,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Opacity(
-                opacity: (1 - t).clamp(0.0, 1.0),
-                child: Container(
-                  width: size + 14 * t,
-                  height: size + 14 * t,
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.35),
-                    shape: BoxShape.circle,
+              Icon(icon, size: 18, color: foreground),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: foreground,
                   ),
-                ),
-              ),
-              Container(
-                width: size,
-                height: size,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: ringWidth > 0
-                      ? Border.all(color: Colors.white, width: ringWidth)
-                      : null,
                 ),
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

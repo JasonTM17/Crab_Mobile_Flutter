@@ -6,7 +6,6 @@ import '../../data/models/location_model.dart';
 import '../bloc/ride_bloc.dart';
 import '../bloc/ride_event.dart';
 import '../bloc/ride_state.dart';
-import '../widgets/driver_info_card.dart';
 import '../widgets/ride_bottom_sheet.dart';
 import '../widgets/tracking_map.dart';
 import 'location_search_screen.dart';
@@ -159,6 +158,29 @@ class _RideBookingScreenState extends State<RideBookingScreen>
     }
   }
 
+  void _swapLocations() {
+    if (_pickup == null && _dropoff == null) return;
+    setState(() {
+      final tmp = _pickup;
+      _pickup = _dropoff;
+      _dropoff = tmp;
+    });
+    if (_pickup != null) {
+      context.read<RideBloc>().add(PickupLocationSelected(location: _pickup!));
+    }
+    if (_dropoff != null) {
+      context
+          .read<RideBloc>()
+          .add(DropoffLocationSelected(location: _dropoff!));
+    }
+    if (_pickup != null && _dropoff != null) {
+      context.read<RideBloc>().add(
+            EstimateFareRequested(pickup: _pickup!, dropoff: _dropoff!),
+          );
+      _fitBounds();
+    }
+  }
+
   void _bookRide() {
     if (_pickup == null || _dropoff == null) return;
     context.read<RideBloc>().add(RequestRide(
@@ -175,7 +197,7 @@ class _RideBookingScreenState extends State<RideBookingScreen>
           if (state is RidePickup ||
               state is RideInProgress ||
               state is RideDriverMatched) {
-            return TrackingMap(state: state);
+            return TrackingMap.fromState(state: state);
           }
 
           return Stack(
@@ -191,8 +213,8 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                 myLocationEnabled: true,
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
+                padding: const EdgeInsets.only(bottom: 220),
               ),
-              // Floating translucent back button
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -200,11 +222,11 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.92),
+                      color: Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
+                          color: Colors.black.withValues(alpha: 0.15),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -218,23 +240,30 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                   ),
                 ),
               ),
-              // Bottom sheet
               if (state is RideSearchingDriver)
                 _buildSearchingOverlay()
+              else if (state is RideLoading)
+                const Center(child: CircularProgressIndicator())
               else
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: RideBottomSheet(
-                    pickup: _pickup,
-                    dropoff: _dropoff,
-                    fareEstimate:
-                        state is RideIdle ? state.fareEstimate : null,
-                    onPickupTap: _selectPickup,
-                    onDropoffTap: _selectDropoff,
-                    onBookRide: _bookRide,
-                  ),
+                DraggableScrollableSheet(
+                  initialChildSize: 0.35,
+                  minChildSize: 0.35,
+                  maxChildSize: 0.95,
+                  snap: true,
+                  snapSizes: const [0.35, 0.7, 0.95],
+                  builder: (context, scrollController) {
+                    return RideBottomSheet(
+                      scrollController: scrollController,
+                      pickup: _pickup,
+                      dropoff: _dropoff,
+                      fareEstimate:
+                          state is RideIdle ? state.fareEstimate : null,
+                      onPickupTap: _selectPickup,
+                      onDropoffTap: _selectDropoff,
+                      onBookRide: _bookRide,
+                      onSwap: _swapLocations,
+                    );
+                  },
                 ),
             ],
           );
