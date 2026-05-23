@@ -32,9 +32,10 @@ const socket = io('http://localhost:3000/ride', {
 Rider requests a new ride.
 ```javascript
 socket.emit('ride:request', {
-  pickupLocation: { lat: 10.7769, lng: 106.7009, address: '123 Nguyen Hue' },
-  dropoffLocation: { lat: 10.8021, lng: 106.7146, address: '456 Le Van Sy' },
-  vehicleType: 'car'
+  riderId: 'uuid',
+  pickup: { lat: 10.7769, lng: 106.7009, address: '123 Nguyen Hue' },
+  dropoff: { lat: 10.8021, lng: 106.7146, address: '456 Le Van Sy' },
+  paymentMethod: 'wallet'
 });
 ```
 
@@ -81,11 +82,27 @@ socket.emit('ride:complete', { rideId: 'uuid', actualFare: 48000 });
 
 ### Server → Client Events
 
+#### `ride:new_request`
+Broadcast to nearby drivers when a rider requests a ride.
+```javascript
+socket.on('ride:new_request', (data) => {
+  // data: { riderId, pickup, dropoff, paymentMethod }
+});
+```
+
+#### `ride:request_received`
+Acknowledges that the gateway received the rider request.
+```javascript
+socket.emit('ride:request', payload, (ack) => {
+  // ack: { status }
+});
+```
+
 #### `ride:matched`
 Broadcast to a nearby driver when the matching engine offers them a ride. Drivers should reply via `ride:accept` within the offer window.
 ```javascript
 socket.on('ride:matched', (data) => {
-  // data: { rideId, pickupLocation, dropoffLocation, vehicleType, estimatedFare, expiresAt }
+  // data: { rideId, driver, estimatedArrival }
 });
 ```
 

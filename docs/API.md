@@ -15,18 +15,28 @@ Register a new user account.
 {
   "email": "user@example.com",
   "password": "SecurePass123!",
-  "fullName": "Nguyen Van A",
   "phone": "+84901234567",
-  "role": "rider" // rider | driver | restaurant_owner
+  "firstName": "Van A",
+  "lastName": "Nguyen"
 }
 
 // Response 201
 {
-  "id": "uuid",
-  "email": "user@example.com",
-  "fullName": "Nguyen Van A",
-  "role": "rider",
-  "createdAt": "2024-01-01T00:00:00Z"
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "phone": "+84901234567",
+    "firstName": "Van A",
+    "lastName": "Nguyen",
+    "role": "RIDER",
+    "status": "PENDING_VERIFICATION",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  "tokens": {
+    "access_token": "eyJhbG...",
+    "refresh_token": "eyJhbG..."
+  },
+  "requiresPhoneVerification": true
 }
 ```
 
@@ -43,13 +53,14 @@ Authenticate and receive tokens.
 
 // Response 200
 {
-  "accessToken": "eyJhbG...",
-  "refreshToken": "eyJhbG...",
-  "expiresIn": 900,
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "role": "rider"
+    "role": "RIDER"
+  },
+  "tokens": {
+    "access_token": "eyJhbG...",
+    "refresh_token": "eyJhbG..."
   }
 }
 ```
@@ -60,12 +71,19 @@ Refresh an expired access token.
 
 ```json
 // Request
-{ "refreshToken": "eyJhbG..." }
+{ "refresh_token": "eyJhbG..." }
 
 // Response 200
 {
-  "accessToken": "eyJhbG...",
-  "expiresIn": 900
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "role": "RIDER"
+  },
+  "tokens": {
+    "access_token": "eyJhbG...",
+    "refresh_token": "eyJhbG..."
+  }
 }
 ```
 
@@ -92,7 +110,7 @@ Invalidate the current refresh token.
 
 ## User Service
 
-### GET /users/me
+### GET /profiles/:userId
 
 Get current user profile.
 
@@ -101,41 +119,34 @@ Get current user profile.
 {
   "id": "uuid",
   "email": "user@example.com",
-  "fullName": "Nguyen Van A",
   "phone": "+84901234567",
-  "avatar": "https://storage.example.com/avatars/uuid.jpg",
-  "role": "rider",
-  "rating": 4.8,
-  "totalRides": 42,
+  "firstName": "Van A",
+  "lastName": "Nguyen",
+  "role": "RIDER",
+  "status": "ACTIVE",
+  "avatarUrl": "https://storage.example.com/avatars/uuid.jpg",
+  "dateOfBirth": "1990-01-01",
+  "gender": "male",
+  "bio": "Rider in Ho Chi Minh City",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
 
-### PATCH /users/me
+### PUT /profiles/:userId
 
 Update current user profile.
 
 ```json
 // Request
 {
-  "fullName": "Nguyen Van B",
-  "phone": "+84909876543"
+  "firstName": "Van B",
+  "lastName": "Nguyen",
+  "phone": "+84909876543",
+  "avatarUrl": "https://storage.example.com/avatars/uuid.jpg"
 }
 
 // Response 200
-{ "id": "uuid", "fullName": "Nguyen Van B", ... }
-```
-
-### POST /users/me/avatar
-
-Upload avatar (multipart/form-data).
-
-```
-Content-Type: multipart/form-data
-Field: avatar (file, max 5MB, jpg/png)
-
-// Response 200
-{ "avatar": "https://storage.example.com/avatars/uuid.jpg" }
+{ "id": "uuid", "firstName": "Van B", "lastName": "Nguyen", ... }
 ```
 
 ### GET /users/:id (Admin)
@@ -153,28 +164,27 @@ Request a new ride.
 ```json
 // Request
 {
-  "pickupLocation": {
-    "lat": 10.7769,
-    "lng": 106.7009,
-    "address": "123 Nguyen Hue, District 1"
-  },
-  "dropoffLocation": {
-    "lat": 10.8021,
-    "lng": 106.7146,
-    "address": "456 Le Van Sy, District 3"
-  },
-  "vehicleType": "car" // bike | car | car_plus
+  "rider_id": "uuid",
+  "pickup_lat": 10.7769,
+  "pickup_lng": 106.7009,
+  "pickup_address": "123 Nguyen Hue, District 1",
+  "dropoff_lat": 10.8021,
+  "dropoff_lng": 106.7146,
+  "dropoff_address": "456 Le Van Sy, District 3"
 }
 
 // Response 201
 {
   "id": "uuid",
   "status": "REQUESTED",
-  "estimatedFare": 45000,
-  "estimatedDuration": 15,
-  "pickupLocation": { ... },
-  "dropoffLocation": { ... },
-  "createdAt": "2024-01-01T00:00:00Z"
+  "estimated_fare": 45000,
+  "pickup_lat": 10.7769,
+  "pickup_lng": 106.7009,
+  "pickup_address": "123 Nguyen Hue, District 1",
+  "dropoff_lat": 10.8021,
+  "dropoff_lng": 106.7146,
+  "dropoff_address": "456 Le Van Sy, District 3",
+  "created_at": "2024-01-01T00:00:00Z"
 }
 ```
 
@@ -223,12 +233,12 @@ Alternative: any state → `CANCELLED`. The matching queue dispatches drivers; i
 
 ## Food Service
 
-### GET /food/restaurants
+### GET /restaurants/search
 
 List restaurants near location.
 
 ```json
-// Query: ?lat=10.77&lng=106.70&radius=5&category=vietnamese&page=1
+// Query: ?latitude=10.77&longitude=106.70&radiusKm=5&cuisineType=vietnamese&page=1
 
 // Response 200
 {
@@ -249,7 +259,7 @@ List restaurants near location.
 }
 ```
 
-### GET /food/restaurants/:id/menu
+### GET /menus/items/restaurant/:restaurantId
 
 Get restaurant menu.
 
@@ -276,23 +286,22 @@ Get restaurant menu.
 }
 ```
 
-### POST /food/orders
+### POST /orders
 
 Place a food order.
 
 ```json
 // Request
 {
+  "customerId": "uuid",
   "restaurantId": "uuid",
   "items": [
     { "menuItemId": "uuid", "quantity": 2, "options": { "Size": "Large" } }
   ],
-  "deliveryAddress": {
-    "lat": 10.77,
-    "lng": 106.70,
-    "address": "123 Nguyen Hue"
-  },
-  "note": "Extra chili please"
+  "deliveryLat": 10.77,
+  "deliveryLng": 106.70,
+  "deliveryAddress": "123 Nguyen Hue",
+  "deliveryNotes": "Extra chili please"
 }
 
 // Response 201
@@ -317,7 +326,7 @@ Alternative: any non-terminal state → `CANCELLED`.
 
 ## Payment Service
 
-### GET /payments/wallet
+### GET /wallet/:userId
 
 Get wallet balance.
 
@@ -330,7 +339,7 @@ Get wallet balance.
 }
 ```
 
-### POST /payments/topup
+### POST /wallet/:userId/top-up
 
 Top up wallet.
 
@@ -338,7 +347,7 @@ Top up wallet.
 // Request
 {
   "amount": 100000,
-  "method": "bank_transfer" // bank_transfer | momo | zalopay | credit_card
+  "paymentMethod": "bank_transfer" // bank_transfer | momo | zalopay | credit_card
 }
 
 // Response 200
@@ -350,7 +359,7 @@ Top up wallet.
 }
 ```
 
-### GET /payments/transactions
+### GET /transactions/user/:userId
 
 Get transaction history.
 

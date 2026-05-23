@@ -153,15 +153,12 @@ function OrderStatusBadge({ status }: { status: string }) {
     'success' | 'destructive' | 'secondary' | 'warning' | 'info'
   > = {
     DELIVERED: 'success',
-    COMPLETED: 'success',
+    PICKED_UP: 'info',
     PREPARING: 'info',
     READY: 'info',
-    OUT_FOR_DELIVERY: 'info',
-    PENDING: 'warning',
+    CONFIRMED: 'info',
     PLACED: 'warning',
     CANCELLED: 'destructive',
-    CANCELED: 'destructive',
-    REFUNDED: 'destructive',
   }
   return <Badge variant={variant[status] ?? 'secondary'}>{status}</Badge>
 }

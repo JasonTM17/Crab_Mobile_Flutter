@@ -47,7 +47,10 @@ export class NotificationsController {
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string, @Body('userId') userId: string) {
+  delete(
+    @Param('id') id: string,
+    @Body('userId') userId: string,
+  ): Promise<{ acknowledged: boolean; deletedCount: number }> {
     return this.service.delete(id, userId)
   }
 }

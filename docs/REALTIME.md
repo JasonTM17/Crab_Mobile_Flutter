@@ -70,7 +70,7 @@ rider     gateway                ride-svc      driver
   │                                │ assign       │
   │ ◀── ride:status MATCHED ───────│              │
   │ ◀── ride:location ◀────────────────────────── │ (every 3s)
-  │ ◀── ride:status IN_TRIP ───────│              │
+  │ ◀── ride:status IN_PROGRESS ───│              │
   │ ◀── ride:status COMPLETED ─────│              │
 ```
 

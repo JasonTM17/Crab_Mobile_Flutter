@@ -102,8 +102,8 @@ Chat Service ──Socket.IO──► Notification Service (new message)
 ## Data Flow: Food Order
 
 ```
-1. Customer browses restaurants via GET /api/v1/food/restaurants
-2. Customer places order via POST /api/v1/food/orders
+1. Customer browses restaurants via GET /api/v1/restaurants/search
+2. Customer places order via POST /api/v1/orders
 3. Food Service creates order (status: PLACED)
 4. Restaurant confirms → status: CONFIRMED → PREPARING
 5. Driver assigned + picks up → status: READY → PICKED_UP
