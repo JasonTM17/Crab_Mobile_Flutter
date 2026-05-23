@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 
-/// Reusable section header with bold title, optional leading icon dot,
-/// and optional trailing "See all" button.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
@@ -11,7 +9,10 @@ class SectionHeader extends StatelessWidget {
     this.onSeeAll,
     this.seeAllLabel = 'See all',
     this.leadingDotColor,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.xs,
+    ),
   });
 
   final String title;
@@ -23,55 +24,62 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dotColor = leadingDotColor ?? AppColors.primary;
+    final scheme = theme.colorScheme;
+    final dotColor = leadingDotColor ?? scheme.primary;
 
     return Padding(
       padding: padding,
       child: Row(
         children: [
-          // Leading dot indicator
           Container(
-            width: 8,
-            height: 8,
+            width: 9,
+            height: 9,
             decoration: BoxDecoration(
               color: dotColor,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: dotColor.withValues(alpha: 0.22),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 10),
-          // Title
           Expanded(
             child: Text(
               title,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
               ),
             ),
           ),
-          // Trailing action
           if (onSeeAll != null)
             TextButton(
               onPressed: onSeeAll,
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                minimumSize: const Size(44, 44),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     seeAllLabel,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.primary,
                     ),
                   ),
                   const SizedBox(width: 2),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
-                    color: AppColors.primary,
+                    color: scheme.primary,
                   ),
                 ],
               ),

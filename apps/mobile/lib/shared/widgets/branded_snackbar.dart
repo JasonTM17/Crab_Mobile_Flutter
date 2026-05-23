@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Branded snackbar helpers — replaces ad-hoc `Colors.red` snackbars across
-/// the app with floating, rounded, color-coded surfaces aligned with the
-/// design tokens.
+import '../../core/theme/app_theme.dart';
+
 class BrandedSnack {
   const BrandedSnack._();
 
@@ -21,29 +20,40 @@ class BrandedSnack {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
+          backgroundColor: palette.background,
+          duration: duration,
           content: Row(
             children: [
-              Icon(palette.icon, color: Colors.white, size: 20),
-              const SizedBox(width: 10),
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(palette.icon, color: Colors.white, size: 16),
+              ),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   message,
-                  style: const TextStyle(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
-                    height: 1.35,
                   ),
                 ),
               ),
             ],
           ),
-          backgroundColor: palette.bg,
-          behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppRadii.lg),
           ),
-          margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          duration: duration,
+          margin: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            AppSpacing.md,
+          ),
           action: (actionLabel != null && onAction != null)
               ? SnackBarAction(
                   label: actionLabel,
@@ -71,22 +81,22 @@ class BrandedSnack {
     switch (kind) {
       case SnackKind.success:
         return const _Palette(
-          bg: Color(0xFF15803D),
+          background: Color(0xFF15803D),
           icon: Icons.check_circle_rounded,
         );
       case SnackKind.warning:
         return const _Palette(
-          bg: Color(0xFFD97706),
+          background: Color(0xFFB45309),
           icon: Icons.warning_amber_rounded,
         );
       case SnackKind.error:
         return const _Palette(
-          bg: Color(0xFFDC2626),
+          background: Color(0xFFB91C1C),
           icon: Icons.error_rounded,
         );
       case SnackKind.info:
         return _Palette(
-          bg: theme.colorScheme.primary,
+          background: theme.colorScheme.primary,
           icon: Icons.info_rounded,
         );
     }
@@ -96,7 +106,8 @@ class BrandedSnack {
 enum SnackKind { success, info, warning, error }
 
 class _Palette {
-  final Color bg;
+  const _Palette({required this.background, required this.icon});
+
+  final Color background;
   final IconData icon;
-  const _Palette({required this.bg, required this.icon});
 }

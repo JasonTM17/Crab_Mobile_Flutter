@@ -9,9 +9,9 @@ class GlassCard extends StatelessWidget {
   const GlassCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16),
-    this.borderRadius = 20,
-    this.blur = 18,
+    this.padding = const EdgeInsets.all(AppSpacing.md),
+    this.borderRadius = AppRadii.lg,
+    this.blur = 16,
     this.tint,
     this.borderColor,
     this.shadows,
@@ -29,15 +29,12 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fill = tint ??
-        (isDark
-            ? AppColors.surfaceDark.withValues(alpha: 0.55)
-            : AppColors.surfaceLight.withValues(alpha: 0.65));
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final fill = tint ?? scheme.surface.withValues(alpha: isDark ? 0.78 : 0.9);
     final border = borderColor ??
-        (isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Colors.white.withValues(alpha: 0.55));
+        scheme.outlineVariant.withValues(alpha: isDark ? 0.55 : 0.85);
 
     final radius = BorderRadius.circular(borderRadius);
     final card = ClipRRect(
@@ -59,7 +56,8 @@ class GlassCard extends StatelessWidget {
     final shadowed = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
-        boxShadow: shadows ?? AppShadows.shadowSoft,
+        boxShadow: shadows ??
+            (isDark ? AppShadows.shadowSoft : AppShadows.shadowElevated),
       ),
       child: card,
     );
