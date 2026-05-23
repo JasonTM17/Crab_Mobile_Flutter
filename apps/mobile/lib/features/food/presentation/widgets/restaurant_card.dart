@@ -35,14 +35,24 @@ class RestaurantCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Material(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
+        shadowColor: Colors.black.withValues(alpha: 0.08),
         child: InkWell(
           onTap: r.isOpen ? onTap : null,
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.borderLight),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.borderLight.withValues(alpha: 0.75),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -52,27 +62,79 @@ class RestaurantCard extends StatelessWidget {
                   distanceText: distanceText,
                   isOpen: r.isOpen,
                   promo: r.deliveryFee == 0,
+                  category: r.category,
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         r.name,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                           color: AppColors.textPrimaryLight,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 6),
-                      _MetaRow(
-                        rating: r.rating,
-                        deliveryMinutes: r.deliveryTimeMinutes,
-                        feeText: _formatFee(r.deliveryFee),
+                      if (r.description != null && r.description!.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          r.description!,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondaryLight,
+                            height: 1.35,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _InfoPill(
+                            icon: Icons.star_rounded,
+                            iconColor: const Color(0xFFFFC107),
+                            label: '${r.rating.toStringAsFixed(1)} (${r.totalReviews})',
+                          ),
+                          _InfoPill(
+                            icon: Icons.access_time_filled_rounded,
+                            iconColor: AppColors.primary,
+                            label: '${r.deliveryTimeMinutes} phút',
+                          ),
+                          _InfoPill(
+                            icon: Icons.delivery_dining_rounded,
+                            iconColor: AppColors.accent,
+                            label: _formatFee(r.deliveryFee),
+                          ),
+                        ],
                       ),
+                      if (r.address != null && r.address!.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.place_outlined,
+                              size: 16,
+                              color: AppColors.textSecondaryLight,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                r.address!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondaryLight,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -90,22 +152,24 @@ class _HeroImage extends StatelessWidget {
   final String distanceText;
   final bool isOpen;
   final bool promo;
+  final String category;
 
   const _HeroImage({
     required this.imageUrl,
     required this.distanceText,
     required this.isOpen,
     required this.promo,
+    required this.category,
   });
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       child: Stack(
         children: [
           SizedBox(
-            height: 180,
+            height: 188,
             width: double.infinity,
             child: imageUrl != null
                 ? CachedNetworkImage(
@@ -116,142 +180,167 @@ class _HeroImage extends StatelessWidget {
                   )
                 : const _ImageFallback(),
           ),
-          if (promo)
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.accent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'FREESHIP',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.6,
-                  ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.08),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.58),
+                  ],
+                  stops: const [0.0, 0.45, 1.0],
                 ),
               ),
             ),
-          if (distanceText.isNotEmpty)
-            Positioned(
-              right: 12,
-              bottom: 12,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.location_on_rounded,
-                        size: 12, color: Colors.white),
-                    const SizedBox(width: 4),
-                    Text(
-                      distanceText,
-                      style: const TextStyle(
+          ),
+          Positioned(
+            top: 14,
+            left: 14,
+            right: 14,
+            child: Row(
+              children: [
+                if (promo)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Text(
+                      'FREESHIP',
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          if (!isOpen)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.45),
-                alignment: Alignment.center,
-                child: const Text(
-                  'Đang đóng cửa',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                  ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isOpen
+                        ? Colors.white.withValues(alpha: 0.18)
+                        : Colors.black.withValues(alpha: 0.42),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.22),
+                    ),
+                  ),
+                  child: Text(
+                    isOpen ? 'Đang mở cửa' : 'Tạm đóng cửa',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
+          ),
+          Positioned(
+            left: 14,
+            right: 14,
+            bottom: 14,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    category,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (distanceText.isNotEmpty) ...[
+                  const SizedBox(width: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.34),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.location_on_rounded,
+                          size: 12,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          distanceText,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _MetaRow extends StatelessWidget {
-  final double rating;
-  final int deliveryMinutes;
-  final String feeText;
+class _InfoPill extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
 
-  const _MetaRow({
-    required this.rating,
-    required this.deliveryMinutes,
-    required this.feeText,
+  const _InfoPill({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 14),
-        const SizedBox(width: 4),
-        Text(
-          rating.toStringAsFixed(1),
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimaryLight,
-          ),
-        ),
-        const SizedBox(width: 8),
-        const _Dot(),
-        const SizedBox(width: 8),
-        Text(
-          '$deliveryMinutes phút',
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondaryLight,
-          ),
-        ),
-        const SizedBox(width: 8),
-        const _Dot(),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            feeText,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondaryLight,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Dot extends StatelessWidget {
-  const _Dot();
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
-      width: 3,
-      height: 3,
-      decoration: const BoxDecoration(
-        color: AppColors.textSecondaryLight,
-        shape: BoxShape.circle,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundLight,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: iconColor),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimaryLight,
+            ),
+          ),
+        ],
       ),
     );
   }
