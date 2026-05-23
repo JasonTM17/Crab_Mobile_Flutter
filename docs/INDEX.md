@@ -31,6 +31,13 @@
 | [Observability](./OBSERVABILITY.md) | Logs, metrics, traces, monitoring stack |
 | [Testing](./TESTING.md) | Test strategy, examples, load testing, coverage requirements |
 
+### Architecture Decisions
+
+| Document | Description |
+|----------|-------------|
+| [ADR Template](./adr/template.md) | Standard template for new architecture decision records |
+| [ADR 0001](./adr/0001-record-architecture-decisions.md) | Establishes the ADR process for this repository |
+
 ### Repo-Level Files
 
 | Document | Description |
