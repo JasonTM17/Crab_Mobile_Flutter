@@ -8,6 +8,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { Redis } from 'ioredis'
 import { ObservabilityModule, ResilienceModule } from '@crab/backend-shared'
 import configuration from './config/configuration'
+import { getRequiredJwtSecret } from './config/security'
 import { AuthModule } from './auth/auth.module'
 import { ProxyModule } from './proxy/proxy.module'
 import { RideGateway } from './gateways/ride.gateway'
@@ -43,7 +44,7 @@ const REDIS_CLIENT = 'GATEWAY_REDIS_CLIENT'
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('jwtSecret', 'change-me-in-production'),
+        secret: getRequiredJwtSecret(config),
         signOptions: { expiresIn: '15m' },
       }),
     }),

@@ -14,7 +14,6 @@ import type { OrderPlacedPayload, OrderStatusPayload } from '@crab/socket-events
 
 @WebSocketGateway({
   namespace: '/food',
-  cors: { origin: '*', credentials: true },
 })
 export class FoodGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

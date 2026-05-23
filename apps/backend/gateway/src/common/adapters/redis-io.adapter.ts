@@ -4,6 +4,7 @@ import { createAdapter } from '@socket.io/redis-adapter'
 import { INestApplicationContext, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import Redis from 'ioredis'
+import { getAllowedCorsOrigins } from '../../config/security'
 
 export class RedisIoAdapter extends IoAdapter {
   private readonly logger = new Logger(RedisIoAdapter.name)
@@ -36,9 +37,13 @@ export class RedisIoAdapter extends IoAdapter {
   }
 
   override createIOServer(port: number, options?: ServerOptions): unknown {
+    const config = this.app.get(ConfigService)
     const server = super.createIOServer(port, {
       ...options,
-      cors: { origin: '*', credentials: true },
+      cors: {
+        origin: getAllowedCorsOrigins(config, 'WS_CORS_ORIGIN'),
+        credentials: true,
+      },
       pingInterval: 25000,
       pingTimeout: 60000,
       transports: ['websocket'],

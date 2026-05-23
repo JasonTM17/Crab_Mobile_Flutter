@@ -14,7 +14,6 @@ import type { NotificationPayload, NotificationReadPayload } from '@crab/socket-
 
 @WebSocketGateway({
   namespace: '/notification',
-  cors: { origin: '*', credentials: true },
 })
 export class NotificationGateway
   implements OnGatewayConnection, OnGatewayDisconnect

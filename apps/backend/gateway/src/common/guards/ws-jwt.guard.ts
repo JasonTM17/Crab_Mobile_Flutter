@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config'
 import { WsException } from '@nestjs/websockets'
 import { Socket } from 'socket.io'
 import { JwtPayload } from '@crab/common-types'
+import { getRequiredJwtSecret } from '../../config/security'
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
@@ -25,7 +26,7 @@ export class WsJwtGuard implements CanActivate {
 
     try {
       const payload = this.jwtService.verify<JwtPayload>(token, {
-        secret: this.config.get<string>('JWT_SECRET', 'change-me-in-production'),
+        secret: getRequiredJwtSecret(this.config),
       })
       client.data['user'] = payload
       return true

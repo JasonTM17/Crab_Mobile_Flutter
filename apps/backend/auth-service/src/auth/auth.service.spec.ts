@@ -33,7 +33,13 @@ describe('AuthService', () => {
     save: jest.fn(async (x) => x),
   }
   const mockJwt = { sign: jest.fn().mockReturnValue('signed-token') }
-  const mockConfig = { get: jest.fn().mockReturnValue('refresh-secret') }
+  const mockConfig = {
+    get: jest.fn((key: string) => {
+      if (key === 'NODE_ENV') return 'test'
+      if (key === 'JWT_REFRESH_SECRET') return 'test-refresh-secret'
+      return undefined
+    }),
+  }
   const mockOtp = { generate: jest.fn(), verify: jest.fn() }
   const mockSession = {
     resetLoginAttempts: jest.fn(),
