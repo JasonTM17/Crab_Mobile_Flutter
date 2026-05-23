@@ -79,6 +79,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Phở 24'), findsOneWidget);
+
+      await tester.drag(find.byType(ListView).last, const Offset(0, -400));
+      await tester.pumpAndSettle();
+
       expect(find.text('Bún Bò Huế'), findsOneWidget);
     });
 
