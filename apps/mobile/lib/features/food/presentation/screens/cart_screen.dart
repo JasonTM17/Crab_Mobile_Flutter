@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/section_header.dart';
 import '../../data/models/cart_model.dart';
 import '../bloc/food_bloc.dart';
 import '../bloc/food_event.dart';
@@ -123,6 +125,11 @@ class _CartScreenState extends State<CartScreen> {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             children: [
+              const SectionHeader(
+                title: 'Món đã chọn',
+                padding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: AppSpacing.sm),
               _ItemsCard(
                 cart: cart,
                 onAdd: (item) =>
@@ -131,16 +138,31 @@ class _CartScreenState extends State<CartScreen> {
                     context.read<FoodBloc>().add(RemoveFromCart(itemId: id)),
                 formatPrice: _formatVnd,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.lg),
+              const SectionHeader(
+                title: 'Giao hàng',
+                padding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: AppSpacing.sm),
               _AddressCard(controller: _addressController),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.lg),
+              const SectionHeader(
+                title: 'Thanh toán',
+                padding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: AppSpacing.sm),
               _PaymentCard(
                 selected: _payment,
                 onSelect: (m) => setState(() => _payment = m),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               _PromoCard(controller: _promoController),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
+              const SectionHeader(
+                title: 'Tóm tắt đơn hàng',
+                padding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: AppSpacing.sm),
               _SummaryCard(
                 subtotal: _formatVnd(cart.subtotal),
                 deliveryFee: _formatVnd(deliveryFee),
@@ -176,13 +198,8 @@ class _CardShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GlassCard(
       padding: padding,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderLight),
-      ),
       child: child,
     );
   }
