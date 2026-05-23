@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/gradient_button.dart';
+import '../../../../shared/widgets/info_chip.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../data/models/cart_model.dart';
 import '../bloc/food_bloc.dart';
@@ -60,6 +62,7 @@ class _CartScreenState extends State<CartScreen> {
             SnackBar(
               content: Text(state.message),
               backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -109,8 +112,11 @@ class _CartScreenState extends State<CartScreen> {
                 onPressed: isPlacing
                     ? null
                     : () => context.read<FoodBloc>().add(const ClearCart()),
-                icon: const Icon(Icons.delete_outline_rounded,
-                    size: 18, color: AppColors.error),
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  size: 18,
+                  color: AppColors.error,
+                ),
                 label: const Text(
                   'Xoá',
                   style: TextStyle(
@@ -188,13 +194,13 @@ class _CartScreenState extends State<CartScreen> {
 }
 
 class _CardShell extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-
   const _CardShell({
     required this.child,
     this.padding = const EdgeInsets.all(14),
   });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -206,11 +212,6 @@ class _CardShell extends StatelessWidget {
 }
 
 class _ItemsCard extends StatelessWidget {
-  final dynamic cart;
-  final void Function(dynamic item) onAdd;
-  final void Function(String id) onRemove;
-  final String Function(double) formatPrice;
-
   const _ItemsCard({
     required this.cart,
     required this.onAdd,
@@ -218,45 +219,68 @@ class _ItemsCard extends StatelessWidget {
     required this.formatPrice,
   });
 
+  final dynamic cart;
+  final void Function(dynamic item) onAdd;
+  final void Function(String id) onRemove;
+  final String Function(double) formatPrice;
+
   @override
   Widget build(BuildContext context) {
     final items = cart.items as List<CartItemModel>;
+
     return _CardShell(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (cart.restaurantName != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.restaurant_rounded,
-                        size: 18, color: Colors.white),
+          if (cart.restaurantName != null) ...[
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      cart.restaurantName as String,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimaryLight,
+                  child: const Icon(
+                    Icons.restaurant_rounded,
+                    size: 22,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        cart.restaurantName as String,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w800),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const SizedBox(height: 4),
+                      InfoChip(
+                        label: '${cart.totalItems} món',
+                        icon: Icons.shopping_bag_outlined,
+                        variant: InfoChipVariant.brand,
+                        dense: true,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+            const SizedBox(height: AppSpacing.sm),
+            Divider(
+              color: AppColors.borderLight.withValues(alpha: 0.7),
+              height: 16,
+            ),
+          ],
           for (final ci in items)
             _CartItemRow(
               cartItem: ci,
@@ -271,11 +295,6 @@ class _ItemsCard extends StatelessWidget {
 }
 
 class _CartItemRow extends StatelessWidget {
-  final CartItemModel cartItem;
-  final String priceText;
-  final VoidCallback onAdd;
-  final VoidCallback onRemove;
-
   const _CartItemRow({
     required this.cartItem,
     required this.priceText,
@@ -283,11 +302,17 @@ class _CartItemRow extends StatelessWidget {
     required this.onRemove,
   });
 
+  final CartItemModel cartItem;
+  final String priceText;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Column(
@@ -295,26 +320,25 @@ class _CartItemRow extends StatelessWidget {
               children: [
                 Text(
                   cartItem.item.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimaryLight,
-                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   priceText,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
           _QtyStepper(
             quantity: cartItem.quantity,
             onAdd: onAdd,
@@ -327,15 +351,15 @@ class _CartItemRow extends StatelessWidget {
 }
 
 class _QtyStepper extends StatelessWidget {
-  final int quantity;
-  final VoidCallback onAdd;
-  final VoidCallback onRemove;
-
   const _QtyStepper({
     required this.quantity,
     required this.onAdd,
     required this.onRemove,
   });
+
+  final int quantity;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +367,7 @@ class _QtyStepper extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFEFF1F4),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -353,11 +377,10 @@ class _QtyStepper extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               '$quantity',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textPrimaryLight,
-              ),
+              style: Theme.of(context)
+                  .textTheme
+                  .labelLarge
+                  ?.copyWith(fontWeight: FontWeight.w800),
             ),
           ),
           _StepBtn(icon: Icons.add_rounded, onTap: onAdd, primary: true),
@@ -368,31 +391,34 @@ class _QtyStepper extends StatelessWidget {
 }
 
 class _StepBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool primary;
-
   const _StepBtn({
     required this.icon,
     required this.onTap,
     this.primary = false,
   });
 
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool primary;
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppRadii.pill),
       child: Container(
-        width: 28,
-        height: 28,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: primary ? AppColors.primary : AppColors.surfaceLight,
           shape: BoxShape.circle,
+          border: Border.all(
+            color: primary ? AppColors.primary : AppColors.borderLight,
+          ),
         ),
         child: Icon(
           icon,
-          size: 16,
+          size: 18,
           color: primary ? Colors.white : AppColors.textPrimaryLight,
         ),
       ),
@@ -401,8 +427,9 @@ class _StepBtn extends StatelessWidget {
 }
 
 class _AddressCard extends StatelessWidget {
-  final TextEditingController controller;
   const _AddressCard({required this.controller});
+
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -410,12 +437,11 @@ class _AddressCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.location_on_rounded,
-                  size: 18, color: AppColors.primary),
-              const SizedBox(width: 6),
-              const Text(
+              Icon(Icons.location_on_rounded, size: 18, color: AppColors.primary),
+              SizedBox(width: 6),
+              Text(
                 'Giao đến',
                 style: TextStyle(
                   fontSize: 14,
@@ -423,38 +449,18 @@ class _AddressCard extends StatelessWidget {
                   color: AppColors.textPrimaryLight,
                 ),
               ),
-              const Spacer(),
-              InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.edit_outlined,
-                          size: 14, color: AppColors.primary),
-                      SizedBox(width: 4),
-                      Text(
-                        'Sửa',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
+          const Text(
+            'Bạn có thể chỉnh sửa địa chỉ nhận ngay trước khi đặt đơn.',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondaryLight,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: controller,
             maxLines: 2,
@@ -462,13 +468,27 @@ class _AddressCard extends StatelessWidget {
               fontSize: 14,
               color: AppColors.textPrimaryLight,
             ),
-            decoration: const InputDecoration(
-              isDense: true,
-              filled: false,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.7),
+              hintText: 'Nhập địa chỉ giao hàng',
+              contentPadding: const EdgeInsets.all(14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadii.md),
+                borderSide: BorderSide(
+                  color: AppColors.borderLight.withValues(alpha: 0.8),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadii.md),
+                borderSide: BorderSide(
+                  color: AppColors.borderLight.withValues(alpha: 0.8),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadii.md),
+                borderSide: const BorderSide(color: AppColors.primary),
+              ),
             ),
           ),
         ],
@@ -478,10 +498,10 @@ class _AddressCard extends StatelessWidget {
 }
 
 class _PaymentCard extends StatelessWidget {
+  const _PaymentCard({required this.selected, required this.onSelect});
+
   final _PaymentMethod selected;
   final ValueChanged<_PaymentMethod> onSelect;
-
-  const _PaymentCard({required this.selected, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -497,7 +517,15 @@ class _PaymentCard extends StatelessWidget {
               color: AppColors.textPrimaryLight,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
+          const Text(
+            'Chọn cách thanh toán phù hợp cho đơn hàng này.',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondaryLight,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           _PaymentTile(
             icon: Icons.account_balance_wallet_rounded,
             iconBg: AppColors.primary,
@@ -532,14 +560,6 @@ class _PaymentCard extends StatelessWidget {
 }
 
 class _PaymentTile extends StatelessWidget {
-  final IconData icon;
-  final Color iconBg;
-  final String title;
-  final String subtitle;
-  final _PaymentMethod value;
-  final _PaymentMethod group;
-  final ValueChanged<_PaymentMethod> onSelect;
-
   const _PaymentTile({
     required this.icon,
     required this.iconBg,
@@ -550,51 +570,75 @@ class _PaymentTile extends StatelessWidget {
     required this.onSelect,
   });
 
+  final IconData icon;
+  final Color iconBg;
+  final String title;
+  final String subtitle;
+  final _PaymentMethod value;
+  final _PaymentMethod group;
+  final ValueChanged<_PaymentMethod> onSelect;
+
   @override
   Widget build(BuildContext context) {
     final selected = value == group;
-    return InkWell(
-      onTap: () => onSelect(value),
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: iconBg.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, size: 20, color: iconBg),
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onSelect(value),
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        child: Container(
+          margin: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: selected
+                ? iconBg.withValues(alpha: 0.08)
+                : Colors.white.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(AppRadii.md),
+            border: Border.all(
+              color: selected
+                  ? iconBg.withValues(alpha: 0.35)
+                  : AppColors.borderLight.withValues(alpha: 0.7),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondaryLight,
-                    ),
-                  ),
-                ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconBg.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 20, color: iconBg),
               ),
-            ),
-            _Radio(selected: selected),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimaryLight,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _Radio(selected: selected),
+            ],
+          ),
         ),
       ),
     );
@@ -602,8 +646,9 @@ class _PaymentTile extends StatelessWidget {
 }
 
 class _Radio extends StatelessWidget {
-  final bool selected;
   const _Radio({required this.selected});
+
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -634,52 +679,88 @@ class _Radio extends StatelessWidget {
 }
 
 class _PromoCard extends StatelessWidget {
-  final TextEditingController controller;
   const _PromoCard({required this.controller});
+
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
     return _CardShell(
-      padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-      child: Row(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.local_offer_rounded,
-              size: 18, color: AppColors.accent),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                isDense: true,
-                filled: false,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                hintText: 'Mã khuyến mãi',
-                hintStyle: TextStyle(
-                  color: AppColors.textSecondaryLight,
+          const Row(
+            children: [
+              Icon(Icons.local_offer_rounded, size: 18, color: AppColors.accent),
+              SizedBox(width: 6),
+              Text(
+                'Mã khuyến mãi',
+                style: TextStyle(
                   fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimaryLight,
                 ),
-                contentPadding: EdgeInsets.zero,
               ),
-            ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(80, 40),
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: 'Nhập mã ưu đãi',
+                    hintStyle: const TextStyle(
+                      color: AppColors.textSecondaryLight,
+                      fontSize: 14,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.7),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadii.md),
+                      borderSide: BorderSide(
+                        color: AppColors.borderLight.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadii.md),
+                      borderSide: BorderSide(
+                        color: AppColors.borderLight.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadii.md),
+                      borderSide: const BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                ),
               ),
-              textStyle: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
+              const SizedBox(width: AppSpacing.sm),
+              SizedBox(
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: AppColors.primary.withValues(alpha: 0.35),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadii.md),
+                    ),
+                  ),
+                  child: const Text(
+                    'Áp dụng',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
               ),
-            ),
-            child: const Text('Áp dụng'),
+            ],
           ),
         ],
       ),
@@ -688,21 +769,31 @@ class _PromoCard extends StatelessWidget {
 }
 
 class _SummaryCard extends StatelessWidget {
-  final String subtotal;
-  final String deliveryFee;
-  final String total;
-
   const _SummaryCard({
     required this.subtotal,
     required this.deliveryFee,
     required this.total,
   });
 
+  final String subtotal;
+  final String deliveryFee;
+  final String total;
+
   @override
   Widget build(BuildContext context) {
     return _CardShell(
       child: Column(
         children: [
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: InfoChip(
+              label: 'Xác nhận trước khi đặt',
+              icon: Icons.verified_rounded,
+              variant: InfoChipVariant.success,
+              dense: true,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           _SummaryRow(label: 'Tạm tính', value: subtotal),
           const SizedBox(height: 8),
           _SummaryRow(label: 'Phí giao hàng', value: deliveryFee),
@@ -721,15 +812,15 @@ class _SummaryCard extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool bold;
-
   const _SummaryRow({
     required this.label,
     required this.value,
     this.bold = false,
   });
+
+  final String label;
+  final String value;
+  final bool bold;
 
   @override
   Widget build(BuildContext context) {
@@ -760,122 +851,64 @@ class _SummaryRow extends StatelessWidget {
 }
 
 class _CheckoutBar extends StatelessWidget {
-  final String totalText;
-  final bool loading;
-  final VoidCallback onPlace;
-
   const _CheckoutBar({
     required this.totalText,
     required this.loading,
     required this.onPlace,
   });
 
+  final String totalText;
+  final bool loading;
+  final VoidCallback onPlace;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceLight,
-          border: Border(
-            top: BorderSide(
-              color: AppColors.borderLight.withValues(alpha: 0.6),
-            ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: GlassCard(
+          padding: const EdgeInsets.all(12),
+          borderRadius: AppRadii.xl,
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'TỔNG',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                      color: AppColors.textSecondaryLight,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    totalText,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: GradientButton(
+                  label: 'Đặt đơn ngay',
+                  loading: loading,
+                  icon: Icons.local_shipping_rounded,
+                  height: 56,
+                  borderRadius: AppRadii.lg,
+                  onPressed: loading ? null : onPlace,
+                ),
+              ),
+            ],
           ),
         ),
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'TỔNG',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.6,
-                    color: AppColors.textSecondaryLight,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  totalText,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimaryLight,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _PlaceOrderButton(
-                label: 'Đặt đơn $totalText',
-                loading: loading,
-                onTap: loading ? null : onPlace,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlaceOrderButton extends StatelessWidget {
-  final String label;
-  final bool loading;
-  final VoidCallback? onTap;
-
-  const _PlaceOrderButton({
-    required this.label,
-    required this.loading,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.primary, AppColors.primaryLight],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.35),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2.4,
-                ),
-              )
-            : Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
       ),
     );
   }
