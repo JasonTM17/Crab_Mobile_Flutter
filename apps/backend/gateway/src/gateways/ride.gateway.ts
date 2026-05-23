@@ -18,7 +18,6 @@ import type {
 
 @WebSocketGateway({
   namespace: '/ride',
-  cors: { origin: '*', credentials: true },
 })
 export class RideGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

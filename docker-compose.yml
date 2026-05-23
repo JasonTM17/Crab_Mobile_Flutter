@@ -71,7 +71,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/gateway/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/gateway:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-gateway:${TAG:-latest}
     ports:
       - '3000:3000'
     environment:
@@ -87,7 +87,8 @@ services:
       CHAT_SERVICE_URL: http://chat-service:3006
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
       RATING_SERVICE_URL: http://rating-service:3008
-      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173,http://localhost:3000}
+      WS_CORS_ORIGIN: ${WS_CORS_ORIGIN:-http://localhost:5173,http://localhost:3000}
     depends_on:
       redis:
         condition: service_healthy
@@ -98,7 +99,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/auth-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/auth-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-auth-service:${TAG:-latest}
     ports:
       - '3001:3001'
     environment:
@@ -122,7 +123,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/user-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/user-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-user-service:${TAG:-latest}
     ports:
       - '3002:3002'
     environment:
@@ -147,7 +148,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/ride-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/ride-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-ride-service:${TAG:-latest}
     ports:
       - '3003:3003'
     environment:
@@ -171,7 +172,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/food-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/food-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-food-service:${TAG:-latest}
     ports:
       - '3004:3004'
     environment:
@@ -195,7 +196,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/payment-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/payment-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-payment-service:${TAG:-latest}
     ports:
       - '3005:3005'
     environment:
@@ -216,7 +217,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/chat-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/chat-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-chat-service:${TAG:-latest}
     ports:
       - '3006:3006'
     environment:
@@ -237,7 +238,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/notification-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/notification-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-notification-service:${TAG:-latest}
     ports:
       - '3007:3007'
     environment:
@@ -258,7 +259,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/rating-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/rating-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-rating-service:${TAG:-latest}
     ports:
       - '3008:3008'
     environment:
@@ -278,9 +279,9 @@ services:
     build:
       context: .
       dockerfile: apps/web-admin/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/web-admin:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-web-admin:${TAG:-latest}
     ports:
-      - '5173:80'
+      - '5173:8080'
     environment:
       VITE_API_URL: http://gateway:3000/api/v1
     depends_on:

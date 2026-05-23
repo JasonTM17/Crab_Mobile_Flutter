@@ -1,7 +1,8 @@
 export default () => ({
   port: parseInt(process.env.PORT ?? '3000', 10),
-  jwtSecret: process.env.JWT_SECRET ?? 'change-me-in-production',
-  corsOrigin: process.env.CORS_ORIGIN ?? '*',
+  jwtSecret: process.env.JWT_SECRET,
+  corsOrigin: process.env.CORS_ORIGIN,
+  wsCorsOrigin: process.env.WS_CORS_ORIGIN ?? process.env.CORS_ORIGIN,
   redis: {
     url: process.env.REDIS_URL ?? 'redis://localhost:6379',
     host: process.env.REDIS_HOST ?? 'localhost',

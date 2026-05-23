@@ -199,8 +199,11 @@ export class ProxyController {
       if (req.headers.authorization) {
         headers['Authorization'] = req.headers.authorization as string
       }
-      if (req.headers['x-user-id']) {
-        headers['X-User-Id'] = req.headers['x-user-id'] as string
+      const user = (req as Request & { user?: { sub?: string; role?: string; email?: string } }).user
+      if (user?.sub) {
+        headers['X-User-Id'] = user.sub
+        if (user.role) headers['X-User-Role'] = user.role
+        if (user.email) headers['X-User-Email'] = user.email
       }
       const data = await this.proxy.forward(
         service,
