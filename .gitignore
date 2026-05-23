@@ -77,10 +77,28 @@ temp/
 
 # Claude Code session/private state
 .claude/
+.claude-private/
+.claude/worktrees/
 
 # Kilo private state and plans
 .kilo/
+.private/
 
+# Private planning/docs
+PLAN*.md
+plan*.md
+NOTES*.md
+notes*.md
+TODO*.md
+todo*.md
+ROADMAP*.md
+roadmap*.md
+DRAFT*.md
+draft*.md
+*.private.md
+*.local.md
+DOCUMENTATION_MASTER.md
+RULES.md
 
 # Playwright MCP artifacts
 .playwright-mcp/
