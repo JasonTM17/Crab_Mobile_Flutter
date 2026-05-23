@@ -1,4 +1,4 @@
-package com.example.crab_mobile
+package com.jasontm17.crab
 
 import io.flutter.embedding.android.FlutterActivity
 
