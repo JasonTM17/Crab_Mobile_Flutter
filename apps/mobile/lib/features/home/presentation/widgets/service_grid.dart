@@ -62,18 +62,19 @@ class ServiceGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.count(
       shrinkWrap: true,
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 4,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 8,
-      childAspectRatio: 0.86,
+      mainAxisSpacing: AppSpacing.md,
+      crossAxisSpacing: AppSpacing.sm,
+      childAspectRatio: 0.84,
       children: [
-        for (final s in _services)
+        for (final service in _services)
           ServiceCard(
-            label: s.label,
-            icon: s.icon,
-            tint: s.tint,
-            onTap: () => context.push(s.route),
+            label: service.label,
+            icon: service.icon,
+            tint: service.tint,
+            onTap: () => context.push(service.route),
           ),
       ],
     );

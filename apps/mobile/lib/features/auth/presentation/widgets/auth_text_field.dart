@@ -1,21 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_motion.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class AuthTextField extends StatefulWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? hint;
-  final IconData? prefixIcon;
-  final Widget? suffix;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final String? Function(String?)? validator;
-  final void Function(String)? onChanged;
-  final int? maxLength;
-  final TextInputAction? textInputAction;
-  final void Function(String)? onSubmitted;
-
   const AuthTextField({
     super.key,
     required this.controller,
@@ -30,7 +19,24 @@ class AuthTextField extends StatefulWidget {
     this.maxLength,
     this.textInputAction,
     this.onSubmitted,
+    this.autofillHints,
+    this.textCapitalization = TextCapitalization.none,
   });
+
+  final TextEditingController controller;
+  final String label;
+  final String? hint;
+  final IconData? prefixIcon;
+  final Widget? suffix;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  final int? maxLength;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onSubmitted;
+  final Iterable<String>? autofillHints;
+  final TextCapitalization textCapitalization;
 
   @override
   State<AuthTextField> createState() => _AuthTextFieldState();
@@ -58,8 +64,11 @@ class _AuthTextFieldState extends State<AuthTextField> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final fillColor = cs.surfaceContainerHighest.withValues(alpha: 0.45);
-    final borderColor = _focused ? cs.primary : Colors.transparent;
+    final isDark = theme.brightness == Brightness.dark;
+    final fillColor =
+        cs.surfaceContainerHighest.withValues(alpha: isDark ? 0.34 : 0.78);
+    final borderColor =
+        _focused ? cs.primary : cs.outlineVariant.withValues(alpha: 0.88);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,26 +76,21 @@ class _AuthTextFieldState extends State<AuthTextField> {
         Text(
           widget.label,
           style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface,
+            color: _focused ? cs.primary : cs.onSurface,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xs),
         AnimatedContainer(
           duration: AppMotion.fast,
+          curve: AppMotion.emphasis,
           decoration: BoxDecoration(
             color: fillColor,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: borderColor, width: 1.4),
+            borderRadius: BorderRadius.circular(AppRadii.md),
+            border: Border.all(color: borderColor, width: _focused ? 1.5 : 1),
             boxShadow: _focused
-                ? [
-                    BoxShadow(
-                      color: cs.primary.withValues(alpha: 0.18),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : null,
+                ? AppShadows.coloredGlow(cs.primary, opacity: 0.16)
+                : AppShadows.shadowSoft,
           ),
           child: TextFormField(
             controller: widget.controller,
@@ -98,21 +102,22 @@ class _AuthTextFieldState extends State<AuthTextField> {
             maxLength: widget.maxLength,
             textInputAction: widget.textInputAction,
             onFieldSubmitted: widget.onSubmitted,
-            style: theme.textTheme.bodyLarge,
+            autofillHints: widget.autofillHints,
+            textCapitalization: widget.textCapitalization,
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(fontWeight: FontWeight.w600),
             decoration: InputDecoration(
               hintText: widget.hint,
               hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                color: cs.onSurfaceVariant.withValues(alpha: 0.84),
               ),
-              prefixIcon: widget.prefixIcon != null
-                  ? Icon(
+              prefixIcon: widget.prefixIcon == null
+                  ? null
+                  : Icon(
                       widget.prefixIcon,
                       size: 20,
-                      color: _focused
-                          ? cs.primary
-                          : cs.onSurfaceVariant.withValues(alpha: 0.7),
-                    )
-                  : null,
+                      color: _focused ? cs.primary : cs.onSurfaceVariant,
+                    ),
               suffixIcon: widget.suffix,
               counterText: '',
               filled: false,
@@ -121,8 +126,10 @@ class _AuthTextFieldState extends State<AuthTextField> {
               enabledBorder: InputBorder.none,
               errorBorder: InputBorder.none,
               focusedErrorBorder: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.md,
+              ),
             ),
           ),
         ),

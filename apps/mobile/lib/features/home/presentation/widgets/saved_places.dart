@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class SavedPlaces extends StatelessWidget {
@@ -8,7 +9,6 @@ class SavedPlaces extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     const places = [
       _Place(
           icon: Icons.home_outlined,
@@ -25,18 +25,16 @@ class SavedPlaces extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 40,
+      height: 52,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.zero,
         itemCount: places.length + 1,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          if (i == places.length) {
-            return const _AddChip();
-          }
-          return _PlaceChip(place: places[i], isDark: isDark);
+        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
+        itemBuilder: (context, index) {
+          if (index == places.length) return const _AddChip();
+          return _PlaceChip(place: places[index]);
         },
       ),
     );
@@ -45,49 +43,62 @@ class SavedPlaces extends StatelessWidget {
 
 class _Place {
   const _Place({required this.icon, required this.label, required this.route});
+
   final IconData icon;
   final String label;
   final String route;
 }
 
 class _PlaceChip extends StatelessWidget {
-  const _PlaceChip({required this.place, required this.isDark});
+  const _PlaceChip({required this.place});
+
   final _Place place;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final fill = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final fg = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push(place.route),
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: fill,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: border, width: 1),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(place.icon, size: 18, color: AppColors.primary),
-              const SizedBox(width: 6),
-              Text(
-                place.label,
-                style: TextStyle(
-                  color: fg,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+    return Semantics(
+      button: true,
+      label: 'Đi tới ${place.label}',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push(place.route),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              border:
+                  Border.all(color: cs.outlineVariant.withValues(alpha: 0.84)),
+              boxShadow: isDark ? null : AppShadows.shadowSoft,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(place.icon, size: 18, color: AppColors.primary),
                 ),
-              ),
-            ],
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  place.label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: cs.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -100,34 +111,47 @@ class _AddChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push('/profile'),
-        borderRadius: BorderRadius.circular(20),
-        child: CustomPaint(
-          painter: _DashedBorderPainter(
-            color: AppColors.primary.withValues(alpha: 0.45),
-            radius: 20,
-          ),
-          child: Container(
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            alignment: Alignment.center,
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.add, size: 18, color: AppColors.primary),
-                SizedBox(width: 6),
-                Text(
-                  'Thêm',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+    return Semantics(
+      button: true,
+      label: 'Thêm địa điểm đã lưu',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push('/profile'),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          child: CustomPaint(
+            painter: _DashedBorderPainter(
+              color: AppColors.primary.withValues(alpha: 0.45),
+              radius: AppRadii.pill,
+            ),
+            child: Container(
+              height: 52,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.add,
+                        size: 18, color: AppColors.primary),
                   ),
-                ),
-              ],
+                  const SizedBox(width: AppSpacing.xs),
+                  const Text(
+                    'Thêm',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -149,28 +173,26 @@ class _DashedBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
 
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(radius),
-    );
-    final path = Path()..addRRect(rrect);
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radius)),
+      );
 
     const dash = 5.0;
     const gap = 4.0;
     for (final metric in path.computeMetrics()) {
-      double distance = 0.0;
+      double distance = 0;
       while (distance < metric.length) {
         final next = distance + dash;
         canvas.drawPath(
-          metric.extractPath(distance, next.clamp(0, metric.length)),
-          paint,
-        );
+            metric.extractPath(distance, next.clamp(0, metric.length)), paint);
         distance = next + gap;
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DashedBorderPainter old) =>
-      old.color != color || old.radius != radius;
+  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.radius != radius;
+  }
 }

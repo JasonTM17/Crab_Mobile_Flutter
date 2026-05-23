@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Service card used in the home grid: pastel circular icon + label.
 class ServiceCard extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color tint;
-  final VoidCallback onTap;
-
   const ServiceCard({
     super.key,
     required this.label,
@@ -17,52 +12,72 @@ class ServiceCard extends StatelessWidget {
     required this.onTap,
   });
 
+  final String label;
+  final IconData icon;
+  final Color tint;
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pastel = tint.withValues(alpha: 0.18);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: pastel,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Container(
-                width: 44,
-                height: 44,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.sm,
+            AppSpacing.sm,
+            AppSpacing.sm,
+            AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(AppRadii.lg),
+            border:
+                Border.all(color: cs.outlineVariant.withValues(alpha: 0.84)),
+            boxShadow: isDark ? null : AppShadows.shadowSoft,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
-                  color: tint,
-                  shape: BoxShape.circle,
+                  color: tint.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(22),
                 ),
-                child: Icon(icon, color: Colors.white, size: 24),
+                padding: const EdgeInsets.all(6),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [tint, Color.lerp(tint, Colors.white, 0.18)!],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 24),
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: cs.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
