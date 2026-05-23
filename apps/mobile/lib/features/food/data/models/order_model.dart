@@ -48,28 +48,22 @@ extension OrderStatusLabel on OrderStatus {
   }
 
   static OrderStatus fromString(String value) {
-    switch (value.toUpperCase()) {
-      case 'PLACED':
-      case 'PENDING':
+    switch (value.toLowerCase()) {
+      case 'placed':
+      case 'pending':
         return OrderStatus.pending;
-      case 'CONFIRMED':
       case 'confirmed':
         return OrderStatus.confirmed;
-      case 'PREPARING':
       case 'preparing':
         return OrderStatus.preparing;
-      case 'READY':
-      case 'READY_FOR_PICKUP':
+      case 'ready':
       case 'ready_for_pickup':
         return OrderStatus.readyForPickup;
-      case 'PICKED_UP':
-      case 'OUT_FOR_DELIVERY':
+      case 'picked_up':
       case 'out_for_delivery':
         return OrderStatus.outForDelivery;
-      case 'DELIVERED':
       case 'delivered':
         return OrderStatus.delivered;
-      case 'CANCELLED':
       case 'cancelled':
         return OrderStatus.cancelled;
       default:
@@ -136,7 +130,7 @@ class OrderModel {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
-    final statusStr = json['status'] as String? ?? 'pending';
+    final statusStr = json['status'] as String? ?? 'PLACED';
     final itemsList = (json['items'] as List<dynamic>? ?? [])
         .map((e) => OrderItemModel.fromJson(e as Map<String, dynamic>))
         .toList();
