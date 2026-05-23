@@ -380,15 +380,15 @@ Full guides live under [`docs/`](docs/). Start with the index for an annotated t
 | MongoDB 7 | 27017 | `mongo:7` |
 | Redis 7 | 6379 | `redis:7-alpine` |
 | MinIO | 9000/9001 | `minio/minio` |
-| API Gateway | 3000 | `jasontm17/gateway` |
-| Auth Service | 3001 | `jasontm17/auth-service` |
-| User Service | 3002 | `jasontm17/user-service` |
-| Ride Service | 3003 | `jasontm17/ride-service` |
-| Food Service | 3004 | `jasontm17/food-service` |
-| Payment Service | 3005 | `jasontm17/payment-service` |
-| Chat Service | 3006 | `jasontm17/chat-service` |
-| Notification Service | 3007 | `jasontm17/notification-service` |
-| Rating Service | 3008 | `jasontm17/rating-service` |
+| API Gateway | 3000 | `nguyenson1710/crab-mobile-gateway` |
+| Auth Service | 3001 | `nguyenson1710/crab-mobile-auth-service` |
+| User Service | 3002 | `nguyenson1710/crab-mobile-user-service` |
+| Ride Service | 3003 | `nguyenson1710/crab-mobile-ride-service` |
+| Food Service | 3004 | `nguyenson1710/crab-mobile-food-service` |
+| Payment Service | 3005 | `nguyenson1710/crab-mobile-payment-service` |
+| Chat Service | 3006 | `nguyenson1710/crab-mobile-chat-service` |
+| Notification Service | 3007 | `nguyenson1710/crab-mobile-notification-service` |
+| Rating Service | 3008 | `nguyenson1710/crab-mobile-rating-service` |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -413,6 +413,37 @@ pnpm test         # Run all tests
 | Lint | `pnpm lint` | Zero warnings |
 | Tests | `pnpm test` | All passing |
 | Docker | `docker compose up` | All healthy |
+
+### Release
+
+Release documentation is maintained in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+Quick summary:
+
+- GitHub releases are created by `.github/workflows/release.yml` on tags like `v1.2.3`
+- Docker images are published by `.github/workflows/docker-publish.yml`
+- Public images use `nguyenson1710/crab-mobile-<service>` naming
+- CI now enforces lint, build, Flutter checks, backend tests, and `contract:check`
+- Mobile release builds require secure HTTPS/WSS endpoints and local/CI release signing material
+
+Recommended release commands:
+
+```bash
+pnpm -w run lint
+pnpm -w run build
+pnpm -w run contract:check
+pnpm -w run test
+cd apps/mobile && flutter analyze && flutter test
+```
+
+Then tag the release:
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+See `docs/DEPLOYMENT.md` for required GitHub secrets, Docker Hub naming, compose/k8s notes, mobile signing details, and troubleshooting.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

@@ -26,6 +26,6 @@ Manages digital wallet, transactions, and payment processing.
 ## Docker
 
 ```bash
-docker build -f apps/backend/payment-service/Dockerfile -t jasontm17/payment-service .
-docker run -p 3005:3005 --env-file .env jasontm17/payment-service
+docker build -f apps/backend/payment-service/Dockerfile -t nguyenson1710/crab-mobile-payment-service .
+docker run -p 3005:3005 --env-file .env nguyenson1710/crab-mobile-payment-service
 ```

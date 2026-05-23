@@ -42,6 +42,6 @@ Manages ride-hailing operations including booking, driver matching, tracking, an
 ## Docker
 
 ```bash
-docker build -f apps/backend/ride-service/Dockerfile -t jasontm17/ride-service .
-docker run -p 3003:3003 --env-file .env jasontm17/ride-service
+docker build -f apps/backend/ride-service/Dockerfile -t nguyenson1710/crab-mobile-ride-service .
+docker run -p 3003:3003 --env-file .env nguyenson1710/crab-mobile-ride-service
 ```
