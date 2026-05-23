@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_theme.dart';
+
 enum InfoChipVariant { defaults, success, warning, error, brand }
 
 class InfoChip extends StatelessWidget {
@@ -20,22 +22,23 @@ class InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final colors = _resolveColors(scheme);
 
-    final verticalPad = dense ? 2.0 : 4.0;
-    final horizontalPad = dense ? 8.0 : 12.0;
-    final fontSize = dense ? 11.0 : 12.0;
+    final verticalPad = dense ? 4.0 : 6.0;
+    final horizontalPad = dense ? 10.0 : 12.0;
     final iconSize = dense ? 12.0 : 14.0;
 
     return Container(
+      constraints: BoxConstraints(minHeight: dense ? 24 : 30),
       padding: EdgeInsets.symmetric(
         vertical: verticalPad,
         horizontal: horizontalPad,
       ),
       decoration: BoxDecoration(
         color: colors.background,
-        borderRadius: BorderRadius.circular(100),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: colors.border, width: 1),
       ),
       child: Row(
@@ -43,22 +46,20 @@ class InfoChip extends StatelessWidget {
         children: [
           if (icon != null) ...[
             Icon(icon, size: iconSize, color: colors.foreground),
-            SizedBox(width: dense ? 3 : 4),
+            SizedBox(width: dense ? 4 : 6),
           ],
           Text(
             label,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w500,
+            style: theme.textTheme.labelSmall?.copyWith(
               color: colors.foreground,
-              height: 1.2,
+              fontWeight: FontWeight.w700,
             ),
           ),
           if (trailingDot) ...[
-            SizedBox(width: dense ? 4 : 6),
+            SizedBox(width: dense ? 5 : 7),
             Container(
-              width: 5,
-              height: 5,
+              width: dense ? 5 : 6,
+              height: dense ? 5 : 6,
               decoration: BoxDecoration(
                 color: colors.foreground,
                 shape: BoxShape.circle,
@@ -74,33 +75,33 @@ class InfoChip extends StatelessWidget {
     switch (variant) {
       case InfoChipVariant.success:
         return _ChipColors(
-          foreground: const Color(0xFF16A34A),
-          background: const Color(0xFF16A34A).withValues(alpha: 0.08),
-          border: const Color(0xFF16A34A).withValues(alpha: 0.2),
+          foreground: const Color(0xFF15803D),
+          background: const Color(0xFF16A34A).withValues(alpha: 0.1),
+          border: const Color(0xFF16A34A).withValues(alpha: 0.22),
         );
       case InfoChipVariant.warning:
         return _ChipColors(
-          foreground: const Color(0xFFD97706),
-          background: const Color(0xFFD97706).withValues(alpha: 0.08),
+          foreground: const Color(0xFFB45309),
+          background: const Color(0xFFD97706).withValues(alpha: 0.1),
           border: const Color(0xFFD97706).withValues(alpha: 0.2),
         );
       case InfoChipVariant.error:
         return _ChipColors(
-          foreground: const Color(0xFFDC2626),
-          background: const Color(0xFFDC2626).withValues(alpha: 0.08),
+          foreground: const Color(0xFFB91C1C),
+          background: const Color(0xFFDC2626).withValues(alpha: 0.1),
           border: const Color(0xFFDC2626).withValues(alpha: 0.2),
         );
       case InfoChipVariant.brand:
         return _ChipColors(
           foreground: scheme.primary,
-          background: scheme.primary.withValues(alpha: 0.08),
+          background: scheme.primary.withValues(alpha: 0.1),
           border: scheme.primary.withValues(alpha: 0.2),
         );
       case InfoChipVariant.defaults:
         return _ChipColors(
           foreground: scheme.onSurfaceVariant,
-          background: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          border: scheme.outlineVariant,
+          background: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
+          border: scheme.outlineVariant.withValues(alpha: 0.8),
         );
     }
   }

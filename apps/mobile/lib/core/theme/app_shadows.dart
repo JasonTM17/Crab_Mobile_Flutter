@@ -7,43 +7,42 @@ class AppShadows {
 
   static const List<BoxShadow> shadowSoft = [
     BoxShadow(
-      color: Color(0x14000000),
-      offset: Offset(0, 4),
-      blurRadius: 12,
-      spreadRadius: -2,
-    ),
-  ];
-
-  static const List<BoxShadow> shadowElevated = [
-    BoxShadow(
-      color: Color(0x1F000000),
-      offset: Offset(0, 8),
-      blurRadius: 24,
-      spreadRadius: -4,
+      color: Color(0x120F172A),
+      offset: Offset(0, 6),
+      blurRadius: 18,
+      spreadRadius: -6,
     ),
     BoxShadow(
-      color: Color(0x0A000000),
+      color: Color(0x080F172A),
       offset: Offset(0, 2),
       blurRadius: 6,
     ),
   ];
 
-  static List<BoxShadow> shadowGlow = [
+  static const List<BoxShadow> shadowElevated = [
     BoxShadow(
-      color: AppColors.primary.withValues(alpha: 0.30),
-      offset: const Offset(0, 8),
-      blurRadius: 24,
-      spreadRadius: -4,
+      color: Color(0x1A0F172A),
+      offset: Offset(0, 12),
+      blurRadius: 32,
+      spreadRadius: -10,
+    ),
+    BoxShadow(
+      color: Color(0x0D0F172A),
+      offset: Offset(0, 4),
+      blurRadius: 10,
+      spreadRadius: -2,
     ),
   ];
 
-  static List<BoxShadow> coloredGlow(Color color, {double opacity = 0.30}) {
+  static final List<BoxShadow> shadowGlow = coloredGlow(AppColors.primary);
+
+  static List<BoxShadow> coloredGlow(Color color, {double opacity = 0.24}) {
     return [
       BoxShadow(
         color: color.withValues(alpha: opacity),
-        offset: const Offset(0, 8),
-        blurRadius: 24,
-        spreadRadius: -4,
+        offset: const Offset(0, 10),
+        blurRadius: 28,
+        spreadRadius: -8,
       ),
     ];
   }

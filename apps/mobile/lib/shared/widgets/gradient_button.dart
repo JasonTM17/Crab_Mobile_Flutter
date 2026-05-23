@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_gradients.dart';
 import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_theme.dart';
 
 class GradientButton extends StatefulWidget {
   const GradientButton({
@@ -11,8 +12,8 @@ class GradientButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.gradient,
-    this.height = 54,
-    this.borderRadius = 16,
+    this.height = 56,
+    this.borderRadius = AppRadii.md,
     this.glow,
     this.loading = false,
     this.expand = true,
@@ -43,10 +44,13 @@ class _GradientButtonState extends State<GradientButton>
     _controller = AnimationController(
       vsync: this,
       duration: AppMotion.fast,
-      lowerBound: 0.0,
-      upperBound: 0.04,
+      lowerBound: 0,
+      upperBound: 1,
     );
-    _scale = _controller.drive(Tween<double>(begin: 1.0, end: 0.96));
+    _scale = Tween<double>(
+      begin: 1,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _controller, curve: AppMotion.emphasis));
   }
 
   @override
@@ -61,30 +65,31 @@ class _GradientButtonState extends State<GradientButton>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final disabled = widget.onPressed == null || widget.loading;
     final gradient = widget.gradient ?? AppGradients.primary;
     final glow = widget.glow ?? AppShadows.shadowGlow;
-
     final radius = BorderRadius.circular(widget.borderRadius);
+
     final body = AnimatedBuilder(
       animation: _scale,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _controller.value == 0 ? 1.0 : (1 - _controller.value),
-          child: child,
-        );
+        return Transform.scale(scale: _scale.value, child: child);
       },
       child: Opacity(
-        opacity: disabled ? 0.55 : 1.0,
+        opacity: disabled ? 0.6 : 1,
         child: Container(
-          height: widget.height,
+          height: widget.height < 52 ? 52 : widget.height,
           decoration: BoxDecoration(
             gradient: gradient,
             borderRadius: radius,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: disabled ? 0.08 : 0.14),
+            ),
             boxShadow: disabled ? null : glow,
           ),
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: widget.loading
               ? const SizedBox(
                   width: 22,
@@ -100,16 +105,15 @@ class _GradientButtonState extends State<GradientButton>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (widget.icon != null) ...[
-                      Icon(widget.icon, color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
+                      Icon(widget.icon, color: Colors.white, size: 18),
+                      const SizedBox(width: AppSpacing.xs),
                     ],
                     Text(
                       widget.label,
-                      style: const TextStyle(
+                      style: theme.textTheme.titleSmall?.copyWith(
                         color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.1,
                       ),
                     ),
                   ],
