@@ -1,3 +1,8 @@
+jest.mock('bcrypt', () => ({
+  hash: jest.fn(async (value: string) => `hashed:${value}`),
+  compare: jest.fn(async (value: string, hash: string) => hash === `hashed:${value}`),
+}))
+
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
@@ -6,6 +11,7 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common'
+import * as bcrypt from 'bcrypt'
 import { AuthService } from './auth.service'
 import { UserEntity } from './entities/user.entity'
 import { RefreshTokenEntity } from './entities/refresh-token.entity'
@@ -86,6 +92,71 @@ describe('AuthService', () => {
           lastName: 'B',
         } as never),
       ).rejects.toThrow(ConflictException)
+    })
+
+    it('stores a hashed password and returns token bundle', async () => {
+      mockUserRepo.findOne.mockResolvedValueOnce(null)
+
+      const result = await service.register({
+        email: 'new@b.co',
+        phone: '+10000000001',
+        password: 'secret123',
+        firstName: 'A',
+        lastName: 'B',
+      } as never)
+
+      expect(mockUserRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'new@b.co',
+          phone: '+10000000001',
+          passwordHash: expect.any(String),
+          firstName: 'A',
+          lastName: 'B',
+        }),
+      )
+      expect(mockUserRepo.create.mock.calls[0][0].passwordHash).not.toBe('secret123')
+      expect(bcrypt.hash).toHaveBeenCalledWith('secret123', 12)
+      expect(result).toEqual(
+        expect.objectContaining({
+          requiresPhoneVerification: true,
+          user: expect.objectContaining({
+            email: 'new@b.co',
+            phone: '+10000000001',
+            firstName: 'A',
+            lastName: 'B',
+            role: 'RIDER',
+            status: 'PENDING_VERIFICATION',
+          }),
+          tokens: expect.objectContaining({
+            access_token: 'signed-token',
+            refresh_token: 'signed-token',
+          }),
+        }),
+      )
+    })
+  })
+
+  describe('changePassword', () => {
+    it('accepts the current password and stores a new hash', async () => {
+      const originalHash = 'hashed:old-pass'
+      mockUserRepo.findOne.mockResolvedValueOnce({
+        id: 'user-1',
+        passwordHash: originalHash,
+      })
+
+      await expect(
+        service.changePassword('user-1', {
+          currentPassword: 'old-pass',
+          newPassword: 'new-pass',
+        } as never),
+      ).resolves.toEqual({ success: true })
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('old-pass', originalHash)
+      expect(mockUserRepo.update).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({ passwordHash: expect.any(String) }),
+      )
+      expect(mockUserRepo.update.mock.calls[0][1].passwordHash).toBe('hashed:new-pass')
     })
   })
 
