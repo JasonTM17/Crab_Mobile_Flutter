@@ -13,9 +13,9 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: http://localhost:3000/api
+  - url: http://localhost:3000/api/v1
     description: Local development
-  - url: https://api.crab.app/api
+  - url: https://api.crab.app/api/v1
     description: Production
 
 tags:
@@ -97,9 +97,9 @@ paths:
             schema:
               type: object
               properties:
-                refreshToken:
+                refresh_token:
                   type: string
-              required: [refreshToken]
+              required: [refresh_token]
       responses:
         '200':
           description: Token refreshed
@@ -108,12 +108,19 @@ paths:
               schema:
                 type: object
                 properties:
-                  accessToken:
-                    type: string
-                  expiresIn:
-                    type: integer
+                  user:
+                    $ref: '#/components/schemas/User'
+                  tokens:
+                    $ref: '#/components/schemas/AuthTokens'
 
-  /users/me:
+  /profiles/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     get:
       tags: [Users]
       summary: Get current user profile
@@ -125,9 +132,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserProfile'
-    patch:
+    put:
       tags: [Users]
-      summary: Update current user profile
+      summary: Update user profile
       operationId: updateProfile
       requestBody:
         content:
@@ -225,28 +232,26 @@ paths:
         '200':
           description: Ride cancelled
 
-  /food/restaurants:
+  /restaurants/search:
     get:
       tags: [Food]
       summary: List nearby restaurants
       operationId: listRestaurants
       parameters:
-        - name: lat
+        - name: latitude
           in: query
-          required: true
           schema:
             type: number
-        - name: lng
+        - name: longitude
           in: query
-          required: true
           schema:
             type: number
-        - name: radius
+        - name: radiusKm
           in: query
           schema:
             type: number
             default: 5
-        - name: category
+        - name: cuisineType
           in: query
           schema:
             type: string
@@ -260,7 +265,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRestaurants'
 
-  /food/restaurants/{restaurantId}/menu:
+  /menus/items/restaurant/{restaurantId}:
     get:
       tags: [Food]
       summary: Get restaurant menu
@@ -280,7 +285,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Menu'
 
-  /food/orders:
+  /orders:
     post:
       tags: [Food]
       summary: Place a food order
@@ -299,7 +304,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/FoodOrder'
 
-  /payments/wallet:
+  /wallet/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     get:
       tags: [Payments]
       summary: Get wallet balance
@@ -312,7 +324,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Wallet'
 
-  /payments/topup:
+  /wallet/{userId}/top-up:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     post:
       tags: [Payments]
       summary: Top up wallet
@@ -331,7 +350,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Transaction'
 
-  /payments/transactions:
+  /transactions/user/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     get:
       tags: [Payments]
       summary: Get transaction history
@@ -410,21 +436,20 @@ components:
   schemas:
     RegisterRequest:
       type: object
-      required: [email, password, fullName, phone, role]
+      required: [email, phone, password, firstName, lastName]
       properties:
         email:
           type: string
           format: email
+        phone:
+          type: string
         password:
           type: string
           minLength: 8
-        fullName:
+        firstName:
           type: string
-        phone:
+        lastName:
           type: string
-        role:
-          type: string
-          enum: [rider, driver, restaurant_owner]
 
     LoginRequest:
       type: object
@@ -439,14 +464,20 @@ components:
     LoginResponse:
       type: object
       properties:
-        accessToken:
-          type: string
-        refreshToken:
-          type: string
-        expiresIn:
-          type: integer
         user:
           $ref: '#/components/schemas/User'
+        tokens:
+          $ref: '#/components/schemas/AuthTokens'
+        requiresPhoneVerification:
+          type: boolean
+
+    AuthTokens:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
 
     User:
       type: object
@@ -456,9 +487,16 @@ components:
           format: uuid
         email:
           type: string
-        fullName:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
           type: string
         role:
+          type: string
+          enum: [RIDER, DRIVER, MERCHANT, ADMIN]
+        status:
           type: string
         createdAt:
           type: string
@@ -469,21 +507,26 @@ components:
         - $ref: '#/components/schemas/User'
         - type: object
           properties:
-            phone:
+            avatarUrl:
               type: string
-            avatar:
+            dateOfBirth:
               type: string
-            rating:
-              type: number
-            totalRides:
-              type: integer
+              format: date
+            gender:
+              type: string
+            bio:
+              type: string
 
     UpdateProfileRequest:
       type: object
       properties:
-        fullName:
+        firstName:
+          type: string
+        lastName:
           type: string
         phone:
+          type: string
+        avatarUrl:
           type: string
 
     Location:
@@ -499,15 +542,23 @@ components:
 
     CreateRideRequest:
       type: object
-      required: [pickupLocation, dropoffLocation, vehicleType]
+      required: [rider_id, pickup_lat, pickup_lng, pickup_address, dropoff_lat, dropoff_lng, dropoff_address]
       properties:
-        pickupLocation:
-          $ref: '#/components/schemas/Location'
-        dropoffLocation:
-          $ref: '#/components/schemas/Location'
-        vehicleType:
+        rider_id:
           type: string
-          enum: [bike, car, car_plus]
+          format: uuid
+        pickup_lat:
+          type: number
+        pickup_lng:
+          type: number
+        pickup_address:
+          type: string
+        dropoff_lat:
+          type: number
+        dropoff_lng:
+          type: number
+        dropoff_address:
+          type: string
 
     Ride:
       type: object
@@ -517,15 +568,23 @@ components:
           format: uuid
         status:
           $ref: '#/components/schemas/RideStatus'
-        estimatedFare:
+        estimated_fare:
           type: integer
-        actualFare:
+        actual_fare:
           type: integer
-        pickupLocation:
-          $ref: '#/components/schemas/Location'
-        dropoffLocation:
-          $ref: '#/components/schemas/Location'
-        createdAt:
+        pickup_lat:
+          type: number
+        pickup_lng:
+          type: number
+        pickup_address:
+          type: string
+        dropoff_lat:
+          type: number
+        dropoff_lng:
+          type: number
+        dropoff_address:
+          type: string
+        created_at:
           type: string
           format: date-time
 
@@ -606,8 +665,11 @@ components:
 
     CreateFoodOrderRequest:
       type: object
-      required: [restaurantId, items, deliveryAddress]
+      required: [customerId, restaurantId, items, deliveryLat, deliveryLng, deliveryAddress]
       properties:
+        customerId:
+          type: string
+          format: uuid
         restaurantId:
           type: string
           format: uuid
@@ -622,9 +684,17 @@ components:
                 type: integer
               options:
                 type: object
+        deliveryLat:
+          type: number
+        deliveryLng:
+          type: number
         deliveryAddress:
-          $ref: '#/components/schemas/Location'
-        note:
+          type: string
+        deliveryNotes:
+          type: string
+        paymentMethod:
+          type: string
+        promoCode:
           type: string
 
     FoodOrder:
@@ -662,14 +732,16 @@ components:
 
     TopUpRequest:
       type: object
-      required: [amount, method]
+      required: [amount, paymentMethod]
       properties:
         amount:
           type: integer
           minimum: 10000
-        method:
+        paymentMethod:
           type: string
           enum: [bank_transfer, momo, zalopay, credit_card]
+        reference:
+          type: string
 
     Transaction:
       type: object

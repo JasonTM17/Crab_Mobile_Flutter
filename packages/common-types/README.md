@@ -14,9 +14,9 @@ import { UserRole, RideStatus, Location } from '@crab/common-types';
 
 ### Enums
 
-- `UserRole` - rider, driver, restaurant_owner, admin
-- `RideStatus` - SEARCHING, ACCEPTED, ARRIVING, IN_PROGRESS, COMPLETED, CANCELLED, NO_DRIVER
-- `FoodOrderStatus` - PENDING, CONFIRMED, PREPARING, READY, PICKED_UP, DELIVERED, CANCELLED, REJECTED
+- `UserRole` - RIDER, DRIVER, MERCHANT, ADMIN
+- `RideStatus` - REQUESTED, MATCHED, PICKUP, IN_PROGRESS, COMPLETED, CANCELLED
+- `OrderStatus` - PLACED, CONFIRMED, PREPARING, READY, PICKED_UP, DELIVERED, CANCELLED
 - `VehicleType` - bike, car, car_plus
 - `TransactionType` - topup, ride_payment, food_payment, refund, withdrawal
 - `NotificationType` - ride_accepted, ride_completed, order_confirmed, etc.

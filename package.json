@@ -12,6 +12,7 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "contract:check": "node scripts/check-contracts.js",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
@@ -22,7 +23,7 @@
   },
   "engines": {
     "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "pnpm": ">=10.0.0"
   },
-  "packageManager": "pnpm@9.0.0"
+  "packageManager": "pnpm@10.0.0"
 }

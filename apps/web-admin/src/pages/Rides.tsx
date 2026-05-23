@@ -135,12 +135,10 @@ function RideStatusBadge({ status }: { status: string }) {
   > = {
     COMPLETED: 'success',
     IN_PROGRESS: 'info',
-    ACCEPTED: 'info',
-    PENDING: 'warning',
+    PICKUP: 'info',
+    MATCHED: 'info',
     REQUESTED: 'warning',
     CANCELLED: 'destructive',
-    CANCELED: 'destructive',
-    FAILED: 'destructive',
   }
   return <Badge variant={variant[status] ?? 'secondary'}>{status}</Badge>
 }
