@@ -7,14 +7,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_motion.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class OtpScreen extends StatefulWidget {
-  final String phone;
   const OtpScreen({super.key, required this.phone});
+
+  final String phone;
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -31,20 +34,20 @@ class _OtpScreenState extends State<OtpScreen> {
     super.initState();
     _startTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _focusNodes[0].requestFocus();
+      if (mounted) _focusNodes.first.requestFocus();
     });
   }
 
   void _startTimer() {
     _seconds = 60;
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
       setState(() {
         if (_seconds > 0) {
           _seconds--;
         } else {
-          t.cancel();
+          timer.cancel();
         }
       });
     });
@@ -53,16 +56,16 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    for (final c in _controllers) {
-      c.dispose();
+    for (final controller in _controllers) {
+      controller.dispose();
     }
-    for (final n in _focusNodes) {
-      n.dispose();
+    for (final node in _focusNodes) {
+      node.dispose();
     }
     super.dispose();
   }
 
-  String get _code => _controllers.map((c) => c.text).join();
+  String get _code => _controllers.map((controller) => controller.text).join();
 
   void _onChanged(int index, String value) {
     if (value.isNotEmpty && index < 5) {
@@ -75,9 +78,9 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void _verify() {
     if (_code.length != 6) return;
-    context.read<AuthBloc>().add(
-          AuthOtpVerifyRequested(phone: widget.phone, code: _code),
-        );
+    context
+        .read<AuthBloc>()
+        .add(AuthOtpVerifyRequested(phone: widget.phone, code: _code));
   }
 
   void _resend() {
@@ -87,16 +90,16 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   String _maskedPhone() {
-    final p = widget.phone;
-    if (p.length < 4) return p;
-    return '${p.substring(0, p.length - 4).replaceAll(RegExp(r'\d'), '•')}'
-        '${p.substring(p.length - 4)}';
+    final phone = widget.phone;
+    if (phone.length < 4) return phone;
+    return '${phone.substring(0, phone.length - 4).replaceAll(RegExp(r'\d'), '•')}${phone.substring(phone.length - 4)}';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state.status == AuthStatus.authenticated) {
@@ -108,14 +111,13 @@ class _OtpScreenState extends State<OtpScreen> {
               backgroundColor: cs.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  borderRadius: BorderRadius.circular(AppRadii.md)),
             ),
           );
-          for (final c in _controllers) {
-            c.clear();
+          for (final controller in _controllers) {
+            controller.clear();
           }
-          _focusNodes[0].requestFocus();
+          _focusNodes.first.requestFocus();
         }
       },
       builder: (context, state) {
@@ -124,98 +126,150 @@ class _OtpScreenState extends State<OtpScreen> {
           body: Stack(
             children: [
               Container(
-                height: 240,
-                decoration: const BoxDecoration(gradient: AppGradients.primary),
+                  decoration:
+                      const BoxDecoration(gradient: AppGradients.primary)),
+              Positioned(
+                top: -28,
+                right: -14,
+                child: Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
               SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 4, 16, 0),
-                      child: Row(
-                        children: [
-                          IconButton(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.md,
+                      AppSpacing.sm, AppSpacing.md, AppSpacing.xl),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Material(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          shape: const CircleBorder(),
+                          child: IconButton(
+                            onPressed: () => context.pop(),
                             icon: const Icon(Icons.arrow_back_rounded,
                                 color: Colors.white),
-                            onPressed: () => context.pop(),
+                            tooltip: 'Quay lại',
                           ),
-                        ],
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: Text(
-                        'Verify your phone',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.4,
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
-                      child: Text(
-                        'We sent a 6-digit code to ${_maskedPhone()}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.88),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
                         decoration: BoxDecoration(
-                          color: cs.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
+                          color: Colors.white.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(AppRadii.xl),
+                          border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.14)),
                         ),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List.generate(6, (i) => _otpBox(i)),
-                            ),
-                            const SizedBox(height: 24),
-                            GradientButton(
-                              label: 'Verify',
-                              icon: Icons.check_circle_rounded,
-                              onPressed:
-                                  loading || _code.length != 6 ? null : _verify,
-                              loading: loading,
-                            ),
-                            const SizedBox(height: 16),
-                            _ResendRow(
-                              seconds: _seconds,
-                              onResend: _resend,
-                              accent: cs.primary,
-                            ),
-                            const Spacer(),
-                            Text(
-                              'Tip: keep this screen open to auto-fill from SMS.',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: cs.onSurfaceVariant,
+                            Container(
+                              width: 58,
+                              height: 58,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: AppShadows.shadowSoft,
                               ),
-                              textAlign: TextAlign.center,
+                              child: const Icon(Icons.sms_outlined,
+                                  color: AppColors.primary, size: 30),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              'Verify your phone',
+                              style: theme.textTheme.displayMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              'Enter the 6-digit code sent to ${_maskedPhone()} to unlock your Crab account.',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.92),
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                      const SizedBox(height: AppSpacing.lg),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(AppSpacing.lg,
+                              AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
+                          decoration: BoxDecoration(
+                            color: cs.surface,
+                            borderRadius: BorderRadius.circular(AppRadii.xl),
+                            border: Border.all(
+                                color:
+                                    cs.outlineVariant.withValues(alpha: 0.8)),
+                            boxShadow: AppShadows.shadowElevated,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: List.generate(6, _otpBox),
+                              ),
+                              const SizedBox(height: AppSpacing.lg),
+                              GradientButton(
+                                label: 'Verify',
+                                icon: Icons.check_circle_rounded,
+                                height: 60,
+                                borderRadius: AppRadii.lg,
+                                onPressed: loading || _code.length != 6
+                                    ? null
+                                    : _verify,
+                                loading: loading,
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              _ResendRow(
+                                  seconds: _seconds,
+                                  onResend: _resend,
+                                  accent: cs.primary),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.all(AppSpacing.sm),
+                                decoration: BoxDecoration(
+                                  color: cs.surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadii.md),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.info_outline_rounded,
+                                        size: 18, color: cs.primary),
+                                    const SizedBox(width: AppSpacing.xs),
+                                    Expanded(
+                                      child: Text(
+                                        'Keep this screen open to auto-fill the code from SMS.',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                                color: cs.onSurfaceVariant,
+                                                height: 1.35),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -225,32 +279,41 @@ class _OtpScreenState extends State<OtpScreen> {
     );
   }
 
-  Widget _otpBox(int i) {
-    final cs = Theme.of(context).colorScheme;
-    final filled = _controllers[i].text.isNotEmpty;
+  Widget _otpBox(int index) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final filled = _controllers[index].text.isNotEmpty;
+    final focused = _focusNodes[index].hasFocus;
+
     return AnimatedContainer(
       duration: AppMotion.fast,
+      curve: AppMotion.emphasis,
       width: 48,
-      height: 56,
+      height: 60,
       decoration: BoxDecoration(
         color: filled
-            ? cs.primary.withValues(alpha: 0.08)
-            : cs.surfaceContainerHighest.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(12),
+            ? cs.primary.withValues(alpha: 0.1)
+            : cs.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppRadii.md),
         border: Border.all(
-          color: filled ? cs.primary : Colors.transparent,
-          width: 1.6,
+          color: focused || filled
+              ? cs.primary
+              : cs.outlineVariant.withValues(alpha: 0.84),
+          width: focused || filled ? 1.5 : 1,
         ),
+        boxShadow:
+            focused ? AppShadows.coloredGlow(cs.primary, opacity: 0.14) : null,
       ),
       alignment: Alignment.center,
       child: TextFormField(
-        controller: _controllers[i],
-        focusNode: _focusNodes[i],
+        controller: _controllers[index],
+        focusNode: _focusNodes[index],
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
         maxLength: 1,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+        style: theme.textTheme.headlineMedium
+            ?.copyWith(fontWeight: FontWeight.w800),
         decoration: const InputDecoration(
           counterText: '',
           border: InputBorder.none,
@@ -258,9 +321,9 @@ class _OtpScreenState extends State<OtpScreen> {
           focusedBorder: InputBorder.none,
           contentPadding: EdgeInsets.zero,
         ),
-        onChanged: (v) {
+        onChanged: (value) {
           setState(() {});
-          _onChanged(i, v);
+          _onChanged(index, value);
         },
       ),
     );
@@ -273,6 +336,7 @@ class _ResendRow extends StatelessWidget {
     required this.onResend,
     required this.accent,
   });
+
   final int seconds;
   final VoidCallback onResend;
   final Color accent;
@@ -280,27 +344,25 @@ class _ResendRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text("Didn't receive the code? ", style: theme.textTheme.bodyMedium),
         if (seconds > 0)
           Text(
-            'Resend in $seconds s',
+            'Resend in ${seconds}s',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           )
         else
-          GestureDetector(
-            onTap: onResend,
+          TextButton(
+            onPressed: onResend,
             child: Text(
               'Resend',
-              style: TextStyle(
-                color: accent,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(color: accent, fontWeight: FontWeight.w800),
             ),
           ),
       ],

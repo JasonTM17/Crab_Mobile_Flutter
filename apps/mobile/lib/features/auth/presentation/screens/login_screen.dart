@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_motion.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -39,10 +41,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_usePhone) {
       bloc.add(AuthPhoneLoginRequested(phone: _phoneController.text.trim()));
     } else {
-      bloc.add(AuthEmailLoginRequested(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      ));
+      bloc.add(
+        AuthEmailLoginRequested(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
     }
   }
 
@@ -50,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state.status == AuthStatus.authenticated) {
@@ -64,8 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
               backgroundColor: cs.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  borderRadius: BorderRadius.circular(AppRadii.md)),
             ),
           );
         }
@@ -75,127 +79,185 @@ class _LoginScreenState extends State<LoginScreen> {
         return Scaffold(
           body: Stack(
             children: [
-              // Top gradient backdrop
               Container(
-                height: 280,
-                decoration: const BoxDecoration(gradient: AppGradients.primary),
+                  decoration:
+                      const BoxDecoration(gradient: AppGradients.primary)),
+              Positioned(
+                top: -30,
+                right: -18,
+                child: Container(
+                  width: 152,
+                  height: 152,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
               SafeArea(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 12),
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.18),
-                                blurRadius: 18,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.local_taxi_rounded,
-                            size: 36,
-                            color: Color(0xFF00B14F),
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        const Text(
-                          'Welcome back',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Sign in to continue',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.88),
-                            fontSize: 15,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: cs.surface,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 24,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _MethodToggle(
-                                usePhone: _usePhone,
-                                onChange: (v) => setState(() => _usePhone = v),
-                              ),
-                              const SizedBox(height: 22),
-                              AnimatedSwitcher(
-                                duration: AppMotion.normal,
-                                switchInCurve: AppMotion.standard,
-                                child:
-                                    _usePhone ? _phoneFields() : _emailFields(),
-                              ),
-                              if (!_usePhone)
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed: () =>
-                                        context.push('/forgot-password'),
-                                    child: const Text('Forgot password?'),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.md,
+                      AppSpacing.lg, AppSpacing.md, AppSpacing.xl),
+                  child: AutofillGroup(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(AppRadii.xl),
+                              border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.14)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 72,
+                                  height: 72,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: AppShadows.shadowElevated,
+                                  ),
+                                  child: const Icon(
+                                    Icons.local_taxi_rounded,
+                                    size: 38,
+                                    color: AppColors.primary,
                                   ),
                                 ),
-                              const SizedBox(height: 18),
-                              GradientButton(
-                                label: _usePhone ? 'Send OTP' : 'Sign In',
-                                icon: _usePhone
-                                    ? Icons.sms_rounded
-                                    : Icons.lock_open_rounded,
-                                onPressed: loading ? null : _submit,
-                                loading: loading,
+                                const SizedBox(height: AppSpacing.lg),
+                                Text(
+                                  'Welcome back',
+                                  style:
+                                      theme.textTheme.displayMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  'Book rides, track food, and manage your wallet from one calm, premium home base.',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.92),
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                const Wrap(
+                                  spacing: AppSpacing.xs,
+                                  runSpacing: AppSpacing.xs,
+                                  children: [
+                                    _HeroChip(
+                                        icon: Icons.flash_on_rounded,
+                                        label: 'Fast booking'),
+                                    _HeroChip(
+                                        icon: Icons.shield_outlined,
+                                        label: 'Secure login'),
+                                    _HeroChip(
+                                        icon: Icons.card_giftcard_rounded,
+                                        label: 'Reward perks'),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            decoration: BoxDecoration(
+                              color: cs.surface,
+                              borderRadius: BorderRadius.circular(AppRadii.xl),
+                              border: Border.all(
+                                  color:
+                                      cs.outlineVariant.withValues(alpha: 0.8)),
+                              boxShadow: AppShadows.shadowElevated,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  'Sign in',
+                                  style: theme.textTheme.titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.w800),
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  'Choose your quickest way back in.',
+                                  style: theme.textTheme.bodyMedium
+                                      ?.copyWith(color: cs.onSurfaceVariant),
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                _MethodToggle(
+                                  usePhone: _usePhone,
+                                  onChange: (value) =>
+                                      setState(() => _usePhone = value),
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                AnimatedSwitcher(
+                                  duration: AppMotion.normal,
+                                  switchInCurve: AppMotion.standard,
+                                  child: _usePhone
+                                      ? _phoneFields()
+                                      : _emailFields(),
+                                ),
+                                if (!_usePhone)
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton(
+                                      onPressed: () =>
+                                          context.push('/forgot-password'),
+                                      child: const Text('Forgot password?'),
+                                    ),
+                                  ),
+                                const SizedBox(height: AppSpacing.md),
+                                GradientButton(
+                                  label: _usePhone ? 'Send OTP' : 'Sign In',
+                                  icon: _usePhone
+                                      ? Icons.sms_rounded
+                                      : Icons.lock_open_rounded,
+                                  height: 60,
+                                  borderRadius: AppRadii.lg,
+                                  onPressed: loading ? null : _submit,
+                                  loading: loading,
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text(
+                                  _usePhone
+                                      ? 'We will send a one-time verification code to your phone.'
+                                      : 'Use the same account across rides, food, and wallet.',
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodySmall
+                                      ?.copyWith(color: cs.onSurfaceVariant),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account? ",
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.92),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => context.push('/register'),
+                                child: const Text(
+                                  'Sign Up',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 18),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Don't have an account? ",
-                                style: theme.textTheme.bodyMedium),
-                            TextButton(
-                              onPressed: () => context.push('/register'),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(0, 28),
-                              ),
-                              child: const Text(
-                                'Sign Up',
-                                style: TextStyle(fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -213,15 +275,17 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         AuthTextField(
           controller: _phoneController,
-          label: 'Phone Number',
+          label: 'Phone number',
           hint: '+84 901 234 567',
           prefixIcon: Icons.phone_rounded,
           keyboardType: TextInputType.phone,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
-          validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Phone required';
-            if (!RegExp(r'^\+?[1-9]\d{7,14}$').hasMatch(v.trim())) {
+          autofillHints: const [AutofillHints.telephoneNumber],
+          validator: (value) {
+            final phone = value?.trim() ?? '';
+            if (phone.isEmpty) return 'Phone required';
+            if (!RegExp(r'^\+?[1-9]\d{7,14}$').hasMatch(phone)) {
               return 'Invalid phone number';
             }
             return null;
@@ -242,13 +306,15 @@ class _LoginScreenState extends State<LoginScreen> {
           prefixIcon: Icons.email_rounded,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
-          validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Email required';
-            if (!v.contains('@')) return 'Invalid email';
+          autofillHints: const [AutofillHints.username, AutofillHints.email],
+          validator: (value) {
+            final email = value?.trim() ?? '';
+            if (email.isEmpty) return 'Email required';
+            if (!email.contains('@')) return 'Invalid email';
             return null;
           },
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sm),
         AuthTextField(
           controller: _passwordController,
           label: 'Password',
@@ -256,15 +322,16 @@ class _LoginScreenState extends State<LoginScreen> {
           obscureText: _obscure,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
+          autofillHints: const [AutofillHints.password],
           suffix: IconButton(
+            onPressed: () => setState(() => _obscure = !_obscure),
             icon: Icon(_obscure
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined),
-            onPressed: () => setState(() => _obscure = !_obscure),
           ),
-          validator: (v) {
-            if (v == null || v.isEmpty) return 'Password required';
-            if (v.length < 8) return 'Min 8 characters';
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'Password required';
+            if (value.length < 8) return 'Min 8 characters';
             return null;
           },
         ),
@@ -275,69 +342,128 @@ class _LoginScreenState extends State<LoginScreen> {
 
 class _MethodToggle extends StatelessWidget {
   const _MethodToggle({required this.usePhone, required this.onChange});
+
   final bool usePhone;
   final ValueChanged<bool> onChange;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      height: 44,
+      height: 50,
+      padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
+        color:
+            cs.surfaceContainerHighest.withValues(alpha: isDark ? 0.4 : 0.66),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
       ),
-      padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          _seg(context, 'Phone', Icons.phone_rounded, usePhone,
-              () => onChange(true)),
-          _seg(context, 'Email', Icons.email_rounded, !usePhone,
-              () => onChange(false)),
+          _MethodTogglePill(
+            label: 'Phone',
+            icon: Icons.phone_rounded,
+            active: usePhone,
+            onTap: () => onChange(true),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          _MethodTogglePill(
+            label: 'Email',
+            icon: Icons.email_rounded,
+            active: !usePhone,
+            onTap: () => onChange(false),
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _seg(BuildContext context, String label, IconData icon, bool active,
-      VoidCallback onTap) {
-    final cs = Theme.of(context).colorScheme;
+class _MethodTogglePill extends StatelessWidget {
+  const _MethodTogglePill({
+    required this.label,
+    required this.icon,
+    required this.active,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: AppMotion.fast,
-          decoration: BoxDecoration(
-            color: active ? cs.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: active
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon,
-                  size: 16, color: active ? cs.primary : cs.onSurfaceVariant),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: active ? cs.onSurface : cs.onSurfaceVariant,
-                ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: active ? cs.surface : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              border: Border.all(
+                color: active
+                    ? cs.primary.withValues(alpha: 0.16)
+                    : Colors.transparent,
               ),
-            ],
+              boxShadow: active ? AppShadows.shadowSoft : null,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon,
+                    size: 18, color: active ? cs.primary : cs.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: active ? cs.primary : cs.onSurfaceVariant,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _HeroChip extends StatelessWidget {
+  const _HeroChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+                color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        ],
       ),
     );
   }
