@@ -8,6 +8,7 @@ import 'package:crab_mobile/features/food/presentation/bloc/food_event.dart';
 import 'package:crab_mobile/features/food/presentation/bloc/food_state.dart';
 import 'package:crab_mobile/features/food/data/models/cart_model.dart';
 import 'package:crab_mobile/features/food/presentation/screens/restaurant_list_screen.dart';
+import 'package:crab_mobile/features/food/presentation/widgets/restaurant_card.dart';
 import 'package:crab_mobile/core/theme/app_theme.dart';
 
 import '../helpers/mocks.dart';
@@ -52,7 +53,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Phở 24'), findsOneWidget);
-      expect(find.textContaining('Bún Bò Huế'), findsOneWidget);
+      expect(find.byType(RestaurantCard), findsAtLeastNWidgets(1));
+      expect(find.textContaining('Bún Bò Huế'), findsNothing);
     });
 
     testWidgets('shows error with retry on FoodError', (tester) async {

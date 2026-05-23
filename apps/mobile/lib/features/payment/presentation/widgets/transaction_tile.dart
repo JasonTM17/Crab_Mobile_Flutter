@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/info_chip.dart';
 import '../../data/models/payment_models.dart';
 
 class TransactionTile extends StatelessWidget {
-  final TransactionModel transaction;
-
   const TransactionTile({super.key, required this.transaction});
+
+  final TransactionModel transaction;
 
   @override
   Widget build(BuildContext context) {
+    final amountColor = transaction.isCredit ? AppColors.success : AppColors.error;
+    final title = transaction.description?.trim().isNotEmpty == true
+        ? transaction.description!.trim()
+        : _title;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: transaction.isCredit
-                  ? Colors.green.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: amountColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(
-              _getIcon(),
-              color: transaction.isCredit ? Colors.green : Colors.red,
-              size: 20,
-            ),
+            child: Icon(_icon, color: amountColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -33,52 +35,61 @@ class TransactionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  transaction.description ?? _getTitle(),
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
-                  _formatDate(transaction.createdAt),
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  '${_typeLabel()} • ${_formatDate(transaction.createdAt)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
                 ),
               ],
             ),
           ),
-          Text(
-            '${transaction.isCredit ? '+' : '-'}${_formatAmount(transaction.amount)}đ',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: transaction.isCredit ? Colors.green : Colors.red,
-            ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${transaction.isCredit ? '+' : '-'}${_formatAmount(transaction.amount)}đ',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: amountColor),
+              ),
+              const SizedBox(height: 6),
+              InfoChip(label: _statusLabel(), variant: _statusVariant(), dense: true),
+            ],
           ),
         ],
       ),
     );
   }
 
-  IconData _getIcon() {
+  IconData get _icon {
     switch (transaction.type) {
       case 'topup':
-        return Icons.add_circle_outline;
+        return Icons.add_circle_outline_rounded;
       case 'ride_payment':
-        return Icons.directions_car;
+        return Icons.directions_car_rounded;
       case 'food_payment':
-        return Icons.restaurant;
+        return Icons.restaurant_rounded;
       case 'refund':
-        return Icons.replay;
+        return Icons.replay_rounded;
       default:
-        return Icons.swap_horiz;
+        return Icons.swap_horiz_rounded;
     }
   }
 
-  String _getTitle() {
+  String get _title {
     switch (transaction.type) {
       case 'topup':
         return 'Top Up';
       case 'ride_payment':
-        return 'Ride Payment';
+        return 'Ride payment';
       case 'food_payment':
-        return 'Food Order';
+        return 'Food order';
       case 'refund':
         return 'Refund';
       default:
@@ -86,14 +97,64 @@ class TransactionTile extends StatelessWidget {
     }
   }
 
-  String _formatAmount(double amount) {
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(0)},000';
+  String _typeLabel() {
+    switch (transaction.type) {
+      case 'topup':
+        return 'Wallet top up';
+      case 'ride_payment':
+        return 'Ride';
+      case 'food_payment':
+        return 'Food';
+      case 'refund':
+        return 'Refund';
+      default:
+        return 'Payment';
     }
-    return amount.toStringAsFixed(0);
+  }
+
+  String _statusLabel() {
+    switch (transaction.status.toLowerCase()) {
+      case 'success':
+      case 'completed':
+        return 'Completed';
+      case 'pending':
+        return 'Pending';
+      case 'failed':
+      case 'cancelled':
+        return 'Issue';
+      default:
+        return transaction.status;
+    }
+  }
+
+  InfoChipVariant _statusVariant() {
+    switch (transaction.status.toLowerCase()) {
+      case 'success':
+      case 'completed':
+        return InfoChipVariant.success;
+      case 'pending':
+        return InfoChipVariant.warning;
+      case 'failed':
+      case 'cancelled':
+        return InfoChipVariant.error;
+      default:
+        return transaction.isCredit ? InfoChipVariant.brand : InfoChipVariant.defaults;
+    }
+  }
+
+  String _formatAmount(double amount) {
+    final digits = amount.abs().round().toString();
+    final buffer = StringBuffer();
+    for (var index = 0; index < digits.length; index++) {
+      if (index > 0 && (digits.length - index) % 3 == 0) buffer.write('.');
+      buffer.write(digits[index]);
+    }
+    return buffer.toString();
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '${date.day}/${date.month}/${date.year} • $hour:$minute';
   }
 }
