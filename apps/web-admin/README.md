@@ -2,7 +2,7 @@
 
 React-based admin panel for managing the Crab platform.
 
-## Port: 5173 (dev) / 80 (Docker)
+## Port: 5173 (dev) / 8080 (Docker)
 
 ## Tech Stack
 - React 18 + TypeScript
@@ -45,6 +45,6 @@ pnpm --filter @crab/web-admin dev
 ## Docker
 
 ```bash
-docker build -f apps/web-admin/Dockerfile -t jasontm17/web-admin .
-docker run -p 80:80 jasontm17/web-admin
+docker build -f apps/web-admin/Dockerfile -t nguyenson1710/crab-mobile-web-admin .
+docker run -p 8080:8080 nguyenson1710/crab-mobile-web-admin
 ```

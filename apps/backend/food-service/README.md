@@ -38,6 +38,6 @@ Manages food delivery operations including restaurants, menus, orders, and deliv
 ## Docker
 
 ```bash
-docker build -f apps/backend/food-service/Dockerfile -t jasontm17/food-service .
-docker run -p 3004:3004 --env-file .env jasontm17/food-service
+docker build -f apps/backend/food-service/Dockerfile -t nguyenson1710/crab-mobile-food-service .
+docker run -p 3004:3004 --env-file .env nguyenson1710/crab-mobile-food-service
 ```

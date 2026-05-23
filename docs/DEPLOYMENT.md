@@ -1,250 +1,294 @@
 # Deployment Guide
 
+## Overview
+
+This repository ships three kinds of release artifacts:
+
+1. **GitHub release** created by `.github/workflows/release.yml` on semantic tags like `v1.2.3`
+2. **Docker images** published by `.github/workflows/docker-publish.yml`
+3. **Deployable runtime configs** for Docker Compose and Kubernetes under repo root / `infra/k8s/`
+
+The public Docker Hub namespace for this project is:
+
+- `nguyenson1710`
+
+Image naming follows this convention:
+
+- `nguyenson1710/crab-mobile-gateway`
+- `nguyenson1710/crab-mobile-auth-service`
+- `nguyenson1710/crab-mobile-user-service`
+- `nguyenson1710/crab-mobile-ride-service`
+- `nguyenson1710/crab-mobile-food-service`
+- `nguyenson1710/crab-mobile-payment-service`
+- `nguyenson1710/crab-mobile-chat-service`
+- `nguyenson1710/crab-mobile-notification-service`
+- `nguyenson1710/crab-mobile-rating-service`
+- `nguyenson1710/crab-mobile-web-admin`
+
 ## Prerequisites
 
-- Docker 24+ & Docker Compose v2
-- Node.js 20 LTS (for local development)
-- pnpm 8+
-- Git
+For local verification and deployment work:
 
-## Quick Start (Docker)
+- Docker 24+ with Compose v2
+- Node.js 20.x
+- pnpm 10.x
+- Flutter 3.x stable for `apps/mobile`
+- Git 2.40+
+
+For CI/CD:
+
+- GitHub Actions enabled
+- Docker Hub repository access for `nguyenson1710/*`
+- Required GitHub Actions secrets configured
+
+## Required GitHub Actions Secrets
+
+Set these at:
+
+`Settings -> Secrets and variables -> Actions`
+
+| Secret | Required | Purpose |
+|---|---:|---|
+| `DOCKERHUB_USERNAME` | yes | Docker Hub username; expected value: `nguyenson1710` |
+| `DOCKERHUB_TOKEN` | yes | Docker Hub access token used by docker publish workflow |
+
+Do **not** commit credentials, keystores, or private env files to the repo.
+
+## CI and Release Workflows
+
+### 1. CI
+
+File: `.github/workflows/ci.yml`
+
+Runs on pushes to `main`, `develop`, and pull requests.
+
+What it checks:
+
+- workspace lint
+- workspace build
+- contract drift guardrails via `pnpm -w run contract:check`
+- backend package tests
+- Flutter analyze
+- Flutter tests
+
+### 2. Docker Publish
+
+File: `.github/workflows/docker-publish.yml`
+
+Runs on:
+
+- pushes to `main`
+- tags matching `v*`
+- manual workflow dispatch
+
+What it does:
+
+- logs in to Docker Hub
+- builds all backend service images plus web-admin
+- publishes images to `nguyenson1710/crab-mobile-<service>`
+- emits tags including:
+  - `latest` on default branch
+  - short git SHA
+  - semver tag when release tag is pushed
+
+### 3. GitHub Release
+
+File: `.github/workflows/release.yml`
+
+Runs on semantic tags:
+
+- `vX.Y.Z`
+
+What it does:
+
+- generates changelog content from git history
+- creates a GitHub release entry
+
+Note: this workflow creates the GitHub release entry; Docker images are published by the separate docker publish workflow.
+
+### 4. Security Workflows
+
+Files:
+
+- `.github/workflows/codeql.yml`
+- `.github/workflows/gitleaks.yml`
+- `.github/workflows/trivy.yml`
+- `.github/workflows/sbom.yml`
+
+These provide:
+
+- SAST via CodeQL
+- secret scanning via Gitleaks
+- vulnerability scanning via Trivy
+- SBOM generation via Syft
+
+## Local Verification Before Release
+
+From repo root:
 
 ```bash
-# Clone the repository
-git clone https://github.com/JasonTM17/Crab_Mobile_Flutter.git
-cd Crab_Mobile_Flutter
+pnpm install --frozen-lockfile
+pnpm -w run lint
+pnpm -w run build
+pnpm -w run contract:check
+pnpm -w run test
+```
 
-# Copy environment file
-cp .env.example .env
+For mobile:
 
-# Start all services
+```bash
+cd apps/mobile
+flutter pub get
+flutter analyze
+flutter test
+```
+
+### Known Local Caveat
+
+On some Windows environments, local workspace verification may be blocked by:
+
+- `pnpm install` hitting `EACCES` inside `node_modules`
+- `@crab/auth-service` tests failing before assertions because `bcrypt_lib.node` cannot be loaded locally
+
+If this happens, treat CI on a clean runner as the authority after confirming the diff is otherwise sound.
+
+## Docker Compose
+
+### Development
+
+Use `docker-compose.yml` for local multi-service orchestration.
+
+```bash
 docker compose up -d
-
-# Verify services are running
 docker compose ps
+docker compose logs -f gateway
 ```
 
-All services will be available at:
-- Gateway: http://localhost:3000
-- Web Admin: http://localhost:8080
-- PostgreSQL: localhost:5432
-- MongoDB: localhost:27017
-- Redis: localhost:6379
+### Production-like Validation
 
-## Local Development
+Use `docker-compose.prod.yml` with required environment variables supplied.
+
+Required variables include at least:
+
+- `POSTGRES_PASSWORD`
+- `MONGO_PASSWORD`
+- `RABBITMQ_PASSWORD`
+- `MINIO_PASSWORD`
+- `JWT_SECRET`
+- `JWT_REFRESH_SECRET`
+- `CORS_ORIGIN`
+- `WS_CORS_ORIGIN`
+
+Example config validation:
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Start infrastructure only (databases + redis)
-docker compose -f docker/docker-compose.dev.yml up -d
-
-# Start all services in dev mode
-pnpm dev
-
-# Or start individual services
-pnpm --filter @crab/gateway dev
-pnpm --filter @crab/auth-service dev
-pnpm --filter @crab/web-admin dev
+docker compose -f docker-compose.prod.yml config
 ```
 
-## Environment Variables
+## Mobile Release Notes
 
-### Required Variables
+### Android
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode | `development` |
-| `JWT_SECRET` | Secret for JWT signing | (required) |
-| `JWT_REFRESH_SECRET` | Secret for refresh tokens | (required) |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://crab:crab@localhost:5432/crab` |
-| `MONGODB_URI` | MongoDB connection string | `mongodb://crab:crab@localhost:27017/crab` |
-| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
+The Android app now uses:
 
-### Optional Variables
+- package / application ID: `com.jasontm17.crab`
+- release-safe cleartext handling via manifest placeholders
+- secure URL enforcement in release mode for API and sockets
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Gateway port | `3000` |
-| `RATE_LIMIT_TTL` | Rate limit window (seconds) | `60` |
-| `RATE_LIMIT_MAX` | Max requests per window | `100` |
-| `FCM_SERVER_KEY` | Firebase Cloud Messaging key | - |
-| `GOOGLE_MAPS_API_KEY` | Google Maps API key | - |
-| `MOMO_PARTNER_CODE` | MoMo payment partner code | - |
-| `ZALOPAY_APP_ID` | ZaloPay application ID | - |
+Release signing is configured through local `android/key.properties` and a keystore.
 
-## Docker Production Build
+Expected local file (not committed):
+
+- `apps/mobile/android/key.properties`
+
+Expected values inside `key.properties`:
+
+- `storeFile`
+- `storePassword`
+- `keyAlias`
+- `keyPassword`
+
+If no release keystore is configured, the build logs a clear warning instead of silently using debug signing.
+
+### Mobile Runtime Requirements
+
+Release mobile builds must use secure endpoints:
+
+- API: `https://.../api/v1`
+- Socket: `wss://...`
+
+Do not ship release builds that rely on emulator HTTP defaults.
+
+## Kubernetes
+
+Manifests live under `infra/k8s/`.
+
+Current hardening in the deployable manifests includes:
+
+- `runAsNonRoot: true`
+- `seccompProfile.type: RuntimeDefault`
+- `allowPrivilegeEscalation: false`
+- image refs aligned to `nguyenson1710/crab-mobile-*`
+
+Before applying to a real cluster:
+
+1. replace placeholder secrets management with your real secret source
+2. verify ingress / DNS / TLS
+3. confirm image tags point to the intended SHA or release tag
+4. validate probes and resource limits in the target environment
+
+## Release Checklist
+
+Use this checklist before tagging a release:
+
+- [ ] `pnpm -w run lint` is green
+- [ ] `pnpm -w run build` is green
+- [ ] `pnpm -w run contract:check` is green
+- [ ] `pnpm -w run test` is green, or environment-only local blocker is understood and CI is green
+- [ ] `flutter analyze` is green
+- [ ] `flutter test` is green
+- [ ] `docker compose -f docker-compose.prod.yml config` is green
+- [ ] required GitHub Actions secrets are present
+- [ ] Android release signing material is configured locally / in CI as needed
+- [ ] release endpoints use HTTPS/WSS
+- [ ] `CHANGELOG.md` / release notes are acceptable
+
+## Creating a Release
 
 ```bash
-# Build all service images
-docker compose build
-
-# Build specific service
-docker compose build gateway
-docker compose build auth-service
-
-# Run in production mode
-docker compose -f docker-compose.yml up -d
+git tag v1.2.3
+git push origin v1.2.3
 ```
 
-### Image Registry (GHCR)
+Expected result:
 
-Images are automatically built and pushed via GitHub Actions on tag:
-
-```bash
-# Tag a release
-git tag v1.0.0
-git push origin v1.0.0
-
-# Images published to:
-# jasontm17/gateway:v1.0.0
-# jasontm17/auth-service:v1.0.0
-# jasontm17/user-service:v1.0.0
-# ... (all 9 services + web-admin)
-```
-
-## Database Setup
-
-### PostgreSQL
-
-The database is auto-created by Docker. For manual setup:
-
-```sql
-CREATE DATABASE crab;
-CREATE USER crab WITH PASSWORD 'crab';
-GRANT ALL PRIVILEGES ON DATABASE crab TO crab;
-```
-
-Migrations run automatically on service startup via TypeORM synchronize (dev) or migrations (prod).
-
-### MongoDB
-
-```bash
-# MongoDB is used by chat-service and notification-service
-# Collections are auto-created on first write
-# Indexes are created via Mongoose schema definitions
-```
-
-### Redis
-
-Redis requires no schema setup. Used for:
-- Session storage
-- Rate limiting counters
-- Socket.IO adapter (pub/sub)
-- Cache layer
-
-## Health Checks
-
-Every service exposes a health endpoint:
-
-```bash
-# Check individual service
-curl http://localhost:3000/health  # Gateway
-curl http://localhost:3001/health  # Auth
-curl http://localhost:3002/health  # User
-# ... etc
-
-# Check all services
-for port in 3000 3001 3002 3003 3004 3005 3006 3007 3008; do
-  echo "Port $port: $(curl -s http://localhost:$port/health | jq -r .status)"
-done
-```
-
-Expected response:
-```json
-{ "status": "ok", "service": "gateway", "uptime": 3600, "timestamp": "2024-01-01T00:00:00Z" }
-```
-
-## Scaling
-
-### Horizontal Scaling with Docker
-
-```bash
-# Scale specific services
-docker compose up -d --scale ride-service=3 --scale food-service=2
-
-# Gateway handles load balancing via Docker DNS
-```
-
-### Production Recommendations
-
-| Service | Min Replicas | CPU | Memory |
-|---------|-------------|-----|--------|
-| Gateway | 2 | 0.5 | 512MB |
-| Auth | 2 | 0.25 | 256MB |
-| User | 1 | 0.25 | 256MB |
-| Ride | 3 | 0.5 | 512MB |
-| Food | 2 | 0.5 | 512MB |
-| Payment | 2 | 0.25 | 256MB |
-| Chat | 2 | 0.5 | 512MB |
-| Notification | 2 | 0.25 | 256MB |
-| Rating | 1 | 0.25 | 256MB |
+1. GitHub Release workflow creates a release entry
+2. Docker publish workflow builds and pushes images tagged for the release
+3. security workflows continue to run on normal branch activity / PRs
 
 ## Troubleshooting
 
-### Services won't start
+### `pnpm install` fails with `EACCES`
 
-```bash
-# Check logs
-docker compose logs -f gateway
-docker compose logs -f auth-service
+Likely a local Windows file lock under `node_modules`.
 
-# Verify databases are ready
-docker compose exec postgres pg_isready
-docker compose exec mongodb mongosh --eval "db.runCommand({ping:1})"
-docker compose exec redis redis-cli ping
-```
+Safest next steps:
 
-### Port conflicts
+1. close editors / terminals / watchers touching the repo
+2. rerun `pnpm install --frozen-lockfile`
+3. if it still fails, identify the locking process
 
-```bash
-# Check what's using a port
-lsof -i :3000
+### Docker build validation cannot run locally
 
-# Override ports in .env
-GATEWAY_PORT=4000
-```
+If Docker daemon is unavailable, you can still validate:
 
-### Database connection issues
+- compose config parsing
+- workflow syntax
+- Dockerfile structure
+- workspace build prerequisites
 
-```bash
-# Reset databases
-docker compose down -v  # WARNING: destroys all data
-docker compose up -d
-```
+But final image-build confidence should come from a machine with a working Docker daemon or CI.
 
-### Memory issues
+### Auth-service tests fail before assertions
 
-```bash
-# Increase Docker memory limit (Docker Desktop)
-# Settings > Resources > Memory > 4GB minimum
-
-# Check container resource usage
-docker stats
-```
-
-## CI/CD Pipeline
-
-### GitHub Actions Workflows
-
-1. **CI** (`.github/workflows/ci.yml`)
-   - Triggers: push to main, pull requests
-   - Steps: lint, test, build all services
-   - Matrix build for all 9 backend services + web-admin
-
-2. **Release** (`.github/workflows/release.yml`)
-   - Triggers: tag push (v*)
-   - Steps: build Docker images, push to GHCR, create GitHub release
-
-### Manual Deployment
-
-```bash
-# Pull latest images
-docker compose pull
-
-# Rolling update (zero downtime)
-docker compose up -d --no-deps --build gateway
-docker compose up -d --no-deps --build auth-service
-# ... repeat for each service
-```
+If the failure is a missing `bcrypt_lib.node`, treat it as local environment/runtime setup rather than an immediate code regression, then confirm behavior in CI.
