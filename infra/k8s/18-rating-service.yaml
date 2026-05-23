@@ -7,9 +7,15 @@ spec:
   template:
     metadata: { labels: { app: rating-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: rating-service
-          image: jasontm17/rating-service:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-rating-service:latest
           ports: [{ containerPort: 3008 }]
           envFrom:
             - configMapRef: { name: crab-config }

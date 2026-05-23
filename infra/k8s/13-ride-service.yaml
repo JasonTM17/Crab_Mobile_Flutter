@@ -7,9 +7,15 @@ spec:
   template:
     metadata: { labels: { app: ride-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: ride-service
-          image: jasontm17/ride-service:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-ride-service:latest
           ports: [{ containerPort: 3003 }]
           envFrom:
             - configMapRef: { name: crab-config }

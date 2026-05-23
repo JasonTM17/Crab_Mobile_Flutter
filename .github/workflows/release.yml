@@ -24,7 +24,6 @@ jobs:
         with:
           config: cliff.toml
           args: --latest --strip header
-        continue-on-error: true
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3

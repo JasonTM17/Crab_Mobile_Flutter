@@ -7,9 +7,15 @@ spec:
   template:
     metadata: { labels: { app: auth-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: auth-service
-          image: jasontm17/auth-service:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-auth-service:latest
           ports: [{ containerPort: 3001 }]
           envFrom:
             - configMapRef: { name: crab-config }
