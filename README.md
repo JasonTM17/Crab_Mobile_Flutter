@@ -46,7 +46,7 @@
 | **Realtime** | Socket.IO with Redis adapter for horizontal scaling |
 | **Database** | PostgreSQL + MongoDB (geospatial) + Redis (cache/pub-sub) |
 | **Storage** | MinIO (S3-compatible) |
-| **Status** | All Phases Complete |
+| **Status** | Core phases complete · release hardening in progress |
 
 ---
 
@@ -228,7 +228,7 @@ Mobile screenshots can be captured via `flutter screenshot` from a running emula
 ### Prerequisites
 
 - Node.js 20+
-- pnpm 8+
+- pnpm 10+
 - Flutter 3.x (for mobile development)
 - Docker & Docker Compose
 
@@ -390,6 +390,8 @@ Full guides live under [`docs/`](docs/). Start with the index for an annotated t
 | Notification Service | 3007 | `nguyenson1710/crab-mobile-notification-service` |
 | Rating Service | 3008 | `nguyenson1710/crab-mobile-rating-service` |
 
+In hardened local/prod compose, the gateway is the intended public entrypoint. Internal service ports above are service/container ports, not ports that must remain host-exposed.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
@@ -410,9 +412,10 @@ pnpm test         # Run all tests
 | Check | Command | Expected |
 |-------|---------|----------|
 | TypeScript | `pnpm build` | Zero errors |
-| Lint | `pnpm lint` | Zero warnings |
+| Lint | `pnpm lint` | Zero errors |
 | Tests | `pnpm test` | All passing |
-| Docker | `docker compose up` | All healthy |
+| Flutter analyze | `flutter analyze` | Zero issues |
+| Docker config | `docker compose -f docker-compose.prod.yml config` | Valid config |
 
 ### Release
 
@@ -491,14 +494,12 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [ci-badge]: https://img.shields.io/github/actions/workflow/status/JasonTM17/Crab_Mobile_Flutter/ci.yml?style=for-the-badge&label=CI
 [ci-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/actions
 [docker-badge]: https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white
-[docker-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/pkgs/container/crab-gateway
+[docker-url]: docs/DEPLOYMENT.md
 [license-badge]: https://img.shields.io/github/license/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
 [license-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/blob/main/LICENSE
-[contributors-badge]: https://img.shields.io/github/contributors/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
-[contributors-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/graphs/contributors
 [stars-badge]: https://img.shields.io/github/stars/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
 [stars-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/stargazers
 [issues-badge]: https://img.shields.io/github/issues/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
 [issues-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/issues
 [security-badge]: https://img.shields.io/badge/Security-Hardened-green?style=for-the-badge&logo=shield
-[security-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/security
+[security-url]: SECURITY.md

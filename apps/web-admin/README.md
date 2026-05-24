@@ -26,20 +26,35 @@ React-based admin panel for managing the Crab platform.
 
 | Route | Description |
 |-------|-------------|
-| `/` | Dashboard with KPIs and charts |
-| `/users` | User management table |
-| `/drivers` | Driver management and verification |
-| `/rides` | Ride history and live monitoring |
-| `/orders` | Food order management |
-| `/restaurants` | Restaurant management |
-| `/payments` | Transaction history |
-| `/ratings` | Review moderation |
-| `/settings` | System configuration |
+| `/dashboard` | Dashboard with KPIs and charts |
+| `/dashboard/users` | User management table |
+| `/dashboard/drivers` | Driver management and verification |
+| `/dashboard/merchants` | Merchant list via restaurant data |
+| `/dashboard/restaurants` | Restaurant management |
+| `/dashboard/rides` | Ride history and live monitoring |
+| `/dashboard/orders` | Food order management |
+| `/dashboard/promos` | Promo code management |
+| `/dashboard/notifications` | Broadcast notifications |
+| `/dashboard/payments` | Transaction history |
 
-## Development
+Current routes are defined in `src/App.tsx` and `src/components/layout/Sidebar.tsx`.
+
+## API Base URL
+
+- Development: Vite proxy forwards `/api/*` to `http://localhost:3000`
+- Production: the app uses same-origin `/api/v1` by default
+- Optional override: `VITE_API_URL`
+
+Do not point production builds at `http://localhost:3000`.
+
+## Testing
+
+There is currently no dedicated automated test command for `@crab/web-admin`.
+Use lint + production build + browser smoke checks until a test harness is added.
 
 ```bash
-pnpm --filter @crab/web-admin dev
+pnpm --filter @crab/web-admin lint
+pnpm --filter @crab/web-admin build
 ```
 
 ## Docker
@@ -48,3 +63,33 @@ pnpm --filter @crab/web-admin dev
 docker build -f apps/web-admin/Dockerfile -t nguyenson1710/crab-mobile-web-admin .
 docker run -p 8080:8080 nguyenson1710/crab-mobile-web-admin
 ```
+
+For production, place the container behind a reverse proxy that forwards `/api/` to the gateway.
+Do not expose it as a standalone app unless API routing is configured.
+
+## Known Gaps
+
+- Release bundles are currently large (~860 kB main JS chunk) and should be split further.
+- Web-admin Kubernetes manifests must include a matching `web-admin` Deployment/Service if `admin.crab.example.com` is enabled.
+- Payments error handling should surface backend failures directly instead of silently degrading to empty data.
+
+## Development
+
+```bash
+pnpm --filter @crab/web-admin dev
+```
+
+## Runtime Notes
+
+- Development uses the Vite proxy to forward `/api/*` to the gateway on `http://localhost:3000`.
+- Production defaults to same-origin `/api/v1` unless `VITE_API_URL` is explicitly provided at build time.
+- Deployments behind nginx/ingress must route `/api/` to the gateway.
+
+## Verification
+
+```bash
+pnpm --filter @crab/web-admin lint
+pnpm --filter @crab/web-admin build
+```
+
+Manual smoke coverage should include login, dashboard load, payments, notifications, and logout.

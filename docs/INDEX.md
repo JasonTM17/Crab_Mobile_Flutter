@@ -51,9 +51,10 @@
 
 ## Canonical Constants
 
-- **API base URL**: `http://localhost:3000/api/v1`
-- **WebSocket URL**: `ws://localhost:3000/{namespace}` (`ride`, `food`, `chat`, `notification`)
-- **Health check**: `GET /healthz` and `GET /readyz` per service; gateway aggregator at `GET /health`
+- **API base URL (dev)**: `http://localhost:3000/api/v1`
+- **API base URL (web-admin prod default)**: same-origin `/api/v1`
+- **WebSocket URL (dev)**: `ws://localhost:3000/{namespace}` (`ride`, `food`, `chat`, `notification`)
+- **Health check**: gateway `GET /health`; services expose `GET /health`, and the shared observability module also provides `GET /healthz` and `GET /readyz` where wired
 
 ### Ride Status Vocabulary
 `REQUESTED` → `MATCHED` → `PICKUP` → `IN_PROGRESS` → `COMPLETED` (any state → `CANCELLED`)
