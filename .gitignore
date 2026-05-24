@@ -52,6 +52,7 @@ Thumbs.db
 *.ipr
 *.iws
 .gradle/
+.gradle-local/
 local.properties
 GeneratedPluginRegistrant.java
 *.class
@@ -62,6 +63,7 @@ GeneratedPluginRegistrant.java
 *.dSYM.zip
 *.dSYM
 flutter/
+flutter_*.log
 
 # Docker
 docker-compose.override.yml
@@ -102,4 +104,11 @@ RULES.md
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Local screenshot proof artifacts
+/docs/screenshots/current-proof.png
+/docs/screenshots/emulator-current.png
+/docs/screenshots/emulator-proof-1.png
+/docs/screenshots/ui-proof-*.png
+/docs/screenshots/ui.xml
 

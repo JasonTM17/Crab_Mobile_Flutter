@@ -51,7 +51,7 @@ We follow **coordinated disclosure**:
 
 ## Bug Bounty
 
-A formal bug bounty program is **not currently offered**. We will publicly acknowledge contributors in release notes and the `SECURITY-HALL-OF-FAME.md` file once it exists.
+A formal bug bounty program is **not currently offered**.
 
 ## Scope
 

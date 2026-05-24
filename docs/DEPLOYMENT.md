@@ -5,7 +5,7 @@
 This repository ships three kinds of release artifacts:
 
 1. **GitHub release** created by `.github/workflows/release.yml` on semantic tags like `v1.2.3`
-2. **Docker images** published by `.github/workflows/docker-publish.yml`
+2. **Docker images** published by `.github/workflows/docker-publish.yml` to Docker Hub
 3. **Deployable runtime configs** for Docker Compose and Kubernetes under repo root / `infra/k8s/`
 
 The public Docker Hub namespace for this project is:
@@ -64,10 +64,9 @@ Runs on pushes to `main`, `develop`, and pull requests.
 
 What it checks:
 
-- workspace lint
-- workspace build
+- per-package lint/build matrix for backend packages and web-admin
 - contract drift guardrails via `pnpm -w run contract:check`
-- backend package tests
+- backend package tests matrix
 - Flutter analyze
 - Flutter tests
 
@@ -164,6 +163,8 @@ docker compose ps
 docker compose logs -f gateway
 ```
 
+Note: internal backend services are intended to sit behind the gateway. If a compose profile or local override exposes service ports directly, treat that as a development-only escape hatch and not a release-safe topology.
+
 ### Production-like Validation
 
 Use `docker-compose.prod.yml` with required environment variables supplied.
@@ -230,6 +231,8 @@ Current hardening in the deployable manifests includes:
 - `allowPrivilegeEscalation: false`
 - image refs aligned to `nguyenson1710/crab-mobile-*`
 
+Important: if `admin.crab.example.com` is enabled in ingress, a matching `web-admin` Deployment/Service must exist in `infra/k8s/` or the admin host will route to a missing backend.
+
 Before applying to a real cluster:
 
 1. replace placeholder secrets management with your real secret source
@@ -252,6 +255,7 @@ Use this checklist before tagging a release:
 - [ ] Android release signing material is configured locally / in CI as needed
 - [ ] release endpoints use HTTPS/WSS
 - [ ] `CHANGELOG.md` / release notes are acceptable
+- [ ] internal backend services are not unintentionally exposed outside the gateway boundary
 
 ## Creating a Release
 
