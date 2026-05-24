@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ShoppingBag } from 'lucide-react'
 import api from '@/lib/axios'
 import { Button } from '@/components/ui/button'
@@ -40,10 +40,6 @@ export default function Orders() {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    setLoading(false)
-  }, [])
 
   return (
     <div className="space-y-6">

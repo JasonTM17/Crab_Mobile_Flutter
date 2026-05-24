@@ -100,8 +100,6 @@ services:
       context: .
       dockerfile: apps/backend/auth-service/Dockerfile
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-auth-service:${TAG:-latest}
-    ports:
-      - '3001:3001'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3001
@@ -124,8 +122,6 @@ services:
       context: .
       dockerfile: apps/backend/user-service/Dockerfile
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-user-service:${TAG:-latest}
-    ports:
-      - '3002:3002'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3002
@@ -149,8 +145,6 @@ services:
       context: .
       dockerfile: apps/backend/ride-service/Dockerfile
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-ride-service:${TAG:-latest}
-    ports:
-      - '3003:3003'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3003
@@ -173,8 +167,6 @@ services:
       context: .
       dockerfile: apps/backend/food-service/Dockerfile
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-food-service:${TAG:-latest}
-    ports:
-      - '3004:3004'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3004
@@ -197,8 +189,6 @@ services:
       context: .
       dockerfile: apps/backend/payment-service/Dockerfile
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-payment-service:${TAG:-latest}
-    ports:
-      - '3005:3005'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3005
@@ -218,8 +208,6 @@ services:
       context: .
       dockerfile: apps/backend/chat-service/Dockerfile
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-chat-service:${TAG:-latest}
-    ports:
-      - '3006:3006'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3006
@@ -239,8 +227,6 @@ services:
       context: .
       dockerfile: apps/backend/notification-service/Dockerfile
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-notification-service:${TAG:-latest}
-    ports:
-      - '3007:3007'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3007
@@ -260,8 +246,6 @@ services:
       context: .
       dockerfile: apps/backend/rating-service/Dockerfile
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-rating-service:${TAG:-latest}
-    ports:
-      - '3008:3008'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3008
@@ -279,11 +263,11 @@ services:
     build:
       context: .
       dockerfile: apps/web-admin/Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3000/api/v1
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-web-admin:${TAG:-latest}
     ports:
       - '5173:8080'
-    environment:
-      VITE_API_URL: http://gateway:3000/api/v1
     depends_on:
       - gateway
     restart: unless-stopped

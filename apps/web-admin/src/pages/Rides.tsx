@@ -26,8 +26,6 @@ export default function Rides() {
   const [error, setError] = useState<string | null>(null)
 
   function load() {
-    setLoading(true)
-    setError(null)
     api
       .get('/rides')
       .then((r) => setRides(r.data.data ?? r.data ?? []))
@@ -39,7 +37,7 @@ export default function Rides() {
   }
 
   useEffect(() => {
-    load()
+    void load()
   }, [])
 
   return (
@@ -77,7 +75,14 @@ export default function Rides() {
                     title="Could not load rides"
                     description={error}
                     action={
-                      <Button variant="outline" onClick={load}>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setLoading(true)
+                          setError(null)
+                          void load()
+                        }}
+                      >
                         Retry
                       </Button>
                     }

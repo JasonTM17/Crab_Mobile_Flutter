@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { cn } from '@/lib/utils'
-import { buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 
 // Lightweight AlertDialog built on top of Radix Dialog primitive.
 // Provides the shadcn AlertDialog API surface without a dedicated dep.
@@ -101,11 +101,9 @@ const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Close>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Close>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Close
-    ref={ref}
-    className={cn(buttonVariants(), className)}
-    {...props}
-  />
+  <Button asChild className={className}>
+    <DialogPrimitive.Close ref={ref} {...props} />
+  </Button>
 ))
 AlertDialogAction.displayName = 'AlertDialogAction'
 
@@ -113,15 +111,9 @@ const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Close>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Close>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Close
-    ref={ref}
-    className={cn(
-      buttonVariants({ variant: 'outline' }),
-      'mt-2 sm:mt-0',
-      className,
-    )}
-    {...props}
-  />
+  <Button asChild variant="outline" className={cn('mt-2 sm:mt-0', className)}>
+    <DialogPrimitive.Close ref={ref} {...props} />
+  </Button>
 ))
 AlertDialogCancel.displayName = 'AlertDialogCancel'
 

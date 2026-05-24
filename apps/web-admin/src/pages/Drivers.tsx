@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { toast } from 'sonner'
 import api from '@/lib/axios'
 import { Button } from '@/components/ui/button'
@@ -74,8 +75,12 @@ export default function Drivers() {
       toast.success('Driver approved')
       setPendingApproveId(null)
       loadPending()
-    } catch (e: any) {
-      toast.error(e.response?.data?.message ?? 'Failed to approve')
+    } catch (e: unknown) {
+      toast.error(
+        axios.isAxiosError(e)
+          ? e.response?.data?.message ?? 'Failed to approve'
+          : 'Failed to approve',
+      )
     } finally {
       setSubmitting(false)
     }
@@ -93,8 +98,12 @@ export default function Drivers() {
       setPendingRejectId(null)
       setRejectionReason('')
       loadPending()
-    } catch (e: any) {
-      toast.error(e.response?.data?.message ?? 'Failed to reject')
+    } catch (e: unknown) {
+      toast.error(
+        axios.isAxiosError(e)
+          ? e.response?.data?.message ?? 'Failed to reject'
+          : 'Failed to reject',
+      )
     } finally {
       setSubmitting(false)
     }
