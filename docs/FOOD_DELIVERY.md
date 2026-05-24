@@ -82,9 +82,9 @@ Estimated prep time = `max(item.prep_time_minutes)` from the menu, plus a 2-minu
 
 ### 4. Courier dispatch
 
-> **Implementation note:** The current order lifecycle is API-driven through restaurant and driver actions. A dedicated `DispatchService` / `food-matching` worker can be added behind the same state machine without changing the public order statuses.
+> **Implementation note:** The current order lifecycle is API-driven through restaurant and driver actions. The dispatch flow below is the planned worker-backed path once a dedicated `DispatchService` / `food-matching` queue is added behind the same public order statuses.
 
-When an order hits `READY` (or 5 minutes before, configurable), `DispatchService` enqueues a `food-matching` BullMQ job with the same shape as ride matching, biased to:
+In that worker-backed flow, when an order hits `READY` (or 5 minutes before, configurable), `DispatchService` enqueues a `food-matching` BullMQ job with the same shape as ride matching, biased to:
 
 - Couriers within 1 km of the restaurant (smaller radius than rides).
 - Couriers without an active food/ride (no batching in v1).
