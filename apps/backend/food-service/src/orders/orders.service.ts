@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DataSource, Repository } from 'typeorm'
+import { Between, DataSource, FindOptionsWhere, Repository } from 'typeorm'
 import { OrderStatus } from '@crab/common-types'
 import { OrderEntity } from './entities/order.entity'
 import { OrderItemEntity } from './entities/order-item.entity'
@@ -121,6 +121,33 @@ export class OrdersService {
       order: { createdAt: 'DESC' },
       take: 100,
     })
+  }
+
+  async list(opts: {
+    page?: number
+    limit?: number
+    status?: OrderStatus
+    fromDate?: Date
+    toDate?: Date
+  } = {}) {
+    const page = opts.page ?? 1
+    const limit = opts.limit ?? 20
+    const where: FindOptionsWhere<OrderEntity> = {}
+
+    if (opts.status) where.status = opts.status
+    if (opts.fromDate && opts.toDate) {
+      where.createdAt = Between(opts.fromDate, opts.toDate)
+    }
+
+    const [data, total] = await this.orderRepo.findAndCount({
+      where,
+      relations: ['items'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    })
+
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 
   async findByDriver(driverId: string, limit = 50) {
