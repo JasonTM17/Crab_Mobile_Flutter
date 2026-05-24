@@ -67,9 +67,9 @@ Không build production trỏ trực tiếp về `http://localhost:3000`.
 
 ## Testing
 
-The admin dashboard is verified with static analysis, production builds, and browser smoke coverage for the critical operations paths.
+The admin dashboard is verified with static analysis, production builds, and browser smoke checks for the critical operations paths.
 
-Web admin được kiểm chứng bằng static analysis, production build và browser smoke coverage cho các luồng vận hành quan trọng.
+Web admin được kiểm chứng bằng static analysis, production build và browser smoke checks cho các luồng vận hành quan trọng.
 
 ```bash
 pnpm --filter @crab/web-admin lint
