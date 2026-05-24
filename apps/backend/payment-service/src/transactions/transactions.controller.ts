@@ -6,6 +6,25 @@ import { TransactionStatus, TransactionType } from './entities/transaction.entit
 export class TransactionsController {
   constructor(private readonly service: TransactionsService) {}
 
+  @Get()
+  listAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('type') type?: TransactionType,
+    @Query('status') status?: TransactionStatus,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ) {
+    return this.service.listAll({
+      page: page ? +page : 1,
+      limit: limit ? +limit : 20,
+      type,
+      status,
+      fromDate: fromDate ? new Date(fromDate) : undefined,
+      toDate: toDate ? new Date(toDate) : undefined,
+    })
+  }
+
   @Get('user/:userId')
   list(
     @Param('userId') userId: string,

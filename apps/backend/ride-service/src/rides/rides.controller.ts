@@ -10,6 +10,7 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common'
+import { RideStatus } from '@crab/common-types'
 import { RidesService } from './rides.service'
 import { CreateRideDto } from './dto/create-ride.dto'
 import { UpdateRideStatusDto } from './dto/update-ride-status.dto'
@@ -25,6 +26,24 @@ export class RidesController {
   async create(@Body() dto: CreateRideDto) {
     const ride = await this.ridesService.create(dto)
     return { success: true, data: ride, statusCode: HttpStatus.CREATED }
+  }
+
+  @Get()
+  async list(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('status') status?: RideStatus,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ) {
+    const rides = await this.ridesService.list({
+      page: page ? +page : 1,
+      limit: limit ? +limit : 20,
+      status,
+      fromDate: fromDate ? new Date(fromDate) : undefined,
+      toDate: toDate ? new Date(toDate) : undefined,
+    })
+    return { success: true, ...rides, statusCode: HttpStatus.OK }
   }
 
   @Get(':id')
