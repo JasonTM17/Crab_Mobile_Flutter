@@ -42,6 +42,8 @@ void main() {
       await tester.enterText(textFields.first, 'test@crab.vn');
       await tester.enterText(textFields.at(1), 'Test@1234');
 
+      await tester.ensureVisible(find.text('Sign In'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Sign In'));
       await tester.pump();
 
