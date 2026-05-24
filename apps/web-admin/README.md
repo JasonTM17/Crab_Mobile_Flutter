@@ -66,11 +66,11 @@ docker run -p 8080:8080 nguyenson1710/crab-mobile-web-admin
 For production, place the container behind a reverse proxy that forwards `/api/` to the gateway.
 Do not expose it as a standalone app unless API routing is configured.
 
-## Known Gaps
+## Operational Notes
 
-- Release bundles are currently large (~860 kB main JS chunk) and should be split further.
-- Web-admin Kubernetes manifests must include a matching `web-admin` Deployment/Service if `admin.crab.example.com` is enabled.
-- Payments error handling should surface backend failures directly instead of silently degrading to empty data.
+- Release bundles are currently large (~860 kB main JS chunk) and remain a good candidate for future code-splitting work.
+- If `admin.crab.example.com` is enabled, keep the matching `web-admin` Kubernetes Deployment/Service in sync with ingress updates.
+- Payments views should be regression-tested against backend error responses whenever payment-service contracts change.
 
 ## Development
 
