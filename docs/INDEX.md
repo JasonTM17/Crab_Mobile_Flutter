@@ -2,7 +2,15 @@
 
 ## Crab Super App — Technical Documentation
 
+This index organizes the repository documentation by system area so reviewers can quickly inspect architecture, API contracts, mobile/web clients, deployment, testing, and operations.
+
+Trang này sắp xếp tài liệu theo từng mảng hệ thống để người xem nhanh chóng kiểm tra kiến trúc, API contract, mobile/web clients, deployment, testing và vận hành.
+
 ### Architecture & Reference
+
+Core system design and contract documents.
+
+Tài liệu cốt lõi về thiết kế hệ thống và contract.
 
 | Document | Description |
 |----------|-------------|
@@ -13,6 +21,10 @@
 
 ### Realtime & Domain Flows
 
+Domain-specific flows for rides, food delivery, ratings, and realtime events.
+
+Các luồng nghiệp vụ cho gọi xe, giao đồ ăn, rating và realtime events.
+
 | Document | Description |
 |----------|-------------|
 | [Realtime](./REALTIME.md) | Socket.IO topology, namespaces, lifecycles, replay strategy |
@@ -22,6 +34,10 @@
 | [Rating Service](./RATING.md) | Rating model, aggregate update flow, API surface |
 
 ### Apps & Operations
+
+Application surfaces, deployment guidance, observability, and test strategy.
+
+Tài liệu về bề mặt ứng dụng, triển khai, observability và chiến lược test.
 
 | Document | Description |
 |----------|-------------|
@@ -45,11 +61,14 @@
 | [README](../README.md) | Project overview and quick start |
 | [Changelog](../CHANGELOG.md) | Versioned change history (Keep a Changelog) |
 | [Contributing](../CONTRIBUTING.md) | Setup, branching, PR rules |
-| [AGENTS](../AGENTS.md) | Rules AI coding agents must follow |
 | [Code of Conduct](../CODE_OF_CONDUCT.md) | Community standards |
 | [Security](../SECURITY.md) | How to report vulnerabilities |
 
 ## Canonical Constants
+
+Shared runtime constants used across clients, services, and documentation.
+
+Các hằng số runtime dùng chung giữa client, service và tài liệu.
 
 - **API base URL (dev)**: `http://localhost:3000/api/v1`
 - **API base URL (web-admin prod default)**: same-origin `/api/v1`

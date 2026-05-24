@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend: 3 service unit specs (auth.service, rides.service, promo.service)
 - Tests: k6 load test suite (baseline-smoke, ride-flow, order-flow)
 - Docs: REALTIME, RIDE_MATCHING, FOOD_DELIVERY guides
-- Docs: MOBILE.md, ADMIN.md, RATING.md, OBSERVABILITY.md, AGENTS.md
+- Docs: MOBILE.md, ADMIN.md, RATING.md, OBSERVABILITY.md
 
 ### Changed
 - Mobile: bloc routes catch errors through mapErrorToMessage helper
@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docs: reconcile RideStatus and OrderStatus enums to canonical wire vocabulary
 - Docs: rename socket events to wire-level names (ride:status, ride:matched, ride:location, order:status)
 - Docs: regroup INDEX.md by Architecture / Realtime / Apps / Repo with cross-links to root files
-- Docs: mark FOOD_DELIVERY courier dispatch section aspirational
+- Docs: clarify FOOD_DELIVERY courier dispatch roadmap and current order lifecycle
 
 ### Fixed
 - pnpm-lock.yaml drift after backend-shared added jest deps

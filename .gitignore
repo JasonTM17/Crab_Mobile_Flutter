@@ -74,15 +74,11 @@ docker-compose.override.yml
 tmp/
 temp/
 
-# OMC (AI tooling state)
+# Local workspace state
 .omc/
-
-# Claude Code session/private state
 .claude/
 .claude-private/
 .claude/worktrees/
-
-# Kilo private state and plans
 .kilo/
 .private/
 
@@ -105,14 +101,13 @@ RULES.md
 # Playwright MCP artifacts
 .playwright-mcp/
 
-# Local screenshot proof artifacts
-/docs/screenshots/current-proof.png
-/docs/screenshots/emulator-current.png
-/docs/screenshots/emulator-proof-1.png
-/docs/screenshots/ui-proof-*.png
+# Local screenshot scratch artifacts
+/docs/screenshots/*proof*.png
+/docs/screenshots/*current*.png
+/docs/screenshots/ui-*.png
 /docs/screenshots/ui.xml
-/dashboard-populated.png
+/*-populated.png
 /docs-*-final.png
 /final-*.png
-/login-live.png
+/*-live.png
 
