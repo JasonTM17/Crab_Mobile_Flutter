@@ -1,6 +1,8 @@
 # Screenshots Gallery
 
-Captured UI screenshots of the Crab Super App admin dashboard. All shots taken at 1440x900 viewport with the production Vite build served locally.
+A curated gallery of the Crab Super App admin console across desktop and mobile breakpoints. Screenshots show the production dashboard experience with seeded operational data.
+
+Bộ sưu tập ảnh giao diện admin của Crab Super App trên desktop và mobile viewport. Các ảnh thể hiện trạng thái vận hành có dữ liệu mẫu, không phải màn hình trống.
 
 ## Web Admin Dashboard
 
@@ -22,7 +24,7 @@ Paginated user table with name/email/phone search, status badges (ACTIVE / SUSPE
 ### Driver Verification Queue
 ![Drivers](admin-04-drivers.png)
 
-Pending driver applications with license number, vehicle info, plate, and approve/reject actions. Calls `/verification/drivers/admin/pending`.
+Pending driver applications with license number, vehicle information, plate details, and review actions.
 
 ### Rides Monitoring
 ![Rides](admin-05-rides.png)
@@ -43,7 +45,9 @@ Re-captured dashboard after navigating through all sections to verify state pers
 
 ## Mobile Viewport (390x812 - iPhone)
 
-The web admin is also responsive. Same screens captured at iPhone-sized viewport:
+The web admin is responsive and keeps the same operations-first layout at an iPhone-sized viewport.
+
+Giao diện web admin hỗ trợ responsive và giữ được bố cục ưu tiên vận hành trên viewport cỡ iPhone:
 
 ### Mobile Dashboard
 ![Mobile Dashboard](admin-mobile-01-dashboard.png)
@@ -67,15 +71,9 @@ The web admin is also responsive. Same screens captured at iPhone-sized viewport
 
 ## Mobile (Flutter) Screenshots
 
-Mobile screenshots are best captured via:
+The Flutter mobile app shares the same product surface: authentication, home services, ride booking, food discovery, wallet, notifications, and profile settings.
 
-```bash
-cd apps/mobile
-flutter run -d <device>
-# Use device's screenshot capability or `flutter screenshot`
-```
-
-Place captures in this directory using prefix `mobile-NN-<screen>.png`.
+Ứng dụng Flutter bao phủ cùng bề mặt sản phẩm: đăng nhập, trang chủ dịch vụ, đặt xe, khám phá món ăn, ví, thông báo và hồ sơ cá nhân.
 
 ## GIFs
 
@@ -83,6 +81,6 @@ Place captures in this directory using prefix `mobile-NN-<screen>.png`.
 
 ![Admin release flow](../gifs/admin-release-flow.gif)
 
-A curated login → dashboard → users → drivers → rides → orders → final dashboard flow is now published at `docs/gifs/admin-release-flow.gif`.
+A short login → dashboard → users → drivers → rides → orders flow demonstrates the core admin journey.
 
-Additional animated flow GIFs belong in `docs/gifs/` using prefix `flow-NN-<name>.gif`.
+GIF ngắn minh họa luồng admin cốt lõi từ đăng nhập đến dashboard, users, drivers, rides và orders.

@@ -8,6 +8,12 @@ This repository ships three kinds of release artifacts:
 2. **Docker images** published by `.github/workflows/docker-publish.yml` to Docker Hub
 3. **Deployable runtime configs** for Docker Compose and Kubernetes under repo root / `infra/k8s/`
 
+Repo này phát hành ba nhóm artifact chính:
+
+1. **GitHub release** được tạo bởi `.github/workflows/release.yml` khi push semantic tag như `v1.2.3`
+2. **Docker images** được publish lên Docker Hub bởi `.github/workflows/docker-publish.yml`
+3. **Runtime configs** cho Docker Compose và Kubernetes ở repo root / `infra/k8s/`
+
 The public Docker Hub namespace for this project is:
 
 - `nguyenson1710`
@@ -142,14 +148,14 @@ flutter analyze
 flutter test
 ```
 
-### Known Local Caveat
+### Local Verification Notes
 
-On some Windows environments, local workspace verification may be blocked by:
+On Windows development machines, file locks or native module resolution can affect local verification:
 
-- `pnpm install` hitting `EACCES` inside `node_modules`
-- `@crab/auth-service` tests failing before assertions because `bcrypt_lib.node` cannot be loaded locally
+- `pnpm install` may hit `EACCES` inside `node_modules` if another process holds a file lock.
+- `@crab/auth-service` tests can fail before assertions if the native bcrypt binding is unavailable in the local runtime.
 
-If this happens, treat CI on a clean runner as the authority after confirming the diff is otherwise sound.
+Use a clean CI runner as the final authority after confirming the working tree and targeted local checks are otherwise sound.
 
 ## Docker Compose
 
@@ -231,7 +237,7 @@ Current hardening in the deployable manifests includes:
 - `allowPrivilegeEscalation: false`
 - image refs aligned to `nguyenson1710/crab-mobile-*`
 
-Important: if `admin.crab.example.com` is enabled in ingress, a matching `web-admin` Deployment/Service must exist in `infra/k8s/` or the admin host will route to a missing backend.
+When enabling a dedicated admin host, keep the `web-admin` Deployment/Service and ingress routes in sync so the static dashboard and same-origin `/api/` proxy both resolve correctly.
 
 Before applying to a real cluster:
 

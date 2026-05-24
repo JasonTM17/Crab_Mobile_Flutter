@@ -1,10 +1,12 @@
 # Security Policy
 
-The Crab Super App team takes security seriously. Thanks for helping us keep the platform and its users safe.
+Crab Super App treats vulnerability reports as high-priority engineering work and follows coordinated disclosure for confirmed security issues.
+
+Crab Super App xem báo cáo lỗ hổng là ưu tiên kỹ thuật cao và tuân theo quy trình coordinated disclosure cho các vấn đề bảo mật đã xác nhận.
 
 ## Supported Versions
 
-Only the latest release on the `main` branch currently receives security updates. Once stable releases are tagged, this section will list the supported version range.
+The latest `main` branch and tagged production releases receive security updates. Older snapshots and experimental branches are not supported.
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -14,6 +16,8 @@ Only the latest release on the `main` branch currently receives security updates
 ## Reporting a Vulnerability
 
 **Do not open a public GitHub issue, pull request, or discussion for security vulnerabilities.**
+
+**Không mở GitHub issue, pull request hoặc discussion công khai cho lỗ hổng bảo mật.**
 
 Instead, email the maintainer directly:
 
@@ -48,10 +52,6 @@ We follow **coordinated disclosure**:
 - We ask reporters to give us **up to 90 days** to ship a fix before public disclosure.
 - Once a fix is released, we will publish a security advisory crediting the reporter (unless they prefer to remain anonymous).
 - For critical issues that are being actively exploited, we may release an emergency patch and disclose immediately.
-
-## Bug Bounty
-
-A formal bug bounty program is **not currently offered**.
 
 ## Scope
 
@@ -99,4 +99,4 @@ We will not pursue legal action against researchers who:
 - Do not access, modify, or exfiltrate user data beyond what is needed to demonstrate the issue
 - Give us a reasonable window to respond before public disclosure
 
-Thanks for keeping Crab safe.
+Responsible reports help keep the platform and its users safe.
