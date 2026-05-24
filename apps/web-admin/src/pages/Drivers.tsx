@@ -111,11 +111,21 @@ export default function Drivers() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">
-        Driver Verifications (Pending)
-      </h1>
-      <div className="bg-card rounded-lg shadow border overflow-hidden">
-        <table className="w-full">
+      <div className="space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+          Drivers
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Review pending driver applications and approve or reject them with a clear reason.
+        </p>
+      </div>
+      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b bg-muted/30 px-6 py-3 text-sm text-muted-foreground">
+          <span>{drivers.length} applications in review</span>
+          <span>Approval queue for new drivers</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase">
@@ -212,7 +222,8 @@ export default function Drivers() {
               ))
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       {/* Approve confirm */}
