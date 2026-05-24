@@ -2,12 +2,12 @@ import { Process, Processor, OnQueueFailed, OnQueueCompleted } from '@nestjs/bul
 import { Injectable, Logger } from '@nestjs/common'
 import type { Job } from 'bull'
 
+import { NOTIFICATION_FANOUT_QUEUE } from './notification-queue.constants'
 import { NotificationsService } from './notifications.service'
 import {
   NotificationType,
   NotificationChannel,
 } from './schemas/notification.schema'
-import { NOTIFICATION_FANOUT_QUEUE } from './notification-queue.module'
 import type { NotificationFanoutJob } from './notification-queue.service'
 
 const TYPE_MAP: Record<NotificationFanoutJob['type'], NotificationType> = {
