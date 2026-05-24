@@ -41,20 +41,6 @@ Re-captured dashboard after navigating through all sections to verify state pers
 
 ---
 
-## How these were captured
-
-```bash
-# Build web-admin
-cd apps/web-admin && pnpm build
-
-# Serve production build
-node static-server.js  # serves dist/ on :5174
-
-# Capture via Playwright MCP at 1440x900
-playwright_browser_navigate http://localhost:5174
-playwright_browser_take_screenshot --fullPage --type png
-```
-
 ## Mobile Viewport (390x812 - iPhone)
 
 The web admin is also responsive. Same screens captured at iPhone-sized viewport:

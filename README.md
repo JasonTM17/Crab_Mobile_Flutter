@@ -486,8 +486,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  <p>Built with dedication by <a href="https://github.com/JasonTM17">Nguyễn Sơn</a></p>
-  <p><em>This is a learning project. Author: Nguyễn Sơn (jasonbmt06@gmail.com). Feedback and suggestions are welcome!</em></p>
+  <p>Maintained by <a href="https://github.com/JasonTM17">Nguyễn Sơn</a></p>
 </div>
 
 <!-- BADGE REFERENCE LINKS -->
