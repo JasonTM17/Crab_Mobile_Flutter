@@ -42,9 +42,21 @@ export default function Rides() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">Rides</h1>
-      <div className="bg-card rounded-lg shadow border overflow-hidden">
-        <table className="w-full">
+      <div className="space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+          Rides
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Monitor live and historical rides, including assignment status, fare totals, and distance.
+        </p>
+      </div>
+      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b bg-muted/30 px-6 py-3 text-sm text-muted-foreground">
+          <span>{rides.length} rides loaded</span>
+          <span>Assignment, fare, and distance snapshot</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase">ID</th>
@@ -127,7 +139,8 @@ export default function Rides() {
               ))
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   )
