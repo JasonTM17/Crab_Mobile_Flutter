@@ -93,4 +93,10 @@ Place captures in this directory using prefix `mobile-NN-<screen>.png`.
 
 ## GIFs
 
-Animated flow GIFs (login → OTP → home → ride booking) belong in `docs/gifs/` using prefix `flow-NN-<name>.gif`.
+### Admin Release Flow
+
+![Admin release flow](../gifs/admin-release-flow.gif)
+
+A curated login → dashboard → users → drivers → rides → orders → final dashboard flow is now published at `docs/gifs/admin-release-flow.gif`.
+
+Additional animated flow GIFs belong in `docs/gifs/` using prefix `flow-NN-<name>.gif`.
