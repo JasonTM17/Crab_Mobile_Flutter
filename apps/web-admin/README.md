@@ -13,14 +13,13 @@ React-based admin panel for managing the Crab platform.
 - React Router v6
 
 ## Features
-- Dashboard with real-time analytics
-- User management (riders, drivers, restaurants)
+- Admin dashboard with live service-backed KPIs and charts
+- User management views for users, drivers, merchants, and restaurants
 - Ride monitoring and history
 - Order management
-- Payment/transaction oversight
-- Rating moderation
-- System health monitoring
-- Revenue reports
+- Promo management and notification broadcast tools
+- Payment and transaction oversight
+- Responsive admin layout with same-origin API routing for production
 
 ## Pages
 
