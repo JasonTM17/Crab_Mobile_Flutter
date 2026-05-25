@@ -48,7 +48,7 @@ export const testRestaurant = {
   category: 'vietnamese',
   address: '24 Tran Hung Dao, District 1',
   lat: 10.7725,
-  lng: 106.6980,
+  lng: 106.698,
   deliveryFee: 15000,
   minOrder: 30000,
 };

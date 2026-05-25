@@ -10,7 +10,7 @@ Crab có nhiều file Compose. Hướng dẫn này phân biệt full-stack, infr
 | --- | --- | --- |
 | `docker-compose.yml` | Canonical full local stack | Infrastructure, backend services, and web-admin |
 | `docker-compose.dev.yml` | Backend-focused development variant | Keep for compatibility; prefer root full stack unless you need this exact profile |
-| `docker/docker-compose.dev.yml` | Infra-only local stack | Use when running services directly with `pnpm dev` |
+| `docker/docker-compose.infra.yml` | Infra-only local stack | Use when running services directly with `pnpm dev` |
 | `docker-compose.prod.yml` | Production-like compose | Requires env values from `.env.production.example` |
 | `docker-compose.monitoring.yml` | Canonical monitoring sidecar stack | Prometheus, Grafana, Loki, Promtail, cAdvisor, node-exporter |
 
@@ -34,7 +34,7 @@ docker compose logs -f gateway
 ## Infra-only Development / Chỉ Chạy Hạ Tầng
 
 ```bash
-docker compose -f docker/docker-compose.dev.yml up -d
+docker compose -f docker/docker-compose.infra.yml up -d
 pnpm dev
 ```
 

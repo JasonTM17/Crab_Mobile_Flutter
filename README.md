@@ -140,6 +140,8 @@ packages/socket-events/ Shared Socket.IO event contracts
 docs/                   Public technical documentation and release media
 infra/k8s/              Kubernetes manifests and deployment helper
 monitoring/             Monitoring configs kept for reference/canonicalization
+tests/e2e/              Root E2E test harness and fixtures
+tests/load/             Load test scenarios
 .github/workflows/      CI, Docker publish, release, scanner, SBOM workflows
 ```
 

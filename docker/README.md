@@ -1,12 +1,12 @@
 # Docker
 
-Development-only Docker Compose configuration for running infrastructure services (databases, cache) without the application services.
+Development-only Docker Compose configuration for running infrastructure services (databases, cache, object storage) without the application services.
 
 ## Usage
 
 ```bash
 # Start infrastructure only (for local development)
-docker compose -f docker/docker-compose.dev.yml up -d
+docker compose -f docker/docker-compose.infra.yml up -d
 
 # Then run services locally
 pnpm dev
@@ -26,4 +26,4 @@ pnpm dev
 - MongoDB: `crab:crab`
 - Redis: no auth
 
-For full-stack Docker deployment, use the root `docker-compose.yml`.
+For full-stack Docker deployment, use the root `docker-compose.yml`. For the backend-focused development stack that builds app services, use the root `docker-compose.dev.yml`.

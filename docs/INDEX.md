@@ -105,6 +105,8 @@ Crab_Mobile_Flutter/
 ├── docs/                 Public documentation and release media
 ├── infra/k8s/            Kubernetes manifests
 ├── monitoring/           Monitoring configs retained for canonicalization/reference
+├── tests/e2e/            Root E2E test harness and fixtures
+├── tests/load/           Load test scenarios
 └── .github/workflows/    CI/CD, scanners, SBOM, releases
 ```
 

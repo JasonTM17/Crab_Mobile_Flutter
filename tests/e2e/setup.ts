@@ -5,7 +5,7 @@ let mongoContainer: StartedTestContainer;
 let redisContainer: StartedTestContainer;
 
 export default async function setup() {
-  console.log('\n🚀 Starting test containers...');
+  console.log('\nStarting test containers...');
 
   [postgresContainer, mongoContainer, redisContainer] = await Promise.all([
     new GenericContainer('postgres:15-alpine')
@@ -25,9 +25,7 @@ export default async function setup() {
       .withExposedPorts(27017)
       .start(),
 
-    new GenericContainer('redis:7-alpine')
-      .withExposedPorts(6379)
-      .start(),
+    new GenericContainer('redis:7-alpine').withExposedPorts(6379).start(),
   ]);
 
   process.env.DATABASE_URL = `postgresql://crab:crab@${postgresContainer.getHost()}:${postgresContainer.getMappedPort(5432)}/crab_test`;
@@ -38,5 +36,5 @@ export default async function setup() {
   (global as any).__MONGO_CONTAINER__ = mongoContainer;
   (global as any).__REDIS_CONTAINER__ = redisContainer;
 
-  console.log('✅ Test containers ready');
+  console.log('Test containers ready');
 }

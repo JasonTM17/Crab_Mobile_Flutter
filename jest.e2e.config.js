@@ -7,6 +7,6 @@ module.exports = {
   },
   testEnvironment: 'node',
   testTimeout: 30000,
-  globalSetup: './test/setup.ts',
-  globalTeardown: './test/teardown.ts',
+  globalSetup: './tests/e2e/setup.ts',
+  globalTeardown: './tests/e2e/teardown.ts',
 };

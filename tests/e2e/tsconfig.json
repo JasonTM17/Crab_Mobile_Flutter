@@ -8,8 +8,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "paths": {
-      "@crab/common-types": ["../packages/common-types/src"],
-      "@crab/socket-events": ["../packages/socket-events/src"]
+      "@crab/common-types": ["../../packages/common-types/src"],
+      "@crab/socket-events": ["../../packages/socket-events/src"]
     }
   },
   "include": ["./**/*.ts"],

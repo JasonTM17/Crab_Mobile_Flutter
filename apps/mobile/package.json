@@ -2,5 +2,11 @@
   "name": "@crab/mobile",
   "version": "1.0.0",
   "private": true,
-  "description": "Crab Mobile Flutter app placeholder"
+  "description": "Crab Mobile Flutter app",
+  "scripts": {
+    "codegen": "dart run build_runner build --delete-conflicting-outputs",
+    "lint": "flutter analyze",
+    "test": "flutter test",
+    "clean": "flutter clean"
+  }
 }
