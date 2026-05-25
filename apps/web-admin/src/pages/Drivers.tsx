@@ -120,12 +120,43 @@ export default function Drivers() {
         </p>
       </div>
       <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between border-b bg-muted/30 px-6 py-3 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-1 border-b bg-muted/30 px-3 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between md:px-6">
           <span>{drivers.length} applications in review</span>
           <span>Approval queue for new drivers</span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
+        <div className="space-y-3 p-3 md:hidden">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => <DriverCardSkeleton key={i} />)
+          ) : error ? (
+            <EmptyState
+              icon={<Car className="h-5 w-5" />}
+              title="Could not load verifications"
+              description={error}
+              action={
+                <Button onClick={loadPending} variant="outline">
+                  Retry
+                </Button>
+              }
+            />
+          ) : drivers.length === 0 ? (
+            <EmptyState
+              icon={<Car className="h-5 w-5" />}
+              title="No pending verifications"
+              description="All driver applications have been processed."
+            />
+          ) : (
+            drivers.map((d) => (
+              <DriverCard
+                key={d.userId}
+                driver={d}
+                onApprove={() => setPendingApproveId(d.userId)}
+                onReject={() => setPendingRejectId(d.userId)}
+              />
+            ))
+          )}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[720px]">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase">
@@ -300,6 +331,61 @@ export default function Drivers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+function DriverCard({
+  driver,
+  onApprove,
+  onReject,
+}: {
+  driver: Driver
+  onApprove: () => void
+  onReject: () => void
+}) {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-semibold">{driver.licenseNumber}</p>
+          <p className="text-sm text-muted-foreground">
+            {driver.vehicleType} - {driver.vehicleBrand} {driver.vehicleModel}
+          </p>
+        </div>
+        <Badge variant="warning">{driver.verificationStatus}</Badge>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <p className="text-xs text-muted-foreground">Plate</p>
+          <p className="font-mono font-medium">{driver.vehiclePlate}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Rides</p>
+          <p className="font-medium">{driver.totalRides}</p>
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Button size="sm" variant="outline" onClick={onApprove}>
+          Approve
+        </Button>
+        <Button size="sm" variant="destructive" onClick={onReject}>
+          Reject
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function DriverCardSkeleton() {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="mt-2 h-4 w-48" />
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-9 w-full" />
+      </div>
     </div>
   )
 }

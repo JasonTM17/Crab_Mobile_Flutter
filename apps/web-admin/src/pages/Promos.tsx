@@ -111,9 +111,9 @@ export default function Promos() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Promo Codes</h1>
-        <Button onClick={() => setShowForm(!showForm)}>
+        <Button className="w-full sm:w-auto" onClick={() => setShowForm(!showForm)}>
           {showForm ? 'Cancel' : '+ New Promo'}
         </Button>
       </div>
@@ -121,7 +121,7 @@ export default function Promos() {
       {showForm && (
         <form
           onSubmit={submit}
-          className="bg-card p-6 rounded-lg shadow border grid grid-cols-2 gap-4"
+          className="bg-card p-4 sm:p-6 rounded-lg shadow border grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
           <Input
             placeholder="Code (e.g. WELCOME50)"
@@ -171,8 +171,8 @@ export default function Promos() {
             onChange={(e) => setForm({ ...form, validUntil: e.target.value })}
             required
           />
-          <div className="col-span-2 flex justify-end">
-            <Button type="submit" disabled={submitting}>
+          <div className="sm:col-span-2 flex justify-end">
+            <Button className="w-full sm:w-auto" type="submit" disabled={submitting}>
               {submitting ? 'Creating…' : 'Create Promo'}
             </Button>
           </div>
@@ -180,7 +180,43 @@ export default function Promos() {
       )}
 
       <div className="bg-card rounded-lg shadow border overflow-hidden">
-        <table className="w-full">
+        <div className="space-y-3 p-3 md:hidden">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => <PromoCardSkeleton key={i} />)
+          ) : error ? (
+            <EmptyState
+              icon={<Ticket className="h-5 w-5" />}
+              title="Could not load promos"
+              description={error}
+              action={
+                <Button onClick={load} variant="outline">
+                  Retry
+                </Button>
+              }
+            />
+          ) : promos.length === 0 ? (
+            <EmptyState
+              icon={<Ticket className="h-5 w-5" />}
+              title="No promos yet"
+              description="Create your first promo code to incentivise riders and customers."
+              action={
+                <Button onClick={() => setShowForm(true)}>
+                  + New Promo
+                </Button>
+              }
+            />
+          ) : (
+            promos.map((p) => (
+              <PromoCard
+                key={p.id}
+                promo={p}
+                onDeactivate={() => setPendingDeactivate(p)}
+              />
+            ))
+          )}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[860px]">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase">Code</th>
@@ -272,6 +308,7 @@ export default function Promos() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       <AlertDialog
@@ -300,6 +337,66 @@ export default function Promos() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  )
+}
+
+function PromoCard({ promo, onDeactivate }: { promo: Promo; onDeactivate: () => void }) {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate font-mono font-bold">{promo.code}</p>
+          <p className="text-sm text-muted-foreground">{promo.name}</p>
+        </div>
+        <Badge variant={promo.isActive ? 'success' : 'secondary'}>
+          {promo.isActive ? 'Active' : 'Inactive'}
+        </Badge>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <p className="text-xs text-muted-foreground">Type</p>
+          <p className="font-medium">{promo.type}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Value</p>
+          <p className="font-medium">
+            {promo.value}
+            {promo.type === 'PERCENTAGE' ? '%' : ' VND'}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Used</p>
+          <p className="font-medium">
+            {promo.totalUsed}
+            {promo.totalUsageLimit ? ` / ${promo.totalUsageLimit}` : ''}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Valid Until</p>
+          <p className="font-medium">
+            {promo.validUntil ? new Date(promo.validUntil).toLocaleDateString() : '-'}
+          </p>
+        </div>
+      </div>
+      {promo.isActive && (
+        <Button className="mt-4 w-full" size="sm" variant="outline" onClick={onDeactivate}>
+          Deactivate
+        </Button>
+      )}
+    </div>
+  )
+}
+
+function PromoCardSkeleton() {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="mt-2 h-4 w-44" />
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
     </div>
   )
 }
