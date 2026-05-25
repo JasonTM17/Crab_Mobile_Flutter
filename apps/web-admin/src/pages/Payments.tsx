@@ -18,12 +18,8 @@ type Transaction = {
 }
 
 async function fetchTransactions(): Promise<Transaction[]> {
-  try {
-    const { data } = await api.get('/transactions?limit=100')
-    return (data?.data ?? data ?? []) as Transaction[]
-  } catch {
-    return []
-  }
+  const { data } = await api.get('/transactions?limit=100')
+  return (data?.data ?? data ?? []) as Transaction[]
 }
 
 export default function Payments() {
@@ -95,9 +91,35 @@ export default function Payments() {
         <CardHeader>
           <CardTitle>Recent transactions</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+        <CardContent className="px-0 sm:px-6">
+          <div className="space-y-3 px-4 pb-4 md:hidden">
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => <TransactionCardSkeleton key={i} />)
+            ) : isError ? (
+              <EmptyState
+                icon={<CreditCard className="h-5 w-5" />}
+                title="Could not load transactions"
+                description="Try refreshing in a moment."
+                action={
+                  <Button variant="outline" onClick={() => refetch()}>
+                    Retry
+                  </Button>
+                }
+              />
+            ) : transactions.length === 0 ? (
+              <EmptyState
+                icon={<CreditCard className="h-5 w-5" />}
+                title="No transactions yet"
+                description="Wallet movements will be recorded here as users transact."
+              />
+            ) : (
+              transactions.slice(0, 20).map((t) => (
+                <TransactionCard key={t.id} transaction={t} />
+              ))
+            )}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[820px] text-sm">
               <thead>
                 <tr className="text-left text-muted-foreground border-b">
                   <th className="py-2 pr-4">Time</th>
@@ -183,6 +205,65 @@ export default function Payments() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+function TransactionCard({ transaction }: { transaction: Transaction }) {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-semibold">{transaction.type}</p>
+          <p className="truncate text-sm text-muted-foreground">
+            {transaction.description ?? 'Wallet movement'}
+          </p>
+        </div>
+        <Badge
+          variant={
+            transaction.status === 'COMPLETED'
+              ? 'success'
+              : transaction.status === 'PENDING'
+                ? 'warning'
+                : 'destructive'
+          }
+        >
+          {transaction.status}
+        </Badge>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <p className="text-xs text-muted-foreground">Amount</p>
+          <p
+            className={`font-medium ${Number(transaction.amount) < 0 ? 'text-destructive' : 'text-emerald-600'}`}
+          >
+            {Number(transaction.amount).toLocaleString('vi-VN')}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">User</p>
+          <p className="font-mono font-medium">{transaction.userId?.slice(0, 8)}...</p>
+        </div>
+        <div className="col-span-2">
+          <p className="text-xs text-muted-foreground">Time</p>
+          <p className="font-medium">
+            {new Date(transaction.createdAt).toLocaleString('vi-VN')}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TransactionCardSkeleton() {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="mt-2 h-4 w-48" />
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
     </div>
   )
 }

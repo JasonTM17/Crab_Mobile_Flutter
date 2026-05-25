@@ -57,7 +57,7 @@ export default function Users() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
             Users
@@ -71,17 +71,45 @@ export default function Users() {
           placeholder="Search by name, email, phone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-80"
+          className="w-full md:w-80"
         />
       </div>
 
       <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between border-b bg-muted/30 px-6 py-3 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-1 border-b bg-muted/30 px-3 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between md:px-6">
           <span>{filtered.length} visible users</span>
           <span>20 records per page</span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
+        <div className="space-y-3 p-3 md:hidden">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => <UserCardSkeleton key={i} />)
+          ) : error ? (
+            <EmptyState
+              icon={<UsersIcon className="h-5 w-5" />}
+              title="Could not load users"
+              description={error}
+              action={
+                <Button variant="outline" onClick={loadUsers}>
+                  Retry
+                </Button>
+              }
+            />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={<UsersIcon className="h-5 w-5" />}
+              title={search ? 'No users match your search' : 'No users yet'}
+              description={
+                search
+                  ? 'Try adjusting the search term.'
+                  : 'New users will appear here once they sign up.'
+              }
+            />
+          ) : (
+            filtered.map((u) => <UserCard key={u.userId} user={u} />)
+          )}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[760px]">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase">
@@ -181,6 +209,53 @@ export default function Users() {
         <Button variant="outline" onClick={() => setPage((p) => p + 1)}>
           Next
         </Button>
+      </div>
+    </div>
+  )
+}
+
+function UserCard({ user }: { user: User }) {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate font-semibold">
+            {user.firstName} {user.lastName}
+          </p>
+          <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+        </div>
+        <StatusBadge status={user.status} />
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <p className="text-xs text-muted-foreground">Phone</p>
+          <p className="font-medium">{user.phone}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Role</p>
+          <Badge variant="info" className="mt-1">
+            {user.role}
+          </Badge>
+        </div>
+        <div className="col-span-2">
+          <p className="text-xs text-muted-foreground">Joined</p>
+          <p className="font-medium">
+            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function UserCardSkeleton() {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="mt-2 h-4 w-48" />
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
       </div>
     </div>
   )

@@ -40,11 +40,11 @@ export default function NotificationBroadcast() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="w-full max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold tracking-tight">Broadcast Notification</h1>
       <form
         onSubmit={send}
-        className="bg-card p-6 rounded-lg shadow border space-y-4"
+        className="bg-card p-4 sm:p-6 rounded-lg shadow border space-y-4"
       >
         <div>
           <label className="block text-sm font-medium mb-1">Title</label>
@@ -91,7 +91,7 @@ export default function NotificationBroadcast() {
         <button
           type="submit"
           disabled={sending}
-          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg disabled:opacity-50"
+          className="w-full sm:w-auto px-6 py-2 bg-primary text-primary-foreground rounded-lg disabled:opacity-50"
         >
           {sending ? 'Sending...' : 'Send Notification'}
         </button>
