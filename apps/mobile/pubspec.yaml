@@ -1,7 +1,11 @@
 name: crab_mobile
-description: Crab - Super App for ride, food delivery, and more.
+description: Crab mobile app for ride-hailing, food delivery, wallet, chat, notifications, and profile flows.
 publish_to: 'none'
 version: 1.0.0+1
+homepage: https://github.com/JasonTM17/Crab_Mobile_Flutter
+repository: https://github.com/JasonTM17/Crab_Mobile_Flutter
+issue_tracker: https://github.com/JasonTM17/Crab_Mobile_Flutter/issues
+documentation: https://github.com/JasonTM17/Crab_Mobile_Flutter/tree/main/docs
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

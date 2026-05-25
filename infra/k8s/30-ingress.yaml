@@ -4,7 +4,6 @@ metadata:
   name: crab-ingress
   namespace: crab
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/proxy-body-size: "20m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
     nginx.ingress.kubernetes.io/limit-rps: "30"
@@ -24,6 +23,12 @@ spec:
     - host: admin.crab.example.com
       http:
         paths:
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port: { number: 3000 }
           - path: /
             pathType: Prefix
             backend:

@@ -5,8 +5,7 @@ import { BullModule } from '@nestjs/bull'
 import { NotificationsModule } from './notifications.module'
 import { NotificationProcessor } from './notification.processor'
 import { NotificationQueueService } from './notification-queue.service'
-
-export const NOTIFICATION_FANOUT_QUEUE = 'notification-fanout'
+import { NOTIFICATION_FANOUT_QUEUE } from './notification-queue.constants'
 
 /**
  * BullMQ-backed fanout queue. Producers (any service that wants to push a

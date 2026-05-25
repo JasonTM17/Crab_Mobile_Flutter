@@ -11,6 +11,7 @@ import configuration from './config/configuration'
 import { getRequiredJwtSecret } from './config/security'
 import { AuthModule } from './auth/auth.module'
 import { ProxyModule } from './proxy/proxy.module'
+import { AdminDashboardModule } from './admin/admin-dashboard.module'
 import { RideGateway } from './gateways/ride.gateway'
 import { FoodGateway } from './gateways/food.gateway'
 import { ChatGateway } from './gateways/chat.gateway'
@@ -50,6 +51,7 @@ const REDIS_CLIENT = 'GATEWAY_REDIS_CLIENT'
     }),
     AuthModule,
     ProxyModule,
+    AdminDashboardModule,
   ],
   controllers: [HealthController],
   providers: [

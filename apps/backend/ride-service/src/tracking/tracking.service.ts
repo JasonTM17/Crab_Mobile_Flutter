@@ -38,12 +38,15 @@ export class TrackingService implements OnModuleDestroy {
     private readonly driverLocationModel: Model<DriverLocationDocument>,
     private readonly configService: ConfigService,
   ) {
-    this.redis = new Redis({
-      host: this.configService.get('REDIS_HOST', 'localhost'),
-      port: this.configService.get<number>('REDIS_PORT', 6379),
-      password: this.configService.get('REDIS_PASSWORD'),
-      lazyConnect: true,
-    })
+    const redisUrl = this.configService.get<string>('REDIS_URL')
+    this.redis = redisUrl
+      ? new Redis(redisUrl, { lazyConnect: true })
+      : new Redis({
+          host: this.configService.get('REDIS_HOST', 'localhost'),
+          port: this.configService.get<number>('REDIS_PORT', 6379),
+          password: this.configService.get('REDIS_PASSWORD'),
+          lazyConnect: true,
+        })
     this.redis.connect().catch((err: Error) =>
       this.logger.warn(`Redis connection failed (non-fatal): ${err.message}`),
     )

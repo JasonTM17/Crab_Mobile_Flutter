@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import axios from 'axios'
 import api from '@/lib/axios'
 
 export default function NotificationBroadcast() {
@@ -27,8 +28,12 @@ export default function NotificationBroadcast() {
         userIds,
       })
       setResult(`Sent to ${res.data.sent ?? userIds.length} users`)
-    } catch (err: any) {
-      setResult(err.response?.data?.message ?? 'Failed to send')
+    } catch (err: unknown) {
+      setResult(
+        axios.isAxiosError(err)
+          ? err.response?.data?.message ?? 'Failed to send'
+          : 'Failed to send',
+      )
     } finally {
       setSending(false)
     }

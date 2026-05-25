@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectQueue } from '@nestjs/bull'
 import type { Queue } from 'bull'
 
-import { NOTIFICATION_FANOUT_QUEUE } from './notification-queue.module'
+import { NOTIFICATION_FANOUT_QUEUE } from './notification-queue.constants'
 
 export type NotificationChannel = 'push' | 'inapp' | 'email' | 'sms'
 

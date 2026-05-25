@@ -1,11 +1,14 @@
 import {
+  Body,
   Controller,
+  ForbiddenException,
   Get,
+  Headers,
+  Param,
   Post,
   Put,
-  Param,
-  Body,
   Query,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { VerificationService } from './verification.service'
 import { RegisterDriverDto } from './dto/driver.dto'
@@ -27,12 +30,21 @@ export class VerificationController {
   }
 
   @Put('drivers/:userId/approve')
-  approveDriver(@Param('userId') userId: string) {
+  approveDriver(
+    @Headers('x-user-role') authRole: string | undefined,
+    @Param('userId') userId: string,
+  ) {
+    this.assertAdmin(authRole)
     return this.service.approveDriver(userId)
   }
 
   @Put('drivers/:userId/reject')
-  rejectDriver(@Param('userId') userId: string, @Body('reason') reason: string) {
+  rejectDriver(
+    @Headers('x-user-role') authRole: string | undefined,
+    @Param('userId') userId: string,
+    @Body('reason') reason: string,
+  ) {
+    this.assertAdmin(authRole)
     return this.service.rejectDriver(userId, reason)
   }
 
@@ -42,7 +54,12 @@ export class VerificationController {
   }
 
   @Get('drivers/admin/pending')
-  listPending(@Query('page') page?: string, @Query('limit') limit?: string) {
+  listPending(
+    @Headers('x-user-role') authRole: string | undefined,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    this.assertAdmin(authRole)
     return this.service.listPendingDrivers(page ? +page : 1, limit ? +limit : 20)
   }
 
@@ -60,12 +77,21 @@ export class VerificationController {
   }
 
   @Put('merchants/:userId/approve')
-  approveMerchant(@Param('userId') userId: string) {
+  approveMerchant(
+    @Headers('x-user-role') authRole: string | undefined,
+    @Param('userId') userId: string,
+  ) {
+    this.assertAdmin(authRole)
     return this.service.approveMerchant(userId)
   }
 
   @Put('merchants/:userId/reject')
-  rejectMerchant(@Param('userId') userId: string, @Body('reason') reason: string) {
+  rejectMerchant(
+    @Headers('x-user-role') authRole: string | undefined,
+    @Param('userId') userId: string,
+    @Body('reason') reason: string,
+  ) {
+    this.assertAdmin(authRole)
     return this.service.rejectMerchant(userId, reason)
   }
 
@@ -84,7 +110,29 @@ export class VerificationController {
   }
 
   @Put('documents/:docId/verify')
-  verifyDoc(@Param('docId') docId: string, @Body('adminId') adminId: string) {
+  verifyDoc(
+    @Headers('x-user-role') authRole: string | undefined,
+    @Headers('x-user-id') adminId: string | undefined,
+    @Param('docId') docId: string,
+  ) {
+    this.assertAdmin(authRole)
+    this.assertAuthenticated(adminId)
     return this.service.verifyDocument(docId, adminId)
+  }
+
+  private assertAuthenticated(userId: string | undefined): asserts userId is string {
+    if (!userId) {
+      throw new UnauthorizedException('Missing authenticated user')
+    }
+  }
+
+  private assertAdmin(authRole: string | undefined) {
+    if (!authRole) {
+      throw new UnauthorizedException('Missing admin role')
+    }
+
+    if (authRole !== 'ADMIN') {
+      throw new ForbiddenException('Admin role required')
+    }
   }
 }

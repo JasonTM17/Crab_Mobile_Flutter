@@ -7,8 +7,7 @@ import { FareModule } from '../fare/fare.module'
 import { MatchingService } from './matching.service'
 import { MatchingProcessor } from './matching.processor'
 import { MatchingQueueService } from './matching-queue.service'
-
-export const RIDE_MATCHING_QUEUE = 'ride-matching'
+import { RIDE_MATCHING_QUEUE } from './matching-queue.constants'
 
 /**
  * BullMQ-backed matching queue. Producers (rides controller / service) push

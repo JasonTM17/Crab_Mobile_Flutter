@@ -43,6 +43,26 @@ export class TransactionsService {
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 
+  async listAll(opts: ListOptions = {}) {
+    const page = opts.page ?? 1
+    const limit = opts.limit ?? 20
+    const where: FindOptionsWhere<TransactionEntity> = {}
+    if (opts.type) where.type = opts.type
+    if (opts.status) where.status = opts.status
+    if (opts.fromDate && opts.toDate) {
+      where.createdAt = Between(opts.fromDate, opts.toDate)
+    }
+
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    })
+
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) }
+  }
+
   async findById(id: string): Promise<TransactionEntity | null> {
     return this.repo.findOne({ where: { id } })
   }

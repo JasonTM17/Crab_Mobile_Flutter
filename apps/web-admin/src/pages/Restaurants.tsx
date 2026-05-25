@@ -22,8 +22,6 @@ export default function Restaurants() {
   const [error, setError] = useState<string | null>(null)
 
   function load() {
-    setLoading(true)
-    setError(null)
     api
       .get('/restaurants/search')
       .then((r) => setList(r.data.data ?? r.data ?? []))
@@ -35,7 +33,7 @@ export default function Restaurants() {
   }
 
   useEffect(() => {
-    load()
+    void load()
   }, [])
 
   return (
@@ -71,7 +69,14 @@ export default function Restaurants() {
                     title="Could not load restaurants"
                     description={error}
                     action={
-                      <Button variant="outline" onClick={load}>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setLoading(true)
+                          setError(null)
+                          void load()
+                        }}
+                      >
                         Retry
                       </Button>
                     }

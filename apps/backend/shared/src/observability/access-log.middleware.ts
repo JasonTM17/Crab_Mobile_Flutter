@@ -17,12 +17,8 @@ interface AuthenticatedRequest extends Request {
  */
 @Injectable()
 export class AccessLogMiddleware implements NestMiddleware {
-  private readonly logger: Logger;
+  private readonly logger: Logger = getDefaultLogger();
   private readonly nestLogger = new NestLogger(AccessLogMiddleware.name);
-
-  constructor(logger?: Logger) {
-    this.logger = logger ?? getDefaultLogger();
-  }
 
   use(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
     const start = process.hrtime.bigint();
