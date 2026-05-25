@@ -162,7 +162,10 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     _LogoutCard(
-                      onTap: () => context.read<AuthBloc>().add(const AuthLogoutRequested()),
+                      onTap: () {
+                        context.read<AuthBloc>().add(const AuthLogoutRequested());
+                        context.go('/login');
+                      },
                     ),
                   ],
                 ),

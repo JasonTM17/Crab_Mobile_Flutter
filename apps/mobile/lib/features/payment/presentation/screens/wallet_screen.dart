@@ -12,8 +12,25 @@ import '../bloc/payment_event.dart';
 import '../bloc/payment_state.dart';
 import '../widgets/transaction_tile.dart';
 
-class WalletScreen extends StatelessWidget {
+class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
+
+  @override
+  State<WalletScreen> createState() => _WalletScreenState();
+}
+
+class _WalletScreenState extends State<WalletScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final state = context.read<PaymentBloc>().state;
+      if (state is! WalletLoaded && state is! PaymentLoading) {
+        context.read<PaymentBloc>().add(const LoadWallet());
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +76,62 @@ class WalletScreen extends StatelessWidget {
           if (state is WalletLoaded) {
             return _WalletBody(state: state);
           }
-          return const SizedBox.shrink();
+          return _WalletBootstrap(
+            onRetry: () => context.read<PaymentBloc>().add(const LoadWallet()),
+          );
         },
+      ),
+    );
+  }
+}
+
+class _WalletBootstrap extends StatelessWidget {
+  const _WalletBootstrap({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                gradient: AppGradients.primary,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: AppShadows.coloredGlow(AppColors.primary),
+              ),
+              child: const Icon(
+                Icons.account_balance_wallet_rounded,
+                color: Colors.white,
+                size: 34,
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Loading your Crab Wallet',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Your balance, top ups, and payment history will appear here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondaryLight, height: 1.4),
+            ),
+            const SizedBox(height: 18),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Load wallet'),
+            ),
+          ],
+        ),
       ),
     );
   }

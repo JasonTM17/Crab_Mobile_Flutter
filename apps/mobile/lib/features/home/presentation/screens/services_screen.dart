@@ -10,12 +10,20 @@ class ServicesScreen extends StatelessWidget {
     _ServiceItem('Car', 'Comfortable city trips', Icons.directions_car,
         '/ride/book?type=CAR_4'),
     _ServiceItem('Food', 'Restaurants nearby', Icons.restaurant, '/food'),
+    _ServiceItem('Mart', 'Daily essentials and grocery delivery',
+        Icons.local_grocery_store, '/food'),
+    _ServiceItem('Express', 'Fast city delivery for small parcels',
+        Icons.local_shipping, '/ride/book?type=BIKE'),
     _ServiceItem('Wallet', 'Balance and payments', Icons.account_balance_wallet,
         '/wallet'),
+    _ServiceItem('Promos', 'Active vouchers and Crab rewards', Icons.local_offer,
+        '/promos'),
     _ServiceItem('Chat', 'Messages with drivers and merchants',
         Icons.chat_bubble, '/chat'),
     _ServiceItem('Notifications', 'Updates and receipts', Icons.notifications,
         '/notifications'),
+    _ServiceItem('Activity', 'Rides, orders, and wallet timeline', Icons.history,
+        '/activity'),
   ];
 
   @override
