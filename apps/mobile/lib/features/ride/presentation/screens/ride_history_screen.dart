@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../shared/services/auth_storage.dart';
+import '../../../../shared/utils/error_message.dart';
 import '../../data/models/ride_models.dart';
 import '../../data/repositories/ride_repository.dart';
 
@@ -41,8 +42,8 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> {
           if (snapshot.hasError) {
             return _MessageState(
               icon: Icons.error_outline,
-              title: 'Could not load rides',
-              message: snapshot.error.toString(),
+              title: 'Không tải được lịch sử chuyến đi',
+              message: mapErrorToMessage(snapshot.error),
               onRetry: () => setState(() => _future = _load()),
             );
           }
@@ -50,8 +51,9 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> {
           if (rides.isEmpty) {
             return const _MessageState(
               icon: Icons.route_outlined,
-              title: 'No rides yet',
-              message: 'Completed and cancelled rides will appear here.',
+              title: 'Chưa có chuyến đi',
+              message:
+                  'Các chuyến đã hoàn thành hoặc đã huỷ sẽ xuất hiện tại đây.',
             );
           }
           return RefreshIndicator(
@@ -128,7 +130,7 @@ class _MessageState extends StatelessWidget {
             Text(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              FilledButton(onPressed: onRetry, child: const Text('Retry')),
+              FilledButton(onPressed: onRetry, child: const Text('Thử lại')),
             ],
           ],
         ),

@@ -439,7 +439,8 @@ class _AddressCard extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.location_on_rounded, size: 18, color: AppColors.primary),
+              Icon(Icons.location_on_rounded,
+                  size: 18, color: AppColors.primary),
               SizedBox(width: 6),
               Text(
                 'Giao đến',
@@ -692,7 +693,8 @@ class _PromoCard extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.local_offer_rounded, size: 18, color: AppColors.accent),
+              Icon(Icons.local_offer_rounded,
+                  size: 18, color: AppColors.accent),
               SizedBox(width: 6),
               Text(
                 'Mã khuyến mãi',
@@ -745,7 +747,18 @@ class _PromoCard extends StatelessWidget {
               SizedBox(
                 height: 48,
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    final code = controller.text.trim();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          code.isEmpty
+                              ? 'Vui lòng nhập mã ưu đãi.'
+                              : 'Mã ưu đãi sẽ được kiểm tra ở bước thanh toán.',
+                        ),
+                      ),
+                    );
+                  },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
                       color: AppColors.primary.withValues(alpha: 0.35),

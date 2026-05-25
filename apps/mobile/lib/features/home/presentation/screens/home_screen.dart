@@ -11,6 +11,7 @@ import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../payment/presentation/bloc/payment_bloc.dart';
 import '../../../payment/presentation/bloc/payment_event.dart';
 import '../../../payment/presentation/bloc/payment_state.dart';
+import '../../../../shared/widgets/shimmer_box.dart';
 import '../widgets/promo_carousel.dart';
 import '../widgets/saved_places.dart';
 import '../widgets/service_grid.dart';
@@ -103,16 +104,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() => _bottomIndex = index);
                     switch (index) {
                       case 1:
-                        context.push('/activity');
+                        context.go('/activity');
                         break;
                       case 2:
-                        context.push('/chat');
+                        context.go('/chat');
                         break;
                       case 3:
-                        context.push('/notifications');
+                        context.go('/notifications');
                         break;
                       case 4:
-                        context.push('/profile');
+                        context.go('/profile');
                         break;
                     }
                   },
@@ -474,6 +475,7 @@ class _WalletPill extends StatelessWidget {
 
     return BlocBuilder<PaymentBloc, PaymentState>(
       builder: (context, state) {
+        final isLoading = state is PaymentLoading || state is PaymentInitial;
         String balance = '—';
         if (state is WalletLoaded) {
           balance = _formatVND(state.wallet.balance);
@@ -483,7 +485,9 @@ class _WalletPill extends StatelessWidget {
 
         return Semantics(
           button: true,
-          label: 'Mở ví Crab, số dư $balance đồng',
+          label: isLoading
+              ? 'Mở ví Crab, đang tải số dư'
+              : 'Mở ví Crab, số dư $balance đồng',
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -522,13 +526,20 @@ class _WalletPill extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            '$balance đ',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
+                          if (isLoading)
+                            const ShimmerBox(
+                              width: 118,
+                              height: 24,
+                              borderRadius: 10,
+                            )
+                          else
+                            Text(
+                              '$balance đ',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),

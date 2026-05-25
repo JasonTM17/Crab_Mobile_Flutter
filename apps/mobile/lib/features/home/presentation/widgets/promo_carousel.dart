@@ -1,13 +1,16 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/shimmer_box.dart';
+import '../../../payment/data/models/payment_models.dart';
+import '../../../payment/data/repositories/payment_repository.dart';
 import '../../../../shared/widgets/animated_dot_indicator.dart';
 
 class PromoCarousel extends StatefulWidget {
@@ -18,38 +21,31 @@ class PromoCarousel extends StatefulWidget {
 }
 
 class _PromoCarouselState extends State<PromoCarousel> {
-  static const _slides = <_PromoSlide>[
+  static const _emptySlide = _PromoSlide(
+    title: 'Ưu đãi đang được cập nhật',
+    cta: 'Xem ví Crab',
+    route: '/promos',
+    gradient: AppGradients.primary,
+    badge: 'Sắp có',
+  );
+
+  late final Future<List<_PromoSlide>> _slidesFuture;
+  int _slideCount = 0;
+
+  static const _gradients = <LinearGradient>[
+    AppGradients.sunset,
+    AppGradients.primary,
+    AppGradients.walletHero,
+    AppGradients.violet,
+  ];
+
+  static const _fallbackSlides = <_PromoSlide>[
     _PromoSlide(
-      title: 'Giảm 50K cho đơn đầu',
+      title: 'Mở ví Crab để xem ưu đãi mới nhất',
       cta: 'Xem ngay',
-      route: '/promos',
-      image:
-          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
-      gradient: AppGradients.sunset,
-      badge: 'Ưu đãi hot',
-    ),
-    _PromoSlide(
-      title: 'Freeship đơn từ 100K',
-      cta: 'Đặt ngay',
-      route: '/food',
-      image:
-          'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800',
-      gradient: AppGradients.primary,
-      badge: 'Food',
-    ),
-    _PromoSlide(
-      title: 'Hoàn 5% mỗi chuyến',
-      cta: 'Tìm hiểu',
       route: '/wallet',
       gradient: AppGradients.walletHero,
       badge: 'Ví Crab',
-    ),
-    _PromoSlide(
-      title: 'Đổi điểm lấy quà',
-      cta: 'Nhận thưởng',
-      route: '/promos',
-      gradient: AppGradients.violet,
-      badge: 'Thành viên',
     ),
   ];
 
@@ -61,12 +57,38 @@ class _PromoCarouselState extends State<PromoCarousel> {
   void initState() {
     super.initState();
     _controller = PageController(viewportFraction: 0.9);
+    _slidesFuture = _loadSlides();
     _timer = Timer.periodic(const Duration(seconds: 4), _autoAdvance);
+  }
+
+  Future<List<_PromoSlide>> _loadSlides() async {
+    try {
+      final promos = await sl<PaymentRepository>().getAvailablePromos();
+      if (promos.isEmpty) return _fallbackSlides;
+      return promos.take(5).map(_slideFromPromo).toList(growable: false);
+    } catch (_) {
+      return _fallbackSlides;
+    }
+  }
+
+  _PromoSlide _slideFromPromo(PromoModel promo) {
+    final index = promo.code.hashCode.abs() % _gradients.length;
+    final title = promo.description.trim().isEmpty
+        ? 'Ưu đãi ${promo.code}'
+        : promo.description.trim();
+    return _PromoSlide(
+      title: title,
+      cta: 'Dùng mã ${promo.code}',
+      route: '/promos',
+      gradient: _gradients[index],
+      badge: promo.displayDiscount,
+    );
   }
 
   void _autoAdvance(Timer _) {
     if (!mounted || !_controller.hasClients) return;
-    final next = (_index + 1) % _slides.length;
+    if (_slideCount <= 1) return;
+    final next = (_index + 1) % _slideCount;
     _controller.animateToPage(next,
         duration: AppMotion.carousel, curve: AppMotion.emphasis);
   }
@@ -80,26 +102,46 @@ class _PromoCarouselState extends State<PromoCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 176,
-          child: PageView.builder(
-            controller: _controller,
-            itemCount: _slides.length,
-            onPageChanged: (value) => setState(() => _index = value),
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.only(
-                    right: index == _slides.length - 1 ? 0 : AppSpacing.sm),
-                child: _PromoCard(slide: _slides[index]),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        AnimatedDotIndicator(count: _slides.length, activeIndex: _index),
-      ],
+    return FutureBuilder<List<_PromoSlide>>(
+      future: _slidesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 176,
+            width: double.infinity,
+            child: ShimmerBox(height: 176, borderRadius: AppRadii.xl),
+          );
+        }
+
+        final slides = snapshot.data?.isNotEmpty == true
+            ? snapshot.data!
+            : const [_emptySlide];
+        _slideCount = slides.length;
+
+        return Column(
+          children: [
+            SizedBox(
+              height: 176,
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: slides.length,
+                onPageChanged: (value) => setState(() => _index = value),
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                        right: index == slides.length - 1 ? 0 : AppSpacing.sm),
+                    child: _PromoCard(slide: slides[index]),
+                  );
+                },
+              ),
+            ),
+            if (slides.length > 1) ...[
+              const SizedBox(height: AppSpacing.sm),
+              AnimatedDotIndicator(count: slides.length, activeIndex: _index),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -111,7 +153,6 @@ class _PromoSlide {
     required this.route,
     required this.gradient,
     required this.badge,
-    this.image,
   });
 
   final String title;
@@ -119,7 +160,6 @@ class _PromoSlide {
   final String route;
   final String badge;
   final LinearGradient gradient;
-  final String? image;
 }
 
 class _PromoCard extends StatelessWidget {
@@ -145,13 +185,6 @@ class _PromoCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                if (slide.image != null)
-                  CachedNetworkImage(
-                    imageUrl: slide.image!,
-                    fit: BoxFit.cover,
-                    fadeInDuration: const Duration(milliseconds: 250),
-                    errorWidget: (_, __, ___) => const SizedBox.shrink(),
-                  ),
                 DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(

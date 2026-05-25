@@ -122,7 +122,8 @@ class _WalletBootstrap extends StatelessWidget {
             const Text(
               'Your balance, top ups, and payment history will appear here.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondaryLight, height: 1.4),
+              style:
+                  TextStyle(color: AppColors.textSecondaryLight, height: 1.4),
             ),
             const SizedBox(height: 18),
             ElevatedButton.icon(
@@ -153,7 +154,8 @@ class _WalletBody extends StatelessWidget {
         .fold<double>(0, (sum, tx) => sum + tx.amount.abs());
 
     return RefreshIndicator(
-      onRefresh: () async => context.read<PaymentBloc>().add(const LoadWallet()),
+      onRefresh: () async =>
+          context.read<PaymentBloc>().add(const LoadWallet()),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
@@ -161,7 +163,9 @@ class _WalletBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _BalanceCard(wallet: state.wallet, transactionCount: state.transactions.length),
+              _BalanceCard(
+                  wallet: state.wallet,
+                  transactionCount: state.transactions.length),
               const SizedBox(height: 14),
               _WalletInsights(
                 incomingTotal: credits,
@@ -189,7 +193,8 @@ class _WalletBody extends StatelessWidget {
                 ...groups.entries.map(
                   (group) => Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: _TransactionGroup(label: group.key, items: group.value),
+                    child:
+                        _TransactionGroup(label: group.key, items: group.value),
                   ),
                 ),
             ],
@@ -257,12 +262,16 @@ class _BalanceCard extends StatelessWidget {
           const SizedBox(height: 18),
           const Text(
             'Crab Wallet',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+            style: TextStyle(
+                color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
           const Text(
             'Available balance',
-            style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
@@ -284,9 +293,15 @@ class _BalanceCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Expanded(child: _MetaItem(label: 'Wallet ID', value: _maskWalletId(wallet.id))),
-                Expanded(child: _MetaItem(label: 'Updated', value: _formatDay(wallet.updatedAt))),
-                Expanded(child: _MetaItem(label: 'Records', value: '$transactionCount')),
+                Expanded(
+                    child: _MetaItem(
+                        label: 'Wallet ID', value: _maskWalletId(wallet.id))),
+                Expanded(
+                    child: _MetaItem(
+                        label: 'Updated', value: _formatDay(wallet.updatedAt))),
+                Expanded(
+                    child: _MetaItem(
+                        label: 'Records', value: '$transactionCount')),
               ],
             ),
           ),
@@ -343,7 +358,11 @@ class _WalletInsights extends StatelessWidget {
 }
 
 class _InsightCard extends StatelessWidget {
-  const _InsightCard({required this.icon, required this.label, required this.value, required this.color});
+  const _InsightCard(
+      {required this.icon,
+      required this.label,
+      required this.value,
+      required this.color});
 
   final IconData icon;
   final String label;
@@ -373,9 +392,13 @@ class _InsightCard extends StatelessWidget {
             child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(height: 12),
-          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          Text(value,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight)),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 12, color: AppColors.textSecondaryLight)),
         ],
       ),
     );
@@ -389,18 +412,37 @@ class _ActionPills extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _ActionCard(icon: Icons.add_rounded, label: 'Top up', onTap: () => context.push('/wallet/topup'))),
+        Expanded(
+            child: _ActionCard(
+                icon: Icons.add_rounded,
+                label: 'Top up',
+                onTap: () => context.push('/wallet/topup'))),
         const SizedBox(width: 10),
-        Expanded(child: _ActionCard(icon: Icons.send_rounded, label: 'Transfer', onTap: () => context.push('/wallet/transfer'))),
+        Expanded(
+            child: _ActionCard(
+                icon: Icons.send_rounded,
+                label: 'Transfer',
+                onTap: () => context.push('/wallet/transfer'))),
         const SizedBox(width: 10),
-        Expanded(child: _ActionCard(icon: Icons.history_rounded, label: 'History', onTap: () => context.push('/wallet/transactions'))),
+        Expanded(
+            child: _ActionCard(
+                icon: Icons.local_offer_rounded,
+                label: 'Promos',
+                onTap: () => context.push('/promos'))),
+        const SizedBox(width: 10),
+        Expanded(
+            child: _ActionCard(
+                icon: Icons.history_rounded,
+                label: 'History',
+                onTap: () => context.push('/wallet/transactions'))),
       ],
     );
   }
 }
 
 class _ActionCard extends StatelessWidget {
-  const _ActionCard({required this.icon, required this.label, required this.onTap});
+  const _ActionCard(
+      {required this.icon, required this.label, required this.onTap});
 
   final IconData icon;
   final String label;
@@ -418,7 +460,8 @@ class _ActionCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.65)),
+            border: Border.all(
+                color: AppColors.borderLight.withValues(alpha: 0.65)),
             boxShadow: AppShadows.shadowSoft,
           ),
           child: Column(
@@ -433,7 +476,9 @@ class _ActionCard extends StatelessWidget {
                 child: Icon(icon, color: Colors.white, size: 20),
               ),
               const SizedBox(height: 10),
-              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w700)),
             ],
           ),
         ),
@@ -469,7 +514,8 @@ class _TransactionGroup extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.7)),
+            border:
+                Border.all(color: AppColors.borderLight.withValues(alpha: 0.7)),
             boxShadow: AppShadows.shadowSoft,
           ),
           child: Column(
@@ -480,7 +526,11 @@ class _TransactionGroup extends StatelessWidget {
                   child: TransactionTile(transaction: items[index]),
                 ),
                 if (index != items.length - 1)
-                  const Divider(height: 1, indent: 14, endIndent: 14, color: AppColors.borderLight),
+                  const Divider(
+                      height: 1,
+                      indent: 14,
+                      endIndent: 14,
+                      color: AppColors.borderLight),
               ],
             ],
           ),
@@ -512,15 +562,20 @@ class _EmptyTransactions extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.10),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.receipt_long_rounded, color: AppColors.primary, size: 28),
+            child: const Icon(Icons.receipt_long_rounded,
+                color: AppColors.primary, size: 28),
           ),
           const SizedBox(height: 14),
-          const Text('No transactions yet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+          const Text('No transactions yet',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
           const SizedBox(height: 6),
           const Text(
             'Top up your wallet or pay for your first ride to start building history.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight, height: 1.45),
+            style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondaryLight,
+                height: 1.45),
           ),
           const SizedBox(height: 14),
           const InfoChip(
@@ -545,9 +600,17 @@ class _SectionHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimaryLight)),
+        Text(title,
+            style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimaryLight)),
         const SizedBox(height: 4),
-        Text(subtitle, style: const TextStyle(fontSize: 12, height: 1.45, color: AppColors.textSecondaryLight)),
+        Text(subtitle,
+            style: const TextStyle(
+                fontSize: 12,
+                height: 1.45,
+                color: AppColors.textSecondaryLight)),
       ],
     );
   }
@@ -573,7 +636,11 @@ class _GlassPill extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white, size: 14),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700)),
         ],
       ),
     );
@@ -591,9 +658,17 @@ class _MetaItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.72), fontSize: 11, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 11,
+                fontWeight: FontWeight.w600)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+        Text(value,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w700)),
       ],
     );
   }
@@ -615,7 +690,8 @@ String _formatCompact(double value) {
   return value.toStringAsFixed(0);
 }
 
-String _formatTime(DateTime value) => '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+String _formatTime(DateTime value) =>
+    '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
 
 String _formatDay(DateTime value) => '${value.day}/${value.month}';
 

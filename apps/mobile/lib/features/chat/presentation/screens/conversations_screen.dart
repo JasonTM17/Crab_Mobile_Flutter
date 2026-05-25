@@ -40,7 +40,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
           IconButton(
             icon: const Icon(Icons.search_rounded),
             color: theme.colorScheme.onSurface,
-            onPressed: () {},
+            onPressed: () => showSearch<void>(
+              context: context,
+              delegate: _ConversationSearchDelegate(),
+            ),
           ),
           const SizedBox(width: 4),
         ],
@@ -100,6 +103,50 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
             }
             return const SizedBox.shrink();
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _ConversationSearchDelegate extends SearchDelegate<void> {
+  @override
+  String get searchFieldLabel => 'Search conversations';
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      if (query.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => query = '',
+        ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back_rounded),
+      onPressed: () => close(context, null),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) => _buildContent();
+
+  @override
+  Widget buildSuggestions(BuildContext context) => _buildContent();
+
+  Widget _buildContent() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          query.trim().isEmpty
+              ? 'Nhập tên tài xế, nhà hàng hoặc nội dung chat để tìm kiếm.'
+              : 'Tính năng tìm kiếm "$query" sẽ sớm được hỗ trợ.',
+          textAlign: TextAlign.center,
         ),
       ),
     );

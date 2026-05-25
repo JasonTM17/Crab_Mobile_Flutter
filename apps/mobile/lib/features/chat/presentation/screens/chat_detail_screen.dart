@@ -95,12 +95,35 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           IconButton(
             icon: Icon(Icons.phone_rounded, color: cs.primary),
             tooltip: 'Call',
-            onPressed: () {},
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Tính năng gọi sẽ sớm được hỗ trợ.')),
+            ),
           ),
           IconButton(
             icon: Icon(Icons.more_horiz_rounded, color: cs.onSurface),
             tooltip: 'More',
-            onPressed: () {},
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              showDragHandle: true,
+              builder: (_) => SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.notifications_off_outlined),
+                      title: const Text('Mute conversation'),
+                      onTap: () => Navigator.of(context).pop(),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.flag_outlined),
+                      title: const Text('Report issue'),
+                      onTap: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: 4),
         ],

@@ -149,7 +149,7 @@ class AppTheme {
           foregroundColor: scheme.onPrimary,
           disabledBackgroundColor: scheme.primary.withValues(alpha: 0.3),
           disabledForegroundColor: scheme.onPrimary.withValues(alpha: 0.9),
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size.fromHeight(56),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
@@ -169,7 +169,7 @@ class AppTheme {
           foregroundColor: scheme.onPrimary,
           disabledBackgroundColor: scheme.primary.withValues(alpha: 0.3),
           disabledForegroundColor: scheme.onPrimary.withValues(alpha: 0.9),
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: const Size.fromHeight(52),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
@@ -184,7 +184,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.onSurface,
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: const Size.fromHeight(52),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,

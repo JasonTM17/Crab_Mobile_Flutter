@@ -14,12 +14,6 @@ String mapErrorToMessage(Object? error) {
     return _mapDioException(error);
   }
 
-  // Common pattern in this codebase: Exception('something went wrong')
-  final raw = error.toString();
-  if (raw.startsWith('Exception: ')) {
-    return raw.substring('Exception: '.length);
-  }
-
   return 'Đã có lỗi xảy ra. Vui lòng thử lại.';
 }
 

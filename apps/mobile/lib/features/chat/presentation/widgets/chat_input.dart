@@ -55,7 +55,9 @@ class _ChatInputState extends State<ChatInput> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Đính kèm tệp sẽ sớm được hỗ trợ.')),
+            ),
             icon: Icon(Icons.add_circle_outline_rounded, color: cs.primary),
             tooltip: 'Attach',
           ),
