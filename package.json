@@ -33,10 +33,11 @@
     "lint": "turbo run lint",
     "test": "turbo run test --concurrency=1",
     "contract:check": "node scripts/check-contracts.js",
-    "mobile:analyze": "cd apps/mobile && flutter analyze",
-    "mobile:test": "cd apps/mobile && flutter test",
+    "mobile:codegen": "cd apps/mobile && dart run build_runner build --delete-conflicting-outputs",
+    "mobile:analyze": "pnpm run mobile:codegen && cd apps/mobile && flutter analyze",
+    "mobile:test": "pnpm run mobile:codegen && cd apps/mobile && flutter test",
     "docker:config": "docker compose --env-file .env.production.example -f docker-compose.prod.yml config",
-    "verify": "pnpm run lint && pnpm run build && pnpm run contract:check && pnpm run test",
+    "verify": "pnpm run lint && pnpm run build && pnpm run contract:check && pnpm run test && pnpm run mobile:analyze && pnpm run mobile:test",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {

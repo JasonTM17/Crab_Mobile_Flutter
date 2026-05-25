@@ -140,6 +140,9 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
         working-directory: apps/mobile
+      - name: Generate Flutter code
+        run: dart run build_runner build --delete-conflicting-outputs
+        working-directory: apps/mobile
       - name: Analyze Flutter app
         run: flutter analyze
         working-directory: apps/mobile
