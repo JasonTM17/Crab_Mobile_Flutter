@@ -64,7 +64,7 @@ export class DriversService {
   async setDriverStatus(driverId: string, status: DriverStatus): Promise<void> {
     await this.driverLocationModel
       .findOneAndUpdate(
-        { driver_id: driverId },
+        { driver_id: { $eq: driverId } },
         {
           $set: { status, updated_at: new Date() },
           $setOnInsert: {
@@ -87,7 +87,7 @@ export class DriversService {
   ): Promise<void> {
     await this.driverLocationModel
       .findOneAndUpdate(
-        { driver_id: driverId },
+        { driver_id: { $eq: driverId } },
         {
           $set: {
             location: { type: 'Point', coordinates: [longitude, latitude] },
