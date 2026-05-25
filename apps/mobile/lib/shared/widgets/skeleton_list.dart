@@ -46,11 +46,11 @@ class _SkeletonRow extends StatelessWidget {
         children: [
           ShimmerBox(width: height - 16, height: height - 16, borderRadius: 14),
           const SizedBox(width: 12),
-          Expanded(
+          const Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 ShimmerBox(width: 160, height: 14),
                 SizedBox(height: 8),
                 ShimmerBox(width: 100, height: 12),

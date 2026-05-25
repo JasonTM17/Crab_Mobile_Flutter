@@ -26,8 +26,6 @@ export default function Rides() {
   const [error, setError] = useState<string | null>(null)
 
   function load() {
-    setLoading(true)
-    setError(null)
     api
       .get('/rides')
       .then((r) => setRides(r.data.data ?? r.data ?? []))
@@ -39,14 +37,26 @@ export default function Rides() {
   }
 
   useEffect(() => {
-    load()
+    void load()
   }, [])
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">Rides</h1>
-      <div className="bg-card rounded-lg shadow border overflow-hidden">
-        <table className="w-full">
+      <div className="space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+          Rides
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Monitor live and historical rides, including assignment status, fare totals, and distance.
+        </p>
+      </div>
+      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b bg-muted/30 px-6 py-3 text-sm text-muted-foreground">
+          <span>{rides.length} rides loaded</span>
+          <span>Assignment, fare, and distance snapshot</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase">ID</th>
@@ -77,7 +87,14 @@ export default function Rides() {
                     title="Could not load rides"
                     description={error}
                     action={
-                      <Button variant="outline" onClick={load}>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setLoading(true)
+                          setError(null)
+                          void load()
+                        }}
+                      >
                         Retry
                       </Button>
                     }
@@ -122,7 +139,8 @@ export default function Rides() {
               ))
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   )
@@ -135,12 +153,10 @@ function RideStatusBadge({ status }: { status: string }) {
   > = {
     COMPLETED: 'success',
     IN_PROGRESS: 'info',
-    ACCEPTED: 'info',
-    PENDING: 'warning',
+    PICKUP: 'info',
+    MATCHED: 'info',
     REQUESTED: 'warning',
     CANCELLED: 'destructive',
-    CANCELED: 'destructive',
-    FAILED: 'destructive',
   }
   return <Badge variant={variant[status] ?? 'secondary'}>{status}</Badge>
 }

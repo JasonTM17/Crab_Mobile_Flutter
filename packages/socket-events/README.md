@@ -5,47 +5,61 @@ Type-safe Socket.IO event definitions shared between backend services and the Fl
 ## Installation
 
 ```typescript
-import { RIDE_EVENTS, CHAT_EVENTS, RideRequestPayload } from '@crab/socket-events';
+import type { ChatMessagePayload, RideRequestPayload } from '@crab/socket-events';
 ```
 
-## Event Constants
+## Event Map
 
 ### Ride Events (`/ride` namespace)
 
-| Constant | Value | Direction |
-|----------|-------|-----------|
-| `RIDE_EVENTS.REQUEST` | `ride:request` | Client → Server |
-| `RIDE_EVENTS.ACCEPT` | `ride:accept` | Client → Server |
-| `RIDE_EVENTS.CANCEL` | `ride:cancel` | Client → Server |
-| `RIDE_EVENTS.NEW_REQUEST` | `ride:new_request` | Server → Client |
-| `RIDE_EVENTS.ACCEPTED` | `ride:accepted` | Server → Client |
-| `RIDE_EVENTS.DRIVER_LOCATION` | `ride:driver_location` | Server → Client |
-| `RIDE_EVENTS.STATUS_CHANGED` | `ride:status_changed` | Server → Client |
+| Event | Direction |
+|-------|-----------|
+| `ride:request` | Client → Server |
+| `ride:new_request` | Server → Client |
+| `ride:request_received` | Server → Client |
+| `ride:join` | Client → Server |
+| `ride:joined` | Server → Client |
+| `ride:cancel` | Client → Server |
+| `ride:matched` | Server → Client |
+| `ride:accepted` | Server → Client |
+| `ride:location` | Bidirectional |
+| `ride:status` | Server → Client |
+| `ride:completed` | Server → Client |
+| `ride:cancelled` | Server → Client |
 
 ### Food Events (`/food` namespace)
 
-| Constant | Value | Direction |
-|----------|-------|-----------|
-| `FOOD_EVENTS.ORDER_TRACK` | `order:track` | Client → Server |
-| `FOOD_EVENTS.ORDER_STATUS_CHANGED` | `order:status_changed` | Server → Client |
-| `FOOD_EVENTS.ORDER_DRIVER_ASSIGNED` | `order:driver_assigned` | Server → Client |
+| Event | Direction |
+|-------|-----------|
+| `order:placed` | Server → Client |
+| `order:status` | Server → Client |
+| `order:tracking` | Server → Client |
+| `order:ready` | Server → Client |
 
 ### Chat Events (`/chat` namespace)
 
-| Constant | Value | Direction |
-|----------|-------|-----------|
-| `CHAT_EVENTS.MESSAGE_SEND` | `message:send` | Client → Server |
-| `CHAT_EVENTS.MESSAGE_NEW` | `message:new` | Server → Client |
-| `CHAT_EVENTS.MESSAGE_TYPING` | `message:typing` | Bidirectional |
+| Event | Direction |
+|-------|-----------|
+| `chat:message` | Bidirectional |
+| `chat:typing` | Bidirectional |
+| `chat:read` | Client → Server |
 
 ## Payload Types
 
 All event payloads are fully typed:
 
 ```typescript
-import { RideRequestPayload, MessageSendPayload } from '@crab/socket-events';
+import type { RideNamespaceEvents, RideRequestPayload } from '@crab/socket-events';
 
-socket.emit(RIDE_EVENTS.REQUEST, payload satisfies RideRequestPayload);
+const payload = {
+  riderId: 'uuid',
+  pickup: { lat: 10.7769, lng: 106.7009, address: '123 Nguyen Hue' },
+  dropoff: { lat: 10.8021, lng: 106.7146, address: '456 Le Van Sy' },
+  paymentMethod: 'wallet',
+} satisfies RideRequestPayload;
+
+const event: keyof RideNamespaceEvents = 'ride:request';
+socket.emit(event, payload);
 ```
 
 ## Build

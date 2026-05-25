@@ -105,30 +105,32 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            {getGreeting()}, {firstName}
-          </h2>
-          <p className="text-muted-foreground">
-            Here's an overview of your platform.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground">
-            Last refreshed at {formatTime(lastRefresh)}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`}
-            />
-            Refresh
-          </Button>
+      <div className="rounded-2xl bg-gradient-to-br from-primary to-emerald-700 p-6 text-primary-foreground shadow-sm">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {getGreeting()}, {firstName}
+            </h2>
+            <p className="text-primary-foreground/85">
+              Here's an overview of your platform.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-primary-foreground/80">
+              Last refreshed at {formatTime(lastRefresh)}
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`}
+              />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -1,12 +1,12 @@
 # API Reference
 
-Base URL: `http://localhost:3000/api`
+Base URL: `http://localhost:3000/api/v1`
 
-All endpoints require `Authorization: Bearer <token>` unless marked as public.
+All endpoints require `Authorization: Bearer <token>` unless marked as public. The Gateway prefixes every downstream service with `/api/v1`; service ports below are reachable directly only inside the Docker network.
 
 ## Authentication Service
 
-### POST /api/auth/register (Public)
+### POST /auth/register (Public)
 
 Register a new user account.
 
@@ -15,22 +15,32 @@ Register a new user account.
 {
   "email": "user@example.com",
   "password": "SecurePass123!",
-  "fullName": "Nguyen Van A",
   "phone": "+84901234567",
-  "role": "rider" // rider | driver | restaurant_owner
+  "firstName": "Van A",
+  "lastName": "Nguyen"
 }
 
 // Response 201
 {
-  "id": "uuid",
-  "email": "user@example.com",
-  "fullName": "Nguyen Van A",
-  "role": "rider",
-  "createdAt": "2024-01-01T00:00:00Z"
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "phone": "+84901234567",
+    "firstName": "Van A",
+    "lastName": "Nguyen",
+    "role": "RIDER",
+    "status": "PENDING_VERIFICATION",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  "tokens": {
+    "access_token": "eyJhbG...",
+    "refresh_token": "eyJhbG..."
+  },
+  "requiresPhoneVerification": true
 }
 ```
 
-### POST /api/auth/login (Public)
+### POST /auth/login (Public)
 
 Authenticate and receive tokens.
 
@@ -43,33 +53,41 @@ Authenticate and receive tokens.
 
 // Response 200
 {
-  "accessToken": "eyJhbG...",
-  "refreshToken": "eyJhbG...",
-  "expiresIn": 900,
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "role": "rider"
+    "role": "RIDER"
+  },
+  "tokens": {
+    "access_token": "eyJhbG...",
+    "refresh_token": "eyJhbG..."
   }
 }
 ```
 
-### POST /api/auth/refresh
+### POST /auth/refresh
 
 Refresh an expired access token.
 
 ```json
 // Request
-{ "refreshToken": "eyJhbG..." }
+{ "refresh_token": "eyJhbG..." }
 
 // Response 200
 {
-  "accessToken": "eyJhbG...",
-  "expiresIn": 900
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "role": "RIDER"
+  },
+  "tokens": {
+    "access_token": "eyJhbG...",
+    "refresh_token": "eyJhbG..."
+  }
 }
 ```
 
-### POST /api/auth/logout
+### POST /auth/logout
 
 Invalidate the current refresh token.
 
@@ -78,7 +96,7 @@ Invalidate the current refresh token.
 { "message": "Logged out successfully" }
 ```
 
-### POST /api/auth/forgot-password (Public)
+### POST /auth/forgot-password (Public)
 
 ```json
 // Request
@@ -92,7 +110,7 @@ Invalidate the current refresh token.
 
 ## User Service
 
-### GET /api/users/me
+### GET /profiles/:userId
 
 Get current user profile.
 
@@ -101,44 +119,37 @@ Get current user profile.
 {
   "id": "uuid",
   "email": "user@example.com",
-  "fullName": "Nguyen Van A",
   "phone": "+84901234567",
-  "avatar": "https://storage.example.com/avatars/uuid.jpg",
-  "role": "rider",
-  "rating": 4.8,
-  "totalRides": 42,
+  "firstName": "Van A",
+  "lastName": "Nguyen",
+  "role": "RIDER",
+  "status": "ACTIVE",
+  "avatarUrl": "https://storage.example.com/avatars/uuid.jpg",
+  "dateOfBirth": "1990-01-01",
+  "gender": "male",
+  "bio": "Rider in Ho Chi Minh City",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
 
-### PATCH /api/users/me
+### PUT /profiles/:userId
 
 Update current user profile.
 
 ```json
 // Request
 {
-  "fullName": "Nguyen Van B",
-  "phone": "+84909876543"
+  "firstName": "Van B",
+  "lastName": "Nguyen",
+  "phone": "+84909876543",
+  "avatarUrl": "https://storage.example.com/avatars/uuid.jpg"
 }
 
 // Response 200
-{ "id": "uuid", "fullName": "Nguyen Van B", ... }
+{ "id": "uuid", "firstName": "Van B", "lastName": "Nguyen", ... }
 ```
 
-### POST /api/users/me/avatar
-
-Upload avatar (multipart/form-data).
-
-```
-Content-Type: multipart/form-data
-Field: avatar (file, max 5MB, jpg/png)
-
-// Response 200
-{ "avatar": "https://storage.example.com/avatars/uuid.jpg" }
-```
-
-### GET /api/users/:id (Admin)
+### GET /users/:id (Admin)
 
 Get any user by ID (admin only).
 
@@ -146,43 +157,42 @@ Get any user by ID (admin only).
 
 ## Ride Service
 
-### POST /api/rides
+### POST /rides
 
 Request a new ride.
 
 ```json
 // Request
 {
-  "pickupLocation": {
-    "lat": 10.7769,
-    "lng": 106.7009,
-    "address": "123 Nguyen Hue, District 1"
-  },
-  "dropoffLocation": {
-    "lat": 10.8021,
-    "lng": 106.7146,
-    "address": "456 Le Van Sy, District 3"
-  },
-  "vehicleType": "car" // bike | car | car_plus
+  "rider_id": "uuid",
+  "pickup_lat": 10.7769,
+  "pickup_lng": 106.7009,
+  "pickup_address": "123 Nguyen Hue, District 1",
+  "dropoff_lat": 10.8021,
+  "dropoff_lng": 106.7146,
+  "dropoff_address": "456 Le Van Sy, District 3"
 }
 
 // Response 201
 {
   "id": "uuid",
-  "status": "SEARCHING",
-  "estimatedFare": 45000,
-  "estimatedDuration": 15,
-  "pickupLocation": { ... },
-  "dropoffLocation": { ... },
-  "createdAt": "2024-01-01T00:00:00Z"
+  "status": "REQUESTED",
+  "estimated_fare": 45000,
+  "pickup_lat": 10.7769,
+  "pickup_lng": 106.7009,
+  "pickup_address": "123 Nguyen Hue, District 1",
+  "dropoff_lat": 10.8021,
+  "dropoff_lng": 106.7146,
+  "dropoff_address": "456 Le Van Sy, District 3",
+  "created_at": "2024-01-01T00:00:00Z"
 }
 ```
 
-### GET /api/rides/:id
+### GET /rides/:id
 
 Get ride details.
 
-### GET /api/rides/history
+### GET /rides/history
 
 Get ride history for current user.
 
@@ -201,7 +211,7 @@ Get ride history for current user.
 }
 ```
 
-### POST /api/rides/:id/cancel
+### POST /rides/:id/cancel
 
 Cancel an active ride.
 
@@ -215,20 +225,20 @@ Cancel an active ride.
 
 ### Ride Statuses
 
-`SEARCHING` → `ACCEPTED` → `ARRIVING` → `IN_PROGRESS` → `COMPLETED`
+`REQUESTED` → `MATCHED` → `PICKUP` → `IN_PROGRESS` → `COMPLETED`
 
-Alternative: `SEARCHING` → `CANCELLED` | `NO_DRIVER`
+Alternative: any state → `CANCELLED`. The matching queue dispatches drivers; if no driver accepts within the configured timeout the ride is auto-cancelled with reason `NO_DRIVER`.
 
 ---
 
 ## Food Service
 
-### GET /api/food/restaurants
+### GET /restaurants/search
 
 List restaurants near location.
 
 ```json
-// Query: ?lat=10.77&lng=106.70&radius=5&category=vietnamese&page=1
+// Query: ?latitude=10.77&longitude=106.70&radiusKm=5&cuisineType=vietnamese&page=1
 
 // Response 200
 {
@@ -249,7 +259,7 @@ List restaurants near location.
 }
 ```
 
-### GET /api/food/restaurants/:id/menu
+### GET /menus/items/restaurant/:restaurantId
 
 Get restaurant menu.
 
@@ -276,29 +286,28 @@ Get restaurant menu.
 }
 ```
 
-### POST /api/food/orders
+### POST /orders
 
 Place a food order.
 
 ```json
 // Request
 {
+  "customerId": "uuid",
   "restaurantId": "uuid",
   "items": [
     { "menuItemId": "uuid", "quantity": 2, "options": { "Size": "Large" } }
   ],
-  "deliveryAddress": {
-    "lat": 10.77,
-    "lng": 106.70,
-    "address": "123 Nguyen Hue"
-  },
-  "note": "Extra chili please"
+  "deliveryLat": 10.77,
+  "deliveryLng": 106.70,
+  "deliveryAddress": "123 Nguyen Hue",
+  "deliveryNotes": "Extra chili please"
 }
 
 // Response 201
 {
   "id": "uuid",
-  "status": "PENDING",
+  "status": "PLACED",
   "items": [ ... ],
   "subtotal": 125000,
   "deliveryFee": 15000,
@@ -309,15 +318,15 @@ Place a food order.
 
 ### Food Order Statuses
 
-`PENDING` → `CONFIRMED` → `PREPARING` → `READY` → `PICKED_UP` → `DELIVERED`
+`PLACED` → `CONFIRMED` → `PREPARING` → `READY` → `PICKED_UP` → `DELIVERED`
 
-Alternative: `PENDING` → `CANCELLED` | `REJECTED`
+Alternative: any non-terminal state → `CANCELLED`.
 
 ---
 
 ## Payment Service
 
-### GET /api/payments/wallet
+### GET /wallet/:userId
 
 Get wallet balance.
 
@@ -330,7 +339,7 @@ Get wallet balance.
 }
 ```
 
-### POST /api/payments/topup
+### POST /wallet/:userId/top-up
 
 Top up wallet.
 
@@ -338,7 +347,7 @@ Top up wallet.
 // Request
 {
   "amount": 100000,
-  "method": "bank_transfer" // bank_transfer | momo | zalopay | credit_card
+  "paymentMethod": "bank_transfer" // bank_transfer | momo | zalopay | credit_card
 }
 
 // Response 200
@@ -350,7 +359,7 @@ Top up wallet.
 }
 ```
 
-### GET /api/payments/transactions
+### GET /transactions/user/:userId
 
 Get transaction history.
 
@@ -376,7 +385,7 @@ Get transaction history.
 
 ## Chat Service
 
-### GET /api/chat/conversations
+### GET /chat/conversations
 
 List user conversations.
 
@@ -395,7 +404,7 @@ List user conversations.
 }
 ```
 
-### GET /api/chat/conversations/:id/messages
+### GET /chat/conversations/:id/messages
 
 Get messages in a conversation.
 
@@ -421,7 +430,7 @@ Get messages in a conversation.
 
 ## Notification Service
 
-### GET /api/notifications
+### GET /notifications
 
 Get user notifications.
 
@@ -446,7 +455,7 @@ Get user notifications.
 }
 ```
 
-### POST /api/notifications/read
+### POST /notifications/read
 
 Mark notifications as read.
 
@@ -458,7 +467,7 @@ Mark notifications as read.
 { "marked": 2 }
 ```
 
-### POST /api/notifications/fcm-token
+### POST /notifications/fcm-token
 
 Register FCM token for push notifications.
 
@@ -474,7 +483,7 @@ Register FCM token for push notifications.
 
 ## Rating Service
 
-### POST /api/ratings
+### POST /ratings
 
 Submit a rating.
 
@@ -497,7 +506,7 @@ Submit a rating.
 }
 ```
 
-### GET /api/ratings/:targetId
+### GET /ratings/:targetId
 
 Get ratings for a user/restaurant.
 

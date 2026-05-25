@@ -66,15 +66,15 @@ Future<void> configureDependencies() async {
   );
 
   sl.registerLazySingleton<RideRepository>(
-    () => RideRepository(dio: sl<Dio>()),
+    () => RideRepository(dio: sl<Dio>(), authStorage: sl<AuthStorage>()),
   );
 
   sl.registerLazySingleton<DriverRepository>(
-    () => DriverRepository(sl<DioClient>()),
+    () => DriverRepository(sl<DioClient>(), sl<AuthStorage>()),
   );
 
   sl.registerLazySingleton<FoodRepository>(
-    () => FoodRepository(sl<DioClient>()),
+    () => FoodRepository(sl<DioClient>(), sl<AuthStorage>()),
   );
 
   sl.registerLazySingleton<PaymentRepository>(

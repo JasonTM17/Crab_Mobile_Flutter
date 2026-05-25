@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport'
 import { Redis } from 'ioredis'
 import { ObservabilityModule, ResilienceModule } from '@crab/backend-shared'
 import { AuthModule } from './auth/auth.module'
+import { getRequiredJwtSecret } from './security'
 import { UserEntity } from './auth/entities/user.entity'
 import { RefreshTokenEntity } from './auth/entities/refresh-token.entity'
 import { OtpEntity } from './auth/entities/otp.entity'
@@ -47,7 +48,7 @@ const REDIS_CLIENT = 'AUTH_REDIS_CLIENT'
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET', 'change-me-in-production'),
+        secret: getRequiredJwtSecret(config),
         signOptions: { expiresIn: '15m' },
       }),
     }),

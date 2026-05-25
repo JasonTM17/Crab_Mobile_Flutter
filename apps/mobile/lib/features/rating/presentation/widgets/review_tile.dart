@@ -41,9 +41,7 @@ class ReviewTile extends StatelessWidget {
                         children: [
                           ...List.generate(5, (i) {
                             return Icon(
-                              i < review.score
-                                  ? Icons.star
-                                  : Icons.star_border,
+                              i < review.score ? Icons.star : Icons.star_border,
                               size: 14,
                               color: Colors.amber,
                             );
@@ -90,7 +88,7 @@ class ReviewTile extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.05),
+                  color: Colors.blue.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
                   border: Border(
                     left: BorderSide(
@@ -108,7 +106,8 @@ class ReviewTile extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                             color: Colors.grey)),
                     const SizedBox(height: 2),
-                    Text(review.replyContent!, style: const TextStyle(fontSize: 13)),
+                    Text(review.replyContent!,
+                        style: const TextStyle(fontSize: 13)),
                   ],
                 ),
               ),

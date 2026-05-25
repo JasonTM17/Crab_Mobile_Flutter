@@ -41,7 +41,7 @@ Pricing breakdown stored on `food_orders`:
 |------------------|------------------------------------------------|
 | `subtotal`       | Sum of line item prices                        |
 | `delivery_fee`   | Distance-based fee, computed at checkout       |
-| `service_fee`    | Flat platform fee, currently 5%                |
+| `service_fee`    | Flat platform fee, configured by region        |
 | `discount`       | Promo discount, validated against `promotions` |
 | `tax`            | VAT 8% (configurable per-region)               |
 | `total`          | `subtotal + delivery_fee + service_fee + tax - discount` |
@@ -82,7 +82,9 @@ Estimated prep time = `max(item.prep_time_minutes)` from the menu, plus a 2-minu
 
 ### 4. Courier dispatch
 
-When an order hits `READY` (or 5 minutes before, configurable), `DispatchService` enqueues a `food-matching` BullMQ job with the same shape as ride matching, biased to:
+> **Implementation note:** The current order lifecycle is API-driven through restaurant and driver actions. The dispatch flow below is the planned worker-backed path once a dedicated `DispatchService` / `food-matching` queue is added behind the same public order statuses.
+
+In that worker-backed flow, when an order hits `READY` (or 5 minutes before, configurable), `DispatchService` enqueues a `food-matching` BullMQ job with the same shape as ride matching, biased to:
 
 - Couriers within 1 km of the restaurant (smaller radius than rides).
 - Couriers without an active food/ride (no batching in v1).

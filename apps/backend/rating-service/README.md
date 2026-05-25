@@ -32,6 +32,6 @@ Manages ratings, reviews, and feedback for rides and food orders.
 ## Docker
 
 ```bash
-docker build -f apps/backend/rating-service/Dockerfile -t jasontm17/rating-service .
-docker run -p 3008:3008 --env-file .env jasontm17/rating-service
+docker build -f apps/backend/rating-service/Dockerfile -t nguyenson1710/crab-mobile-rating-service .
+docker run -p 3008:3008 --env-file .env nguyenson1710/crab-mobile-rating-service
 ```

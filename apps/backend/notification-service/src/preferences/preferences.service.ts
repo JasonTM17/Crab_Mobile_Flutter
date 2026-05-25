@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
+import { UpdatePreferencesDto } from './dto/preferences.dto'
 import {
   NotificationPreferences,
   PreferencesDocument,
@@ -19,7 +20,7 @@ export class PreferencesService {
     return p
   }
 
-  async update(userId: string, updates: Partial<NotificationPreferences>) {
+  async update(userId: string, updates: UpdatePreferencesDto) {
     return this.model.findOneAndUpdate({ userId }, updates, { new: true, upsert: true })
   }
 

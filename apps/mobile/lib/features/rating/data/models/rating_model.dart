@@ -66,7 +66,8 @@ class RatingStatsModel {
     return RatingStatsModel(
       average: (json['average'] as num).toDouble(),
       count: (json['count'] as num).toInt(),
-      distribution: dist.map((k, v) => MapEntry(int.parse(k), (v as num).toInt())),
+      distribution:
+          dist.map((k, v) => MapEntry(int.parse(k), (v as num).toInt())),
     );
   }
 }

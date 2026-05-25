@@ -14,7 +14,6 @@ import type { ChatMessagePayload, ChatTypingPayload, ChatReadPayload } from '@cr
 
 @WebSocketGateway({
   namespace: '/chat',
-  cors: { origin: '*', credentials: true },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

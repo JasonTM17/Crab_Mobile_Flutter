@@ -7,9 +7,15 @@ spec:
   template:
     metadata: { labels: { app: user-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: user-service
-          image: jasontm17/user-service:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-user-service:latest
           ports: [{ containerPort: 3002 }]
           envFrom:
             - configMapRef: { name: crab-config }

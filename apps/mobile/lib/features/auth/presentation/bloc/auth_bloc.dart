@@ -58,7 +58,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on DioException catch (e) {
       emit(state.copyWith(status: AuthStatus.error, error: _extractError(e)));
     } catch (e) {
-      emit(state.copyWith(status: AuthStatus.error, error: mapErrorToMessage(e)));
+      emit(state.copyWith(
+          status: AuthStatus.error, error: mapErrorToMessage(e)));
     }
   }
 
@@ -71,7 +72,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on DioException catch (e) {
       emit(state.copyWith(status: AuthStatus.error, error: _extractError(e)));
     } catch (e) {
-      emit(state.copyWith(status: AuthStatus.error, error: mapErrorToMessage(e)));
+      emit(state.copyWith(
+          status: AuthStatus.error, error: mapErrorToMessage(e)));
     }
   }
 
@@ -93,8 +95,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthOtpVerifyRequested event, Emitter<AuthState> emit) async {
     emit(state.copyWith(status: AuthStatus.loading));
     try {
-      final auth =
-          await _repository.verifyPhoneLogin(event.phone, event.code);
+      final auth = await _repository.verifyPhoneLogin(event.phone, event.code);
       emit(state.copyWith(
         status: AuthStatus.authenticated,
         user: auth.user,

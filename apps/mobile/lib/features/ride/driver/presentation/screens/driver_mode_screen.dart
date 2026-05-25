@@ -50,7 +50,29 @@ class DriverModeScreen extends StatelessWidget {
             elevation: 0,
             scrolledUnderElevation: 0,
             actions: [
-              if (state is DriverOnlineIdle || state is DriverRideRequest)
+              if (state is DriverOnlineIdle || state is DriverRideRequest) ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Auto Accept',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Switch(
+                      value: state.isAutoAcceptEnabled,
+                      activeThumbColor: const Color(0xFF22C55E),
+                      onChanged: (value) {
+                        context.read<DriverBloc>().add(const ToggleAutoAccept());
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: Center(
@@ -58,13 +80,12 @@ class DriverModeScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF22C55E)
-                            .withValues(alpha: 0.14),
+                        color: const Color(0xFF22C55E).withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           _LiveDot(),
                           SizedBox(width: 6),
                           Text(
@@ -81,6 +102,7 @@ class DriverModeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+              ],
             ],
           ),
           body: Stack(
@@ -114,8 +136,7 @@ class DriverModeScreen extends StatelessWidget {
   Widget _buildMainContent(BuildContext context, DriverState state) {
     if (state is DriverOffline) {
       return _OfflineView(
-        onGoOnline: () =>
-            context.read<DriverBloc>().add(const GoOnline()),
+        onGoOnline: () => context.read<DriverBloc>().add(const GoOnline()),
       );
     }
 
@@ -226,98 +247,157 @@ class _WaitingViewState extends State<_WaitingView>
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            alignment: Alignment.center,
+    return BlocBuilder<DriverBloc, DriverState>(
+      builder: (context, state) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ScaleTransition(
-                scale: _pulseAnimation,
-                child: Container(
-                  width: 160,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.10),
-                    shape: BoxShape.circle,
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  ScaleTransition(
+                    scale: _pulseAnimation,
+                    child: Container(
+                      width: 160,
+                      height: 160,
+                      decoration: BoxDecoration(
+                        color: cs.primary.withValues(alpha: 0.10),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 116,
+                    height: 116,
+                    decoration: BoxDecoration(
+                      gradient: AppGradients.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: cs.primary.withValues(alpha: 0.36),
+                          blurRadius: 26,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.local_taxi_rounded,
+                      size: 54,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Waiting for rides…',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  "We'll buzz you the moment a nearby request comes in.",
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.4,
                   ),
                 ),
               ),
+              const SizedBox(height: 24),
               Container(
-                width: 116,
-                height: 116,
+                margin: const EdgeInsets.symmetric(horizontal: 48),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  gradient: AppGradients.primary,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: cs.primary.withValues(alpha: 0.36),
-                      blurRadius: 26,
-                      offset: const Offset(0, 12),
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: cs.outlineVariant.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      state.isAutoAcceptEnabled
+                          ? Icons.auto_awesome_rounded
+                          : Icons.touch_app_rounded,
+                      color: state.isAutoAcceptEnabled
+                          ? cs.primary
+                          : cs.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Auto Accept',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            state.isAutoAcceptEnabled
+                                ? 'Accepting rides automatically'
+                                : 'Manual confirmation required',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: state.isAutoAcceptEnabled,
+                      activeThumbColor: cs.primary,
+                      onChanged: (value) {
+                        context.read<DriverBloc>().add(const ToggleAutoAccept());
+                      },
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.local_taxi_rounded,
-                  size: 54,
-                  color: Colors.white,
+              ),
+              const SizedBox(height: 32),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    context.read<DriverBloc>().add(const GoOffline()),
+                icon: const Icon(
+                  Icons.power_settings_new_rounded,
+                  size: 18,
+                  color: Color(0xFFEF4444),
+                ),
+                label: const Text(
+                  'Go offline',
+                  style: TextStyle(
+                    color: Color(0xFFEF4444),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  side: const BorderSide(
+                    color: Color(0xFFFECACA),
+                    width: 1.4,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 32),
-          Text(
-            'Waiting for rides…',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.4,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              "We'll buzz you the moment a nearby request comes in.",
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: cs.onSurfaceVariant,
-                height: 1.4,
-              ),
-            ),
-          ),
-          const SizedBox(height: 40),
-          OutlinedButton.icon(
-            onPressed: () =>
-                context.read<DriverBloc>().add(const GoOffline()),
-            icon: const Icon(
-              Icons.power_settings_new_rounded,
-              size: 18,
-              color: Color(0xFFEF4444),
-            ),
-            label: const Text(
-              'Go offline',
-              style: TextStyle(
-                color: Color(0xFFEF4444),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 22,
-                vertical: 12,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-              side: const BorderSide(
-                color: Color(0xFFFECACA),
-                width: 1.4,
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -354,8 +434,8 @@ class _LiveDotState extends State<_LiveDot>
         width: 8,
         height: 8,
         decoration: BoxDecoration(
-          color: const Color(0xFF22C55E)
-              .withValues(alpha: 0.5 + 0.5 * _c.value),
+          color:
+              const Color(0xFF22C55E).withValues(alpha: 0.5 + 0.5 * _c.value),
           shape: BoxShape.circle,
         ),
       ),

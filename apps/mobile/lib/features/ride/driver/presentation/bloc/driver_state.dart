@@ -3,18 +3,20 @@ import 'package:equatable/equatable.dart';
 import '../../../data/models/ride_model.dart';
 
 abstract class DriverState extends Equatable {
-  const DriverState();
+  final bool isAutoAcceptEnabled;
+
+  const DriverState({this.isAutoAcceptEnabled = true});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [isAutoAcceptEnabled];
 }
 
 class DriverOffline extends DriverState {
-  const DriverOffline();
+  const DriverOffline({super.isAutoAcceptEnabled});
 }
 
 class DriverOnlineIdle extends DriverState {
-  const DriverOnlineIdle();
+  const DriverOnlineIdle({super.isAutoAcceptEnabled});
 }
 
 class DriverRideRequest extends DriverState {
@@ -24,15 +26,17 @@ class DriverRideRequest extends DriverState {
   const DriverRideRequest({
     required this.rideRequest,
     required this.countdown,
+    super.isAutoAcceptEnabled,
   });
 
   @override
-  List<Object?> get props => [rideRequest, countdown];
+  List<Object?> get props => [rideRequest, countdown, isAutoAcceptEnabled];
 
-  DriverRideRequest copyWith({int? countdown}) {
+  DriverRideRequest copyWith({int? countdown, bool? isAutoAcceptEnabled}) {
     return DriverRideRequest(
       rideRequest: rideRequest,
       countdown: countdown ?? this.countdown,
+      isAutoAcceptEnabled: isAutoAcceptEnabled ?? this.isAutoAcceptEnabled,
     );
   }
 }
@@ -40,28 +44,37 @@ class DriverRideRequest extends DriverState {
 class DriverNavigatingToPickup extends DriverState {
   final RideModel ride;
 
-  const DriverNavigatingToPickup({required this.ride});
+  const DriverNavigatingToPickup({
+    required this.ride,
+    super.isAutoAcceptEnabled,
+  });
 
   @override
-  List<Object?> get props => [ride];
+  List<Object?> get props => [ride, isAutoAcceptEnabled];
 }
 
 class DriverInRide extends DriverState {
   final RideModel ride;
 
-  const DriverInRide({required this.ride});
+  const DriverInRide({
+    required this.ride,
+    super.isAutoAcceptEnabled,
+  });
 
   @override
-  List<Object?> get props => [ride];
+  List<Object?> get props => [ride, isAutoAcceptEnabled];
 }
 
 class DriverError extends DriverState {
   final String message;
 
-  const DriverError({required this.message});
+  const DriverError({
+    required this.message,
+    super.isAutoAcceptEnabled,
+  });
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, isAutoAcceptEnabled];
 }
 
 /// Lightweight ride request model received via socket

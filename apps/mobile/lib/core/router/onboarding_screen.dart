@@ -134,8 +134,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Expanded(
                     child: GradientButton(
                       label: isLast ? 'Get Started' : 'Next',
-                      icon:
-                          isLast ? Icons.arrow_forward_rounded : Icons.east_rounded,
+                      icon: isLast
+                          ? Icons.arrow_forward_rounded
+                          : Icons.east_rounded,
                       onPressed: () {
                         if (isLast) {
                           context.go('/login');

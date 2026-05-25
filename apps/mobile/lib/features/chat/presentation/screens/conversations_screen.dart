@@ -67,9 +67,8 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                     title: 'Could not load chats',
                     subtitle: state.message,
                     actionLabel: 'Retry',
-                    onAction: () => context
-                        .read<ChatBloc>()
-                        .add(const LoadConversations()),
+                    onAction: () =>
+                        context.read<ChatBloc>().add(const LoadConversations()),
                   ),
                 ],
               );
@@ -191,12 +190,10 @@ class _ConversationTile extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: unread
-                                  ? cs.onSurface
-                                  : cs.onSurfaceVariant,
-                              fontWeight: unread
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                              color:
+                                  unread ? cs.onSurface : cs.onSurfaceVariant,
+                              fontWeight:
+                                  unread ? FontWeight.w600 : FontWeight.w400,
                               height: 1.3,
                             ),
                           ),
@@ -269,8 +266,7 @@ class _Avatar extends StatelessWidget {
               color: cs.primary.withValues(alpha: 0.12),
               image: hasAvatar
                   ? DecorationImage(
-                      image: NetworkImage(
-                          conversation.otherParticipantAvatar!),
+                      image: NetworkImage(conversation.otherParticipantAvatar!),
                       fit: BoxFit.cover,
                     )
                   : null,

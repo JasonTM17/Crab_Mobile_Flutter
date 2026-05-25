@@ -7,9 +7,15 @@ spec:
   template:
     metadata: { labels: { app: notification-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: notification-service
-          image: jasontm17/notification-service:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-notification-service:latest
           ports: [{ containerPort: 3007 }]
           envFrom:
             - configMapRef: { name: crab-config }

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../data/models/location_model.dart';
 import '../bloc/ride_bloc.dart';
 import '../bloc/ride_event.dart';
 import '../bloc/ride_state.dart';
-import '../widgets/driver_info_card.dart';
 import '../widgets/ride_bottom_sheet.dart';
 import '../widgets/tracking_map.dart';
 import 'location_search_screen.dart';
@@ -159,6 +159,29 @@ class _RideBookingScreenState extends State<RideBookingScreen>
     }
   }
 
+  void _swapLocations() {
+    if (_pickup == null && _dropoff == null) return;
+    setState(() {
+      final tmp = _pickup;
+      _pickup = _dropoff;
+      _dropoff = tmp;
+    });
+    if (_pickup != null) {
+      context.read<RideBloc>().add(PickupLocationSelected(location: _pickup!));
+    }
+    if (_dropoff != null) {
+      context
+          .read<RideBloc>()
+          .add(DropoffLocationSelected(location: _dropoff!));
+    }
+    if (_pickup != null && _dropoff != null) {
+      context.read<RideBloc>().add(
+            EstimateFareRequested(pickup: _pickup!, dropoff: _dropoff!),
+          );
+      _fitBounds();
+    }
+  }
+
   void _bookRide() {
     if (_pickup == null || _dropoff == null) return;
     context.read<RideBloc>().add(RequestRide(
@@ -175,66 +198,100 @@ class _RideBookingScreenState extends State<RideBookingScreen>
           if (state is RidePickup ||
               state is RideInProgress ||
               state is RideDriverMatched) {
-            return TrackingMap(state: state);
+            return TrackingMap.fromState(state: state);
           }
+
+          final fareEstimate = state is RideIdle ? state.fareEstimate : null;
+          final errorMessage = state is RideError ? state.message : null;
+          final isLoading = state is RideLoading;
 
           return Stack(
             children: [
-              GoogleMap(
-                initialCameraPosition: const CameraPosition(
-                  target: _defaultCenter,
-                  zoom: 13,
-                ),
-                onMapCreated: (controller) => _mapController = controller,
-                markers: _buildMarkers(),
-                polylines: _buildPolylines(),
-                myLocationEnabled: true,
-                myLocationButtonEnabled: false,
-                zoomControlsEnabled: false,
-              ),
-              // Floating translucent back button
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.92),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(color: AppColors.backgroundLight),
+                  child: GoogleMap(
+                    initialCameraPosition: const CameraPosition(
+                      target: _defaultCenter,
+                      zoom: 13,
                     ),
-                    child: IconButton(
-                      iconSize: 20,
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                      onPressed: () => Navigator.pop(context),
+                    onMapCreated: (controller) => _mapController = controller,
+                    markers: _buildMarkers(),
+                    polylines: _buildPolylines(),
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    padding: const EdgeInsets.only(bottom: 260),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.12),
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.08),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-              // Bottom sheet
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _MapActionButton(
+                        icon: Icons.arrow_back_ios_new_rounded,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _MapStatusCard(
+                          title: _pickup == null || _dropoff == null
+                              ? 'Chọn lộ trình của bạn'
+                              : 'Kiểm tra giá và chọn loại xe',
+                          subtitle: isLoading
+                              ? 'Đang cập nhật lộ trình và giá cước phù hợp.'
+                              : errorMessage ??
+                                  'Crab sẽ gợi ý lựa chọn phù hợp theo quãng đường của bạn.',
+                          isError: errorMessage != null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               if (state is RideSearchingDriver)
                 _buildSearchingOverlay()
               else
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: RideBottomSheet(
-                    pickup: _pickup,
-                    dropoff: _dropoff,
-                    fareEstimate:
-                        state is RideIdle ? state.fareEstimate : null,
-                    onPickupTap: _selectPickup,
-                    onDropoffTap: _selectDropoff,
-                    onBookRide: _bookRide,
-                  ),
+                DraggableScrollableSheet(
+                  initialChildSize: 0.38,
+                  minChildSize: 0.38,
+                  maxChildSize: 0.95,
+                  snap: true,
+                  snapSizes: const [0.38, 0.72, 0.95],
+                  builder: (context, scrollController) {
+                    return RideBottomSheet(
+                      scrollController: scrollController,
+                      pickup: _pickup,
+                      dropoff: _dropoff,
+                      fareEstimate: fareEstimate,
+                      onPickupTap: _selectPickup,
+                      onDropoffTap: _selectDropoff,
+                      onBookRide: _bookRide,
+                      onSwap: _swapLocations,
+                      isLoading: isLoading,
+                      errorMessage: errorMessage,
+                    );
+                  },
                 ),
             ],
           );
@@ -244,59 +301,231 @@ class _RideBookingScreenState extends State<RideBookingScreen>
   }
 
   Widget _buildSearchingOverlay() {
-    return Container(
-      color: Colors.black54,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.54),
+      ),
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ScaleTransition(
-              scale: _pulseAnimation,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  shape: BoxShape.circle,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(maxWidth: 360),
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.18),
+                  blurRadius: 32,
+                  offset: const Offset(0, 16),
                 ),
-                child: const Icon(
-                  Icons.local_taxi,
-                  color: Colors.white,
-                  size: 40,
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ScaleTransition(
+                  scale: _pulseAnimation,
+                  child: Container(
+                    width: 82,
+                    height: 82,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.32),
+                          blurRadius: 22,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.local_taxi_rounded,
+                      color: Colors.white,
+                      size: 42,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 22),
+                const Text(
+                  'Đang tìm tài xế gần bạn',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Crab đang gửi yêu cầu đến các tài xế phù hợp để đón bạn nhanh hơn.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.textSecondaryLight,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundLight,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.bolt_rounded,
+                        size: 18,
+                        color: AppColors.warning,
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Thường mất dưới 1 phút trong khu vực trung tâm.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimaryLight,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      final state = context.read<RideBloc>().state;
+                      if (state is RideSearchingDriver) {
+                        context
+                            .read<RideBloc>()
+                            .add(CancelRide(rideId: state.ride.id));
+                      }
+                    },
+                    child: const Text('Huỷ yêu cầu'),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'Searching for driver...',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Please wait a moment',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(height: 32),
-            TextButton(
-              onPressed: () {
-                final state = context.read<RideBloc>().state;
-                if (state is RideSearchingDriver) {
-                  context
-                      .read<RideBloc>()
-                      .add(CancelRide(rideId: state.ride.id));
-                }
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _MapActionButton extends StatelessWidget {
+  const _MapActionButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.14),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20, color: AppColors.textPrimaryLight),
+      ),
+    );
+  }
+}
+
+class _MapStatusCard extends StatelessWidget {
+  const _MapStatusCard({
+    required this.title,
+    required this.subtitle,
+    this.isError = false,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool isError;
+
+  @override
+  Widget build(BuildContext context) {
+    final accentColor = isError ? AppColors.error : AppColors.primary;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              isError ? Icons.error_outline_rounded : Icons.route_rounded,
+              color: accentColor,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.35,
+                    color: AppColors.textSecondaryLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

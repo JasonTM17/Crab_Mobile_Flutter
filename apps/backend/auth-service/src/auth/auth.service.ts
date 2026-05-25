@@ -18,6 +18,7 @@ import { RefreshTokenEntity } from './entities/refresh-token.entity'
 import { LoginAttemptEntity } from './entities/login-attempt.entity'
 import { OtpService } from './services/otp.service'
 import { SessionService } from './services/session.service'
+import { getRequiredRefreshSecret } from '../security'
 import { OtpPurpose } from './entities/otp.entity'
 import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
@@ -49,7 +50,9 @@ export class AuthService {
     private readonly config: ConfigService,
     private readonly otpService: OtpService,
     private readonly sessionService: SessionService,
-  ) {}
+  ) {
+    getRequiredRefreshSecret(this.config)
+  }
 
   async register(dto: RegisterDto) {
     const existing = await this.userRepo.findOne({
@@ -282,10 +285,7 @@ export class AuthService {
 
     const access_token = this.jwtService.sign(payload)
 
-    const refreshSecret = this.config.get<string>(
-      'JWT_REFRESH_SECRET',
-      'refresh-secret',
-    )
+    const refreshSecret = getRequiredRefreshSecret(this.config)
     const refresh_token = this.jwtService.sign(payload, {
       secret: refreshSecret,
       expiresIn: `${REFRESH_TOKEN_TTL_DAYS}d`,

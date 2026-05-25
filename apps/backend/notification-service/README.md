@@ -47,6 +47,6 @@ Manages push notifications and in-app notification delivery.
 ## Docker
 
 ```bash
-docker build -f apps/backend/notification-service/Dockerfile -t jasontm17/notification-service .
-docker run -p 3007:3007 --env-file .env jasontm17/notification-service
+docker build -f apps/backend/notification-service/Dockerfile -t nguyenson1710/crab-mobile-notification-service .
+docker run -p 3007:3007 --env-file .env nguyenson1710/crab-mobile-notification-service
 ```

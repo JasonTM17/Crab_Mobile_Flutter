@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/animated_dot_indicator.dart';
 
 class PromoCarousel extends StatefulWidget {
@@ -18,28 +20,36 @@ class PromoCarousel extends StatefulWidget {
 class _PromoCarouselState extends State<PromoCarousel> {
   static const _slides = <_PromoSlide>[
     _PromoSlide(
-      title: '50% OFF',
-      subtitle: 'First ride with code WELCOME50',
-      tag: 'New users',
-      icon: Icons.local_offer,
-      gradient: AppGradients.primary,
+      title: 'Giảm 50K cho đơn đầu',
+      cta: 'Xem ngay',
       route: '/promos',
-    ),
-    _PromoSlide(
-      title: 'Free delivery',
-      subtitle: 'On orders over 100K this week',
-      tag: 'Food',
-      icon: Icons.restaurant_menu,
+      image:
+          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
       gradient: AppGradients.sunset,
-      route: '/food',
+      badge: 'Ưu đãi hot',
     ),
     _PromoSlide(
-      title: 'Earn 5x points',
-      subtitle: 'Every Crab Pay transfer until Sunday',
-      tag: 'Pay',
-      icon: Icons.workspace_premium,
-      gradient: AppGradients.violet,
+      title: 'Freeship đơn từ 100K',
+      cta: 'Đặt ngay',
+      route: '/food',
+      image:
+          'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800',
+      gradient: AppGradients.primary,
+      badge: 'Food',
+    ),
+    _PromoSlide(
+      title: 'Hoàn 5% mỗi chuyến',
+      cta: 'Tìm hiểu',
       route: '/wallet',
+      gradient: AppGradients.walletHero,
+      badge: 'Ví Crab',
+    ),
+    _PromoSlide(
+      title: 'Đổi điểm lấy quà',
+      cta: 'Nhận thưởng',
+      route: '/promos',
+      gradient: AppGradients.violet,
+      badge: 'Thành viên',
     ),
   ];
 
@@ -50,18 +60,15 @@ class _PromoCarouselState extends State<PromoCarousel> {
   @override
   void initState() {
     super.initState();
-    _controller = PageController(viewportFraction: 0.92);
+    _controller = PageController(viewportFraction: 0.9);
     _timer = Timer.periodic(const Duration(seconds: 4), _autoAdvance);
   }
 
   void _autoAdvance(Timer _) {
     if (!mounted || !_controller.hasClients) return;
     final next = (_index + 1) % _slides.length;
-    _controller.animateToPage(
-      next,
-      duration: AppMotion.carousel,
-      curve: AppMotion.emphasis,
-    );
+    _controller.animateToPage(next,
+        duration: AppMotion.carousel, curve: AppMotion.emphasis);
   }
 
   @override
@@ -74,28 +81,24 @@ class _PromoCarouselState extends State<PromoCarousel> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          height: 148,
+          height: 176,
           child: PageView.builder(
             controller: _controller,
             itemCount: _slides.length,
-            onPageChanged: (i) => setState(() => _index = i),
-            itemBuilder: (context, i) {
-              final s = _slides[i];
+            onPageChanged: (value) => setState(() => _index = value),
+            itemBuilder: (context, index) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: _PromoCard(slide: s),
+                padding: EdgeInsets.only(
+                    right: index == _slides.length - 1 ? 0 : AppSpacing.sm),
+                child: _PromoCard(slide: _slides[index]),
               );
             },
           ),
         ),
-        const SizedBox(height: 12),
-        AnimatedDotIndicator(
-          count: _slides.length,
-          activeIndex: _index,
-        ),
+        const SizedBox(height: AppSpacing.sm),
+        AnimatedDotIndicator(count: _slides.length, activeIndex: _index),
       ],
     );
   }
@@ -104,19 +107,19 @@ class _PromoCarouselState extends State<PromoCarousel> {
 class _PromoSlide {
   const _PromoSlide({
     required this.title,
-    required this.subtitle,
-    required this.tag,
-    required this.icon,
-    required this.gradient,
+    required this.cta,
     required this.route,
+    required this.gradient,
+    required this.badge,
+    this.image,
   });
 
   final String title;
-  final String subtitle;
-  final String tag;
-  final IconData icon;
-  final LinearGradient gradient;
+  final String cta;
   final String route;
+  final String badge;
+  final LinearGradient gradient;
+  final String? image;
 }
 
 class _PromoCard extends StatelessWidget {
@@ -126,77 +129,111 @@ class _PromoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push(slide.route),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: slide.gradient,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: AppShadows.coloredGlow(
-            slide.gradient.colors.first,
-            opacity: 0.25,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => context.push(slide.route),
+        borderRadius: BorderRadius.circular(AppRadii.xl),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: slide.gradient,
+            borderRadius: BorderRadius.circular(AppRadii.xl),
+            boxShadow: AppShadows.shadowElevated,
           ),
-        ),
-        padding: const EdgeInsets.all(18),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -10,
-              bottom: -20,
-              child: Icon(
-                slide.icon,
-                size: 140,
-                color: Colors.white.withValues(alpha: 0.15),
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadii.xl),
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+                if (slide.image != null)
+                  CachedNetworkImage(
+                    imageUrl: slide.image!,
+                    fit: BoxFit.cover,
+                    fadeInDuration: const Duration(milliseconds: 250),
+                    errorWidget: (_, __, ___) => const SizedBox.shrink(),
                   ),
+                DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.22),
-                    borderRadius: BorderRadius.circular(99),
-                  ),
-                  child: Text(
-                    slide.tag,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.4,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.14),
+                        Colors.black.withValues(alpha: 0.52)
+                      ],
                     ),
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      slide.title,
+                Positioned(
+                  left: AppSpacing.md,
+                  top: AppSpacing.md,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.24)),
+                    ),
+                    child: Text(
+                      slide.badge,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      slide.subtitle,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.92),
-                        fontSize: 13,
+                  ),
+                ),
+                Positioned(
+                  left: AppSpacing.md,
+                  right: AppSpacing.md,
+                  bottom: AppSpacing.md,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        slide.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.3,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(AppRadii.pill),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              slide.cta,
+                              style: const TextStyle(
+                                  color: AppColors.textPrimaryLight,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(Icons.arrow_forward_rounded,
+                                size: 16, color: AppColors.textPrimaryLight),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

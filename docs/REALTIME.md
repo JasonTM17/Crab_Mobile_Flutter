@@ -69,8 +69,8 @@ rider     gateway                ride-svc      driver
   │                                │              │ ride:accept ▶
   │                                │ assign       │
   │ ◀── ride:status MATCHED ───────│              │
-  │ ◀── ride:driver_location ◀─────────────────── │ (every 3s)
-  │ ◀── ride:status IN_TRIP ───────│              │
+  │ ◀── ride:location ◀────────────────────────── │ (every 3s)
+  │ ◀── ride:status IN_PROGRESS ───│              │
   │ ◀── ride:status COMPLETED ─────│              │
 ```
 
@@ -100,7 +100,7 @@ Drivers emit `driver:location` every **3 seconds** while online. The gateway:
 
 1. Validates the payload (`{ lat, lng, heading?, speed? }`) — geo bounds, schema, timestamp not in the future.
 2. Updates `drivers:online` in Redis (sorted set, TTL 30s) so the matching engine sees fresh positions.
-3. If the driver is on an active ride, broadcasts `ride:driver_location` into `ride:<rideId>` so the rider sees the dot move.
+3. If the driver is on an active ride, broadcasts `ride:location` into `ride:<rideId>` so the rider sees the dot move.
 
 If updates stop for 30 seconds the driver is marked **stale** and removed from the matching pool. They get a soft `driver:stale_warning` first; an explicit `driver:offline` at 60s.
 

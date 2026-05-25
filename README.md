@@ -1,28 +1,21 @@
-<!-- Back-to-top anchor -->
 <a id="readme-top"></a>
-
-English | [Tiếng Việt](docs/README_VI.md)
 
 ---
 
-<!-- BADGES -->
 [![CI][ci-badge]][ci-url]
 [![Docker][docker-badge]][docker-url]
 [![License][license-badge]][license-url]
 [![Stars][stars-badge]][stars-url]
 [![Issues][issues-badge]][issues-url]
 
-<!-- LOGO + TITLE -->
 <br />
 <div align="center">
-  <a href="https://github.com/JasonTM17/Crab_Mobile_Flutter">
-    <img src="docs/assets/logo.png" alt="Crab Logo" width="120" height="120">
-  </a>
-
   <h1 align="center">Crab Super App</h1>
 
   <p align="center">
     A ride-hailing and food delivery super app built with Flutter, React, and NestJS microservices
+    <br />
+    Ứng dụng siêu tiện ích gọi xe và giao đồ ăn, xây dựng bằng Flutter, React và NestJS microservices
     <br />
     <a href="docs/"><strong>Explore the docs »</strong></a>
     <br /><br />
@@ -36,19 +29,31 @@ English | [Tiếng Việt](docs/README_VI.md)
 
 ---
 
-<!-- 30-SECOND REVIEWER BRIEF -->
 ## At a Glance
 
-| Aspect | Details |
-|--------|---------|
-| **What** | Super app combining ride-hailing + food delivery (like Grab/ShopeeFood/Be) |
-| **Mobile** | Flutter 3.x with BLoC, GetIt DI, GoRouter |
-| **Web Admin** | React 18 + TypeScript + Vite + TailwindCSS + shadcn/ui |
-| **Backend** | NestJS microservices (Auth, User, Ride, Food, Payment, Chat, Notification) |
-| **Realtime** | Socket.IO with Redis adapter for horizontal scaling |
-| **Database** | PostgreSQL + MongoDB (geospatial) + Redis (cache/pub-sub) |
-| **Storage** | MinIO (S3-compatible) |
-| **Status** | All Phases Complete |
+| Aspect        | Details                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| **What**      | Ride-hailing + food delivery super app, inspired by Grab/ShopeeFood/Be                        |
+| **Mobile**    | Flutter 3.x with BLoC, GetIt DI, GoRouter                                                     |
+| **Web Admin** | React 18 + TypeScript + Vite + TailwindCSS + shadcn/ui                                        |
+| **Backend**   | NestJS microservices for auth, users, rides, food, payment, chat, notifications, and ratings  |
+| **Realtime**  | Socket.IO with Redis adapter for horizontal scaling                                           |
+| **Database**  | PostgreSQL + MongoDB (geospatial) + Redis (cache/pub-sub)                                     |
+| **Storage**   | MinIO (S3-compatible)                                                                         |
+| **Status**    | Release-hardened MVP with Dockerized services, CI quality gates, and admin operations console |
+
+## Tổng quan
+
+| Hạng mục       | Chi tiết                                                                                                          |
+| -------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Sản phẩm**   | Super app gọi xe và giao đồ ăn, lấy cảm hứng từ Grab/ShopeeFood/Be                                                |
+| **Mobile**     | Flutter 3.x với BLoC, GetIt DI, GoRouter                                                                          |
+| **Web Admin**  | React 18 + TypeScript + Vite + TailwindCSS + shadcn/ui                                                            |
+| **Backend**    | NestJS microservices cho auth, user, ride, food, payment, chat, notification và rating                            |
+| **Realtime**   | Socket.IO kết hợp Redis adapter để mở rộng ngang                                                                  |
+| **Database**   | PostgreSQL + MongoDB geospatial + Redis cache/pub-sub                                                             |
+| **Storage**    | MinIO tương thích S3                                                                                              |
+| **Trạng thái** | MVP đã harden cho release với Dockerized services, CI quality gates, screenshots/GIFs và admin operations console |
 
 ---
 
@@ -65,7 +70,9 @@ English | [Tiếng Việt](docs/README_VI.md)
 - [Getting Started](#getting-started)
 - [Project Structure](#project-structure)
 - [API Documentation](#api-documentation)
+- [Validation Commands](#validation-commands)
 - [Documentation](#documentation)
+- [Repository Presentation](#repository-presentation)
 - [Docker Services](#docker-services)
 - [Development](#development)
 - [Roadmap](#roadmap)
@@ -116,44 +123,48 @@ English | [Tiếng Việt](docs/README_VI.md)
 ## Tech Stack
 
 ### Backend
-| Technology | Purpose |
-|-----------|---------|
-| NestJS + TypeScript | Microservice framework |
+
+| Technology                | Purpose                                    |
+| ------------------------- | ------------------------------------------ |
+| NestJS + TypeScript       | Microservice framework                     |
 | Socket.IO + Redis Adapter | Realtime communication, horizontal scaling |
-| TypeORM | PostgreSQL ORM |
-| Mongoose | MongoDB ODM (geospatial) |
-| BullMQ | Job queue and scheduling |
-| Passport + JWT | Authentication |
-| class-validator | DTO validation |
+| TypeORM                   | PostgreSQL ORM                             |
+| Mongoose                  | MongoDB ODM (geospatial)                   |
+| BullMQ                    | Job queue and scheduling                   |
+| Passport + JWT            | Authentication                             |
+| class-validator           | DTO validation                             |
 
 ### Mobile
-| Technology | Purpose |
-|-----------|---------|
-| Flutter 3.x | Cross-platform mobile |
-| flutter_bloc | State management |
-| GetIt + Injectable | Dependency injection |
-| GoRouter | Declarative routing |
-| Dio | HTTP client with interceptors |
-| socket_io_client | Realtime connection |
+
+| Technology         | Purpose                       |
+| ------------------ | ----------------------------- |
+| Flutter 3.x        | Cross-platform mobile         |
+| flutter_bloc       | State management              |
+| GetIt + Injectable | Dependency injection          |
+| GoRouter           | Declarative routing           |
+| Dio                | HTTP client with interceptors |
+| socket_io_client   | Realtime connection           |
 
 ### Web Admin
-| Technology | Purpose |
-|-----------|---------|
-| React 18 + TypeScript | UI framework |
-| Vite | Build tool |
-| TailwindCSS + shadcn/ui | Styling + components |
-| React Query | Server state management |
-| React Router v6 | Client routing |
+
+| Technology              | Purpose                 |
+| ----------------------- | ----------------------- |
+| React 18 + TypeScript   | UI framework            |
+| Vite                    | Build tool              |
+| TailwindCSS + shadcn/ui | Styling + components    |
+| React Query             | Server state management |
+| React Router v6         | Client routing          |
 
 ### Infrastructure
-| Technology | Purpose |
-|-----------|---------|
-| PostgreSQL 15 | Transactional data |
-| MongoDB 7 | Geospatial queries (driver locations) |
-| Redis 7 | Cache, sessions, pub/sub, rate limiting |
-| MinIO | S3-compatible file storage |
-| Docker Compose | Development environment |
-| Turborepo + pnpm | Monorepo management |
+
+| Technology       | Purpose                                 |
+| ---------------- | --------------------------------------- |
+| PostgreSQL 15    | Transactional data                      |
+| MongoDB 7        | Geospatial queries (driver locations)   |
+| Redis 7          | Cache, sessions, pub/sub, rate limiting |
+| MinIO            | S3-compatible file storage              |
+| Docker Compose   | Development environment                 |
+| Turborepo + pnpm | Monorepo management                     |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -162,30 +173,35 @@ English | [Tiếng Việt](docs/README_VI.md)
 ## Features
 
 ### Ride-Hailing
+
 - Real-time GPS tracking (driver → server → rider, 2s interval)
 - Intelligent driver matching (nearest + rating weighted)
 - Surge pricing based on demand
 - Ride state machine: REQUESTED → MATCHED → PICKUP → IN_PROGRESS → COMPLETED
 
 ### Food Delivery
+
 - Location-based restaurant search (5km radius)
 - Menu management with categories, variants, addons
 - Order tracking with delivery GPS
 - Order state machine: PLACED → CONFIRMED → PREPARING → READY → PICKED_UP → DELIVERED
 
 ### Payment & Wallet
+
 - Digital wallet with top-up/withdraw
 - Multiple payment methods (wallet, COD, bank transfer)
 - Double-entry ledger for transaction integrity
 - Promo codes and discount engine
 
 ### Chat & Notifications
+
 - 1-to-1 realtime messaging (rider↔driver, user↔merchant)
 - Typing indicators and read receipts
 - Push notifications via FCM
 - In-app notification center
 
 ### Admin Dashboard
+
 - User/Driver/Merchant management
 - Ride and order monitoring
 - Transaction and payout management
@@ -197,29 +213,38 @@ English | [Tiếng Việt](docs/README_VI.md)
 
 ## Screenshots
 
-Captured at 1440x900 viewport from the production Vite build via Playwright MCP. See [`docs/screenshots/README.md`](docs/screenshots/README.md) for the full gallery.
+The gallery below highlights the admin operations console. See [`docs/screenshots/README.md`](docs/screenshots/README.md) for the complete image set.
+
+Bộ ảnh bên dưới giới thiệu giao diện vận hành admin. Xem thêm tại [`docs/screenshots/README.md`](docs/screenshots/README.md).
 
 ### Web Admin Dashboard
 
-| Screen | Description |
-|--------|-------------|
-| ![Login](docs/screenshots/admin-01-login.png) | Phone/email login form with shadcn/ui styling, JWT auth with refresh-token rotation |
-| ![Dashboard](docs/screenshots/admin-02-dashboard.png) | KPI cards (users, rides, revenue, orders) and full sidebar navigation |
-| ![Users](docs/screenshots/admin-03-users.png) | Paginated user table with search, status badges, role tags |
-| ![Drivers](docs/screenshots/admin-04-drivers.png) | Driver verification queue with license info, vehicle details, approve/reject actions |
-| ![Rides](docs/screenshots/admin-05-rides.png) | Real-time rides monitoring with rider/driver IDs, status, fare, distance |
-| ![Orders](docs/screenshots/admin-06-orders.png) | Food delivery orders by restaurant with full status timeline |
+| Screen                                                | Description                                                                          |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| ![Login](docs/screenshots/admin-01-login.png)         | Phone/email login form with shadcn/ui styling, JWT auth with refresh-token rotation  |
+| ![Dashboard](docs/screenshots/admin-02-dashboard.png) | KPI cards (users, rides, revenue, orders) and full sidebar navigation                |
+| ![Users](docs/screenshots/admin-03-users.png)         | Paginated user table with search, status badges, role tags                           |
+| ![Drivers](docs/screenshots/admin-04-drivers.png)     | Driver verification queue with license info, vehicle details, approve/reject actions |
+| ![Rides](docs/screenshots/admin-05-rides.png)         | Real-time rides monitoring with rider/driver IDs, status, fare, distance             |
+| ![Orders](docs/screenshots/admin-06-orders.png)       | Food delivery orders by restaurant with full status timeline                         |
 
 ### Mobile (Flutter)
 
-Mobile screenshots can be captured via `flutter screenshot` from a running emulator/device. The Flutter app implements:
+The Flutter app covers the end-user journeys that pair with the admin console:
 
-- Auth flow: phone/email login, OTP verification with auto-advance and 60s resend timer, registration
-- Home: greeting, wallet card, 8-service grid (bike, car, food, mart, express, pay, promos)
-- Ride: pickup/dropoff selection, fare comparison across vehicle types, real-time tracking with chat/cancel/SOS
-- Wallet: balance card, top-up sheet, transaction history
-- Food: restaurant list, categories, popular nearby
-- Profile: avatar, settings, theme, language, logout
+Ứng dụng Flutter bao phủ các luồng người dùng tương ứng với hệ thống vận hành admin:
+
+| Screen                                                      | Description                                                                   |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| ![Flutter login proof](docs/screenshots/ui-proof-login.png) | Phone/email authentication surface with Vietnamese-friendly validation states |
+| ![Flutter home proof](docs/screenshots/current-proof.png)   | Mobile home/service hub proof captured from the Flutter UI                    |
+
+- Auth / Xác thực: phone/email login, OTP verification with auto-advance, registration
+- Home / Trang chủ: greeting, wallet card, service grid for rides, food, mart, express, payments, promos
+- Ride / Gọi xe: pickup/dropoff selection, fare comparison, live tracking, chat, cancel, SOS
+- Wallet / Ví: balance card, top-up flow, transaction history
+- Food / Đồ ăn: restaurant discovery, categories, popular nearby items
+- Profile / Hồ sơ: avatar, settings, theme, language, logout
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -227,43 +252,53 @@ Mobile screenshots can be captured via `flutter screenshot` from a running emula
 
 ## Getting Started
 
+Follow these steps to run the full stack locally.
+
+Làm theo các bước dưới đây để chạy toàn bộ hệ thống trên máy local.
+
 ### Prerequisites
 
 - Node.js 20+
-- pnpm 8+
+- pnpm 10+
 - Flutter 3.x (for mobile development)
 - Docker & Docker Compose
 
 ### Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/JasonTM17/Crab_Mobile_Flutter.git
 cd Crab_Mobile_Flutter
 ```
 
 2. Install dependencies
+
 ```bash
 pnpm install
 ```
 
 3. Start infrastructure services
+
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
 
 4. Copy environment files
+
 ```bash
 cp .env.example .env
 cp apps/backend/gateway/.env.example apps/backend/gateway/.env
 ```
 
 5. Start all services in development mode
+
 ```bash
 pnpm dev
 ```
 
 6. For Flutter mobile app
+
 ```bash
 cd apps/mobile
 flutter pub get
@@ -320,29 +355,42 @@ crab/
 
 ### Auth Service
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/auth/register` | Register new user |
-| POST | `/api/v1/auth/login` | Login, returns JWT + refresh token |
-| POST | `/api/v1/auth/refresh` | Rotate refresh token |
-| POST | `/api/v1/auth/logout` | Invalidate refresh token |
+| Method | Endpoint                | Description                        |
+| ------ | ----------------------- | ---------------------------------- |
+| POST   | `/api/v1/auth/register` | Register new user                  |
+| POST   | `/api/v1/auth/login`    | Login, returns JWT + refresh token |
+| POST   | `/api/v1/auth/refresh`  | Rotate refresh token               |
+| POST   | `/api/v1/auth/logout`   | Invalidate refresh token           |
 
 ### User Service
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/users/:id` | Get user profile |
-| PATCH | `/api/v1/users/:id` | Update profile |
-| POST | `/api/v1/users/:id/avatar` | Upload avatar (JPEG/PNG/WebP, 5MB max) |
+| Method | Endpoint                   | Description                            |
+| ------ | -------------------------- | -------------------------------------- |
+| GET    | `/api/v1/users/:id`        | Get user profile                       |
+| PATCH  | `/api/v1/users/:id`        | Update profile                         |
+| POST   | `/api/v1/users/:id/avatar` | Upload avatar (JPEG/PNG/WebP, 5MB max) |
 
 ### Socket.IO Namespaces
 
-| Namespace | Events | Description |
-|-----------|--------|-------------|
-| `/ride` | ride:request, ride:location, ride:status | Ride-hailing realtime |
-| `/food` | order:placed, order:status, order:tracking | Food delivery tracking |
-| `/chat` | chat:message, chat:typing, chat:read | Realtime messaging |
-| `/notification` | notification:new, notification:read | Push notifications |
+| Namespace       | Events                                     | Description            |
+| --------------- | ------------------------------------------ | ---------------------- |
+| `/ride`         | ride:request, ride:location, ride:status   | Ride-hailing realtime  |
+| `/food`         | order:placed, order:status, order:tracking | Food delivery tracking |
+| `/chat`         | chat:message, chat:typing, chat:read       | Realtime messaging     |
+| `/notification` | notification:new, notification:read        | Push notifications     |
+
+## Validation Commands
+
+Run these before creating a release tag:
+
+```bash
+pnpm run lint
+pnpm run build
+pnpm run contract:check
+pnpm run test
+pnpm run mobile:analyze
+pnpm run mobile:test
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -352,18 +400,48 @@ crab/
 
 Full guides live under [`docs/`](docs/). Start with the index for an annotated tour.
 
-| Document | Purpose |
-|----------|---------|
-| [docs/INDEX.md](docs/INDEX.md) | Documentation entry point and reading order |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, service boundaries, data flow |
-| [docs/API.md](docs/API.md) | REST API reference across all services |
-| [docs/REALTIME.md](docs/REALTIME.md) | Socket.IO realtime architecture and Redis adapter |
-| [docs/WEBSOCKET_EVENTS.md](docs/WEBSOCKET_EVENTS.md) | Per-namespace event catalog and payload schemas |
-| [docs/RIDE_MATCHING.md](docs/RIDE_MATCHING.md) | Driver matching algorithm, surge pricing, state machine |
-| [docs/FOOD_DELIVERY.md](docs/FOOD_DELIVERY.md) | Restaurant search, ordering, delivery tracking flow |
-| [docs/DATABASE.md](docs/DATABASE.md) | PostgreSQL + MongoDB schema and indexes |
-| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Docker Compose and Kubernetes deployment guide |
-| [docs/TESTING.md](docs/TESTING.md) | Unit, integration, and load test strategy |
+Tài liệu chi tiết nằm trong [`docs/`](docs/). Bắt đầu từ trang index để xem lộ trình đọc theo từng mảng.
+
+| Document                                             | Purpose                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------- |
+| [docs/INDEX.md](docs/INDEX.md)                       | Documentation entry point and reading order             |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)         | System architecture, service boundaries, data flow      |
+| [docs/API.md](docs/API.md)                           | REST API reference across all services                  |
+| [docs/MOBILE.md](docs/MOBILE.md)                     | Flutter mobile app architecture and feature catalogue   |
+| [docs/ADMIN.md](docs/ADMIN.md)                       | React admin dashboard pages, auth flow, theme           |
+| [docs/REALTIME.md](docs/REALTIME.md)                 | Socket.IO realtime architecture and Redis adapter       |
+| [docs/WEBSOCKET_EVENTS.md](docs/WEBSOCKET_EVENTS.md) | Per-namespace event catalog and payload schemas         |
+| [docs/RIDE_MATCHING.md](docs/RIDE_MATCHING.md)       | Driver matching algorithm, surge pricing, state machine |
+| [docs/FOOD_DELIVERY.md](docs/FOOD_DELIVERY.md)       | Restaurant search, ordering, delivery tracking flow     |
+| [docs/RATING.md](docs/RATING.md)                     | Rating model, aggregate flow, API surface               |
+| [docs/DATABASE.md](docs/DATABASE.md)                 | PostgreSQL + MongoDB schema and indexes                 |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)             | Docker Compose and Kubernetes deployment guide          |
+| [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md)       | Logs, metrics, traces, monitoring stack                 |
+| [docs/TESTING.md](docs/TESTING.md)                   | Unit, integration, and load test strategy               |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## Repository Presentation
+
+The public GitHub surface is prepared for release review:
+
+- **About**: ride-hailing and food delivery super app with Flutter mobile, React admin, and NestJS microservices.
+- **Releases**: semantic tags trigger GitHub Releases through `.github/workflows/release.yml`.
+- **Packages**: Docker images are published under `nguyenson1710/crab-mobile-<service>` through `.github/workflows/docker-publish.yml`, including `web-admin`.
+- **Env examples**: `.env.example` covers local development and `.env.production.example` provides fake production placeholders for compose validation.
+- **Screenshots**: curated admin and Flutter proof captures are stored in [`docs/screenshots/`](docs/screenshots/).
+- **GIF**: the admin release flow is published at [`docs/gifs/admin-release-flow.gif`](docs/gifs/admin-release-flow.gif).
+
+Bề mặt GitHub public đã được chuẩn bị cho review release:
+
+- **About**: super app gọi xe và giao đồ ăn với Flutter mobile, React admin và NestJS microservices.
+- **Releases**: semantic tag tạo GitHub Release thông qua `.github/workflows/release.yml`.
+- **Packages**: Docker images publish dưới namespace `nguyenson1710/crab-mobile-<service>` qua `.github/workflows/docker-publish.yml`, bao gồm `web-admin`.
+- **Env examples**: `.env.example` dùng cho local development và `.env.production.example` dùng placeholder giả để validate compose production.
+- **Screenshots**: ảnh admin và proof Flutter đã chọn lọc nằm trong [`docs/screenshots/`](docs/screenshots/).
+- **GIF**: luồng admin release nằm tại [`docs/gifs/admin-release-flow.gif`](docs/gifs/admin-release-flow.gif).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -371,27 +449,38 @@ Full guides live under [`docs/`](docs/). Start with the index for an annotated t
 
 ## Docker Services
 
-| Service | Port | Image |
-|---------|------|-------|
-| PostgreSQL 16 | 5432 | `postgres:16-alpine` |
-| MongoDB 7 | 27017 | `mongo:7` |
-| Redis 7 | 6379 | `redis:7-alpine` |
-| MinIO | 9000/9001 | `minio/minio` |
-| API Gateway | 3000 | `jasontm17/gateway` |
-| Auth Service | 3001 | `jasontm17/auth-service` |
-| User Service | 3002 | `jasontm17/user-service` |
-| Ride Service | 3003 | `jasontm17/ride-service` |
-| Food Service | 3004 | `jasontm17/food-service` |
-| Payment Service | 3005 | `jasontm17/payment-service` |
-| Chat Service | 3006 | `jasontm17/chat-service` |
-| Notification Service | 3007 | `jasontm17/notification-service` |
-| Rating Service | 3008 | `jasontm17/rating-service` |
+The stack is containerized service-by-service and published under the `nguyenson1710` Docker Hub namespace.
+
+Mỗi service được container hóa riêng và publish dưới namespace Docker Hub `nguyenson1710`.
+
+| Service              | Port      | Image                                            |
+| -------------------- | --------- | ------------------------------------------------ |
+| PostgreSQL 16        | 5432      | `postgres:16-alpine`                             |
+| MongoDB 7            | 27017     | `mongo:7`                                        |
+| Redis 7              | 6379      | `redis:7-alpine`                                 |
+| MinIO                | 9000/9001 | `minio/minio`                                    |
+| API Gateway          | 3000      | `nguyenson1710/crab-mobile-gateway`              |
+| Auth Service         | 3001      | `nguyenson1710/crab-mobile-auth-service`         |
+| User Service         | 3002      | `nguyenson1710/crab-mobile-user-service`         |
+| Ride Service         | 3003      | `nguyenson1710/crab-mobile-ride-service`         |
+| Food Service         | 3004      | `nguyenson1710/crab-mobile-food-service`         |
+| Payment Service      | 3005      | `nguyenson1710/crab-mobile-payment-service`      |
+| Chat Service         | 3006      | `nguyenson1710/crab-mobile-chat-service`         |
+| Notification Service | 3007      | `nguyenson1710/crab-mobile-notification-service` |
+| Rating Service       | 3008      | `nguyenson1710/crab-mobile-rating-service`       |
+| Web Admin            | 8080      | `nguyenson1710/crab-mobile-web-admin`            |
+
+In hardened local/prod compose, the gateway is the intended public API entrypoint and web-admin is the browser-facing operations console. Internal service ports above are service/container ports, not ports that must remain host-exposed.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
 
 ## Development
+
+Development commands are workspace-aware and run through pnpm/Turborepo.
+
+Các lệnh phát triển chạy theo workspace thông qua pnpm/Turborepo.
 
 ### Available Scripts
 
@@ -400,22 +489,62 @@ pnpm dev          # Start all services in dev mode
 pnpm build        # Build all packages and services
 pnpm lint         # Lint all packages
 pnpm test         # Run all tests
+pnpm verify       # Run lint, build, contract check, and tests
+pnpm mobile:test  # Run Flutter tests from apps/mobile
+pnpm docker:config # Validate production compose config
 ```
 
 ### Quality Gates
 
-| Check | Command | Expected |
-|-------|---------|----------|
-| TypeScript | `pnpm build` | Zero errors |
-| Lint | `pnpm lint` | Zero warnings |
-| Tests | `pnpm test` | All passing |
-| Docker | `docker compose up` | All healthy |
+| Check           | Command                  | Expected     |
+| --------------- | ------------------------ | ------------ |
+| TypeScript      | `pnpm build`             | Zero errors  |
+| Lint            | `pnpm lint`              | Zero errors  |
+| Tests           | `pnpm test`              | All passing  |
+| Flutter analyze | `flutter analyze`        | Zero issues  |
+| Docker config   | `pnpm run docker:config` | Valid config |
+
+### Release
+
+Release documentation is maintained in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+Quick summary:
+
+- GitHub releases are created by `.github/workflows/release.yml` on tags like `v1.2.3`
+- Docker images are published by `.github/workflows/docker-publish.yml`
+- Public images use `nguyenson1710/crab-mobile-<service>` naming
+- CI now enforces lint, build, Flutter checks, backend tests, and `contract:check`
+- Mobile release builds require secure HTTPS/WSS endpoints and local/CI release signing material
+
+Recommended release commands:
+
+```bash
+pnpm run lint
+pnpm run build
+pnpm run contract:check
+pnpm run test
+pnpm run mobile:analyze
+pnpm run mobile:test
+```
+
+Then tag the release:
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+See `docs/DEPLOYMENT.md` for required GitHub secrets, Docker Hub naming, compose/k8s notes, mobile signing details, and troubleshooting.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
 
 ## Roadmap
+
+The core product verticals are implemented and the repository is focused on hardening, release verification, and polish.
+
+Các mảng sản phẩm chính đã được triển khai; repo hiện tập trung vào hardening, kiểm chứng release và hoàn thiện trải nghiệm.
 
 - [x] **Phase 1**: Foundation (Monorepo, Auth, User, Gateway, Mobile, Admin)
 - [x] **Phase 2**: Ride-Hailing Core (GPS tracking, driver matching, fare calculation)
@@ -449,22 +578,20 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  <p>Built with dedication by <a href="https://github.com/JasonTM17">Nguyễn Sơn</a></p>
-  <p><em>This is a learning project. Author: Nguyễn Sơn (jasonbmt06@gmail.com). Feedback and suggestions are welcome!</em></p>
+  <p>Crab Super App · Built and maintained by <a href="https://github.com/JasonTM17">Nguyễn Sơn</a></p>
 </div>
 
 <!-- BADGE REFERENCE LINKS -->
+
 [ci-badge]: https://img.shields.io/github/actions/workflow/status/JasonTM17/Crab_Mobile_Flutter/ci.yml?style=for-the-badge&label=CI
 [ci-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/actions
 [docker-badge]: https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white
-[docker-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/pkgs/container/crab-gateway
+[docker-url]: docs/DEPLOYMENT.md
 [license-badge]: https://img.shields.io/github/license/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
 [license-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/blob/main/LICENSE
-[contributors-badge]: https://img.shields.io/github/contributors/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
-[contributors-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/graphs/contributors
 [stars-badge]: https://img.shields.io/github/stars/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
 [stars-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/stargazers
 [issues-badge]: https://img.shields.io/github/issues/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
 [issues-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/issues
 [security-badge]: https://img.shields.io/badge/Security-Hardened-green?style=for-the-badge&logo=shield
-[security-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/security
+[security-url]: SECURITY.md

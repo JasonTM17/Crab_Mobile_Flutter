@@ -5,11 +5,7 @@ class CartItemModel {
   final int quantity;
   final String? note;
 
-  const CartItemModel({
-    required this.item,
-    required this.quantity,
-    this.note,
-  });
+  const CartItemModel({required this.item, required this.quantity, this.note});
 
   double get subtotal => item.price * quantity;
 
@@ -33,13 +29,20 @@ class CartModel {
     this.items = const [],
   });
 
+  factory CartModel.empty() => const CartModel();
+
   bool get isEmpty => items.isEmpty;
   int get totalItems => items.fold(0, (sum, i) => sum + i.quantity);
   double get subtotal => items.fold(0, (sum, i) => sum + i.subtotal);
 
-  CartModel addItem(MenuItemModel item, {String? restaurantId, String? restaurantName}) {
+  CartModel addItem(
+    MenuItemModel item, {
+    String? restaurantId,
+    String? restaurantName,
+  }) {
     // Clear cart if switching restaurants
-    if (this.restaurantId != null && this.restaurantId != (restaurantId ?? this.restaurantId)) {
+    if (this.restaurantId != null &&
+        this.restaurantId != (restaurantId ?? this.restaurantId)) {
       return CartModel(
         restaurantId: restaurantId,
         restaurantName: restaurantName,
@@ -65,9 +68,11 @@ class CartModel {
 
   CartModel removeItem(String itemId) {
     final updated = items
-        .map((ci) => ci.item.id == itemId
-            ? ci.copyWith(quantity: ci.quantity - 1)
-            : ci)
+        .map(
+          (ci) => ci.item.id == itemId
+              ? ci.copyWith(quantity: ci.quantity - 1)
+              : ci,
+        )
         .where((ci) => ci.quantity > 0)
         .toList();
     return CartModel(
@@ -81,11 +86,13 @@ class CartModel {
 
   List<Map<String, dynamic>> toOrderItems() {
     return items
-        .map((ci) => {
-              'menuItemId': ci.item.id,
-              'quantity': ci.quantity,
-              'note': ci.note,
-            })
+        .map(
+          (ci) => {
+            'menuItemId': ci.item.id,
+            'quantity': ci.quantity,
+            if (ci.note != null) 'notes': ci.note,
+          },
+        )
         .toList();
   }
 }

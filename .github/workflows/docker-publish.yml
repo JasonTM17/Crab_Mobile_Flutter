@@ -3,13 +3,17 @@ name: Docker Build and Push
 on:
   push:
     branches: [main]
-    tags: ['v*']
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   REGISTRY: docker.io
-  NAMESPACE: ${{ secrets.DOCKERHUB_NAMESPACE || 'jasontm17' }}
-  IMAGE_PREFIX: crab
+  NAMESPACE: ${{ secrets.DOCKERHUB_USERNAME || 'nguyenson1710' }}
+  IMAGE_PREFIX: crab-mobile
 
 jobs:
   build-and-push:
@@ -39,9 +43,6 @@ jobs:
             dockerfile: apps/backend/rating-service/Dockerfile
           - service: web-admin
             dockerfile: apps/web-admin/Dockerfile
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v6
       - name: Set up Docker Buildx
@@ -49,26 +50,25 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME || 'nguyenson1710' }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.NAMESPACE }}/${{ matrix.service }}
+          images: ${{ env.NAMESPACE }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix=sha-,format=short
-      - name: Build & Push
+            type=semver,pattern={{version}}
+      - name: Build & push image
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.dockerfile }}
           push: true
+          build-args: |
+            VCS_REF=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
