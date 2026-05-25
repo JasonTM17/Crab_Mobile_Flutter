@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Auth Service: OTP verification, phone-based login, account lockout, device management, Redis-backed sessions
 - User Service: profiles, addresses, driver/merchant verification with document upload tracking
 - Gateway: Redis Socket.IO adapter for multi-instance scaling, circuit breaker pattern, three-tier rate limiting
@@ -36,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docs: MOBILE.md, ADMIN.md, RATING.md, OBSERVABILITY.md
 
 ### Changed
+
 - Mobile: bloc routes catch errors through mapErrorToMessage helper
 - Web Admin: Orders/Rides use semantic Badge variants (success/warning/destructive)
 - Docs: align API base on /api/v1 across API.md, ARCHITECTURE.md, TESTING.md
@@ -43,13 +45,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docs: rename socket events to wire-level names (ride:status, ride:matched, ride:location, order:status)
 - Docs: regroup INDEX.md by Architecture / Realtime / Apps / Repo with cross-links to root files
 - Docs: clarify FOOD_DELIVERY courier dispatch roadmap and current order lifecycle
+- Docs: refine README and docs index with release validation commands and release assets map
+- Metadata: refresh root package and Flutter pubspec public repository fields for release polish
+- Tooling: route production compose validation through `.env.production.example` placeholders
 
 ### Fixed
+
 - pnpm-lock.yaml drift after backend-shared added jest deps
 - CI workflow now builds socket-events + backend-shared before service builds (resolves TS2307)
 - README: drop dead docs/README_VI.md link
 
 ### Infrastructure
+
 - Multi-stage Dockerfiles for all 9 backend services + web-admin (alpine, non-root, healthcheck)
 - nginx reverse proxy with rate-limit zones (api 30r/s, auth 10r/min, conn 100/IP)
 - WebSocket support with 24h idle timeout
@@ -58,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-05-15
 
 ### Added
+
 - Initial monorepo scaffolding with pnpm workspaces and Turborepo
 - Basic NestJS microservice skeletons
 - Flutter mobile app skeleton with BLoC architecture

@@ -1,7 +1,27 @@
 {
-  "name": "crab-monorepo",
+  "name": "crab-super-app",
   "version": "1.0.0",
+  "description": "Crab Super App monorepo for Flutter ride-hailing, food delivery, React admin, and NestJS microservices.",
   "private": true,
+  "license": "MIT",
+  "author": "Nguyen Tien Son <jasonbmt06@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JasonTM17/Crab_Mobile_Flutter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JasonTM17/Crab_Mobile_Flutter/issues"
+  },
+  "homepage": "https://github.com/JasonTM17/Crab_Mobile_Flutter#readme",
+  "keywords": [
+    "flutter",
+    "ride-hailing",
+    "food-delivery",
+    "nestjs",
+    "microservices",
+    "react-admin",
+    "docker"
+  ],
   "workspaces": [
     "apps/*",
     "apps/backend/*",
@@ -13,6 +33,10 @@
     "lint": "turbo run lint",
     "test": "turbo run test --concurrency=1",
     "contract:check": "node scripts/check-contracts.js",
+    "mobile:analyze": "cd apps/mobile && flutter analyze",
+    "mobile:test": "cd apps/mobile && flutter test",
+    "docker:config": "docker compose --env-file .env.production.example -f docker-compose.prod.yml config",
+    "verify": "pnpm run lint && pnpm run build && pnpm run contract:check && pnpm run test",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
