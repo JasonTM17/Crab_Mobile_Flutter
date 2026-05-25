@@ -2,17 +2,19 @@
 
 ## Overview
 
-This repository ships three kinds of release artifacts:
+This repository ships four kinds of release artifacts:
 
 1. **GitHub release** created by `.github/workflows/release.yml` on semantic tags like `v1.2.3`
 2. **Docker images** published by `.github/workflows/docker-publish.yml` to Docker Hub
 3. **Deployable runtime configs** for Docker Compose and Kubernetes under repo root / `infra/k8s/`
+4. **Release media** under `docs/screenshots/` and `docs/gifs/`, using verified screenshots and regenerated GIFs
 
-Repo này phát hành ba nhóm artifact chính:
+Repo này phát hành bốn nhóm artifact chính:
 
 1. **GitHub release** được tạo bởi `.github/workflows/release.yml` khi push semantic tag như `v1.2.3`
 2. **Docker images** được publish lên Docker Hub bởi `.github/workflows/docker-publish.yml`
 3. **Runtime configs** cho Docker Compose và Kubernetes ở repo root / `infra/k8s/`
+4. **Release media** trong `docs/screenshots/` và `docs/gifs/`, dùng screenshots đã xác minh và GIF được tạo lại
 
 The public Docker Hub namespace for this project is:
 
@@ -30,6 +32,24 @@ Image naming follows this convention:
 - `nguyenson1710/crab-mobile-notification-service`
 - `nguyenson1710/crab-mobile-rating-service`
 - `nguyenson1710/crab-mobile-web-admin`
+
+## Packages and Images
+
+This repository does not publish public npm packages or a public Flutter package:
+
+- the root `package.json` is private
+- pnpm workspace packages such as `@crab/common-types`, `@crab/socket-events`, and `@crab/backend-shared` are internal packages
+- `apps/mobile/pubspec.yaml` uses `publish_to: 'none'`
+
+Runtime services are published as Docker images under `nguyenson1710/crab-mobile-<service>`.
+
+Docker tags use these semantics:
+
+| Tag | Meaning |
+| --- | --- |
+| `latest` | Latest successful build from the default branch |
+| `sha-<short>` | Commit-addressable image for a specific source revision |
+| `<semver>` | Release image produced from a version tag such as `v1.2.3` |
 
 ## Prerequisites
 
@@ -260,6 +280,8 @@ Use this checklist before tagging a release:
 - [ ] required GitHub Actions secrets are present
 - [ ] Android release signing material is configured locally / in CI as needed
 - [ ] release endpoints use HTTPS/WSS
+- [ ] release media uses verified screenshots under `docs/screenshots/` and regenerated GIFs under `docs/gifs/`
+- [ ] old proof/current/emulator screenshots are not presented as primary release media
 - [ ] `CHANGELOG.md` / release notes are acceptable
 - [ ] internal backend services are not unintentionally exposed outside the gateway boundary
 

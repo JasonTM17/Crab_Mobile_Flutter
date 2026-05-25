@@ -1,129 +1,118 @@
-# Documentation Index
+# Documentation Index / Mục Lục Tài Liệu
 
-## Crab Super App — Technical Documentation
+Crab documentation is organized by reading path: start with quick setup, then architecture, contracts, deployment, operations, and product surfaces.
 
-This index organizes the repository documentation by system area so reviewers can quickly inspect architecture, API contracts, mobile/web clients, deployment, testing, and operations.
+Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ setup nhanh, sau đó tới kiến trúc, contract, deployment, vận hành và các bề mặt sản phẩm.
 
-Trang này sắp xếp tài liệu theo từng mảng hệ thống để người xem nhanh chóng kiểm tra kiến trúc, API contract, mobile/web clients, deployment, testing và vận hành.
+## Start Here / Bắt Đầu Từ Đây
 
-### Architecture & Reference
+| Document | English | Tiếng Việt |
+| --- | --- | --- |
+| [About](../README.md#about--gii-thiu) | Project scope, product surface, and repository map | Phạm vi dự án, bề mặt sản phẩm và cấu trúc repo |
+| [Quickstart](./QUICKSTART.md) | Run the full stack locally | Chạy full stack trên máy local |
+| [Environment](./ENVIRONMENT.md) | Env variable matrix and safe placeholders | Bảng env variables và placeholder an toàn |
+| [Packages](../README.md#packages--gi-workspace) | Private workspace packages and published runtime images | Package workspace private và runtime images được publish |
+| [Release Media](./screenshots/README.md) | Verified screenshots and GIF gallery | Bộ screenshot và GIF đã xác minh |
+| [Troubleshooting](./TROUBLESHOOTING.md) | Common local/CI failures and fixes | Lỗi thường gặp và cách xử lý |
 
-Core system design and contract documents.
+## Architecture & Contracts / Kiến Trúc & Contract
 
-Tài liệu cốt lõi về thiết kế hệ thống và contract.
+| Document | English | Tiếng Việt |
+| --- | --- | --- |
+| [Architecture](./ARCHITECTURE.md) | Service boundaries, data ownership, flows | Ranh giới service, dữ liệu sở hữu, luồng hệ thống |
+| [API Reference](./API.md) | REST endpoints and examples | REST endpoints và ví dụ request/response |
+| [OpenAPI](./openapi.yaml) | Static OpenAPI contract | Contract OpenAPI tĩnh |
+| [Database](./DATABASE.md) | PostgreSQL, MongoDB, Redis schemas | Schema PostgreSQL, MongoDB, Redis |
+| [Realtime](./REALTIME.md) | Socket.IO topology and reliability model | Kiến trúc Socket.IO và độ tin cậy |
+| [WebSocket Events](./WEBSOCKET_EVENTS.md) | Wire-level event names and payloads | Event và payload ở tầng wire |
 
-| Document                          | Description                                                        |
-| --------------------------------- | ------------------------------------------------------------------ |
-| [Architecture](./ARCHITECTURE.md) | System design, service catalog, communication patterns, security   |
-| [API Reference](./API.md)         | REST API endpoints for all services with request/response examples |
-| [OpenAPI Spec](./openapi.yaml)    | Canonical OpenAPI 3.1 contract used by client generators           |
-| [Database Schema](./DATABASE.md)  | PostgreSQL tables, MongoDB collections, Redis data structures      |
+## Domain Guides / Hướng Dẫn Nghiệp Vụ
 
-### Realtime & Domain Flows
+| Document | English | Tiếng Việt |
+| --- | --- | --- |
+| [Ride Matching](./RIDE_MATCHING.md) | Ride lifecycle, matching, surge, rematch | Vòng đời chuyến xe, matching, surge, rematch |
+| [Food Delivery](./FOOD_DELIVERY.md) | Restaurant, menu, order, delivery states | Nhà hàng, menu, order, trạng thái giao hàng |
+| [Rating](./RATING.md) | Rating model and aggregate updates | Model rating và cập nhật aggregate |
 
-Domain-specific flows for rides, food delivery, ratings, and realtime events.
+## Apps / Ứng Dụng
 
-Các luồng nghiệp vụ cho gọi xe, giao đồ ăn, rating và realtime events.
+| Document | English | Tiếng Việt |
+| --- | --- | --- |
+| [Mobile App](./MOBILE.md) | Flutter architecture and feature map | Kiến trúc Flutter và bản đồ tính năng |
+| [Admin Dashboard](./ADMIN.md) | React admin architecture and pages | Kiến trúc và trang của React admin |
+| [Screenshots](./screenshots/README.md) | Curated admin and client gallery | Bộ ảnh admin và client đã chọn lọc |
 
-| Document                                  | Description                                                   |
-| ----------------------------------------- | ------------------------------------------------------------- |
-| [Realtime](./REALTIME.md)                 | Socket.IO topology, namespaces, lifecycles, replay strategy   |
-| [WebSocket Events](./WEBSOCKET_EVENTS.md) | Wire-level event reference for ride, food, chat, notification |
-| [Ride Matching](./RIDE_MATCHING.md)       | Queue, scoring, surge, re-match flow, eligibility             |
-| [Food Delivery](./FOOD_DELIVERY.md)       | Order state machine, dispatch, cancellation, restaurant ops   |
-| [Rating Service](./RATING.md)             | Rating model, aggregate update flow, API surface              |
+## Release, Deployment & Operations / Phát Hành, Triển Khai & Vận Hành
 
-### Apps & Operations
+| Document | English | Tiếng Việt |
+| --- | --- | --- |
+| [Release & Deployment](./DEPLOYMENT.md) | Release artifacts, images, tags, mobile requirements, and checklist | Artifacts phát hành, images, tags, yêu cầu mobile và checklist |
+| [Docker Deployment](./DEPLOYMENT_DOCKER.md) | Compose files and local/prod stack | Compose files và stack local/prod |
+| [Kubernetes Deployment](./DEPLOYMENT_KUBERNETES.md) | K8s manifests, ingress, HPA, rollout | K8s manifests, ingress, HPA, rollout |
+| [CI/CD](./CI_CD.md) | GitHub Actions, scanners, release flow | GitHub Actions, scanners, release flow |
+| [Operations Runbook](./OPERATIONS_RUNBOOK.md) | Health, logs, backup, rollback, incidents | Health, logs, backup, rollback, sự cố |
+| [Observability](./OBSERVABILITY.md) | Metrics, logs, traces, dashboards | Metrics, logs, traces, dashboards |
+| [Testing](./TESTING.md) | Unit, integration, load, mobile tests | Unit, integration, load, mobile tests |
 
-Application surfaces, deployment guidance, observability, and test strategy.
+## Repository & Community / Repo & Cộng Đồng
 
-Tài liệu về bề mặt ứng dụng, triển khai, observability và chiến lược test.
+| Document | English | Tiếng Việt |
+| --- | --- | --- |
+| [Contributing](../CONTRIBUTING.md) | Setup, branch, commit, PR rules | Setup, branch, commit, quy tắc PR |
+| [Security](../SECURITY.md) | Vulnerability reporting and policy | Báo cáo lỗ hổng và chính sách bảo mật |
+| [Code of Conduct](../CODE_OF_CONDUCT.md) | Community standards | Quy tắc cộng đồng |
+| [Changelog](../CHANGELOG.md) | Versioned change history | Lịch sử thay đổi theo phiên bản |
+| [License](../LICENSE) | MIT license | Giấy phép MIT |
 
-| Document                            | Description                                                    |
-| ----------------------------------- | -------------------------------------------------------------- |
-| [Mobile App](./MOBILE.md)           | Flutter app architecture, BLoC, DI, routing, feature catalogue |
-| [Admin Dashboard](./ADMIN.md)       | React admin pages, auth flow, theme, build commands            |
-| [Deployment](./DEPLOYMENT.md)       | Docker setup, environment variables, scaling, CI/CD            |
-| [Observability](./OBSERVABILITY.md) | Logs, metrics, traces, monitoring stack                        |
-| [Testing](./TESTING.md)             | Test strategy, examples, load testing, coverage requirements   |
+## Canonical Runtime Constants / Hằng Số Runtime Chính
 
-### Architecture Decisions
+| Item | Value |
+| --- | --- |
+| REST base path | `/api/v1` |
+| Gateway dev URL | `http://localhost:3000/api/v1` |
+| Flutter emulator API URL | `http://10.0.2.2:3000/api/v1` |
+| Socket.IO namespaces | `/ride`, `/food`, `/chat`, `/notification` |
+| Health endpoints | `/health`, `/healthz`, `/readyz`, `/metrics` outside `/api/v1` |
+| Docker image prefix | `nguyenson1710/crab-mobile-<service>` |
 
-| Document                                                | Description                                             |
-| ------------------------------------------------------- | ------------------------------------------------------- |
-| [ADR Template](./adr/template.md)                       | Standard template for new architecture decision records |
-| [ADR 0001](./adr/0001-record-architecture-decisions.md) | Establishes the ADR process for this repository         |
+## Canonical Status Vocabulary / Bộ Trạng Thái Chuẩn
 
-### Repo-Level Files
+Ride status:
 
-| Document                                 | Description                                                  |
-| ---------------------------------------- | ------------------------------------------------------------ |
-| [README](../README.md)                   | Project overview, architecture snapshot, validation commands |
-| [Changelog](../CHANGELOG.md)             | Versioned change history (Keep a Changelog)                  |
-| [Contributing](../CONTRIBUTING.md)       | Setup, branching, PR rules                                   |
-| [Code of Conduct](../CODE_OF_CONDUCT.md) | Community standards                                          |
-| [Security](../SECURITY.md)               | How to report vulnerabilities                                |
-
-### Release Assets
-
-| Asset Guide                                        | Description                                                                 |
-| -------------------------------------------------- | --------------------------------------------------------------------------- |
-| [Screenshots Catalog](./screenshots/README.md)     | Admin desktop/mobile gallery, Flutter proof captures, and capture checklist |
-| [Admin Release GIF](./gifs/admin-release-flow.gif) | Short walkthrough of the admin release flow                                 |
-
-## Canonical Constants
-
-Shared runtime constants used across clients, services, and documentation.
-
-Các hằng số runtime dùng chung giữa client, service và tài liệu.
-
-- **API base URL (dev)**: `http://localhost:3000/api/v1`
-- **API base URL (web-admin prod default)**: same-origin `/api/v1`
-- **WebSocket URL (dev)**: `ws://localhost:3000/{namespace}` (`ride`, `food`, `chat`, `notification`)
-- **Health check**: gateway `GET /health`; services expose `GET /health`, and the shared observability module also provides `GET /healthz` and `GET /readyz` where wired
-
-### Ride Status Vocabulary
-
-`REQUESTED` → `MATCHED` → `PICKUP` → `IN_PROGRESS` → `COMPLETED` (any state → `CANCELLED`)
-
-### Order Status Vocabulary
-
-`PLACED` → `CONFIRMED` → `PREPARING` → `READY` → `PICKED_UP` → `DELIVERED` (any non-terminal state → `CANCELLED`)
-
-## Project Structure
-
+```text
+REQUESTED -> MATCHED -> PICKUP -> IN_PROGRESS -> COMPLETED
+any non-terminal state -> CANCELLED
 ```
+
+Order status:
+
+```text
+PLACED -> CONFIRMED -> PREPARING -> READY -> PICKED_UP -> DELIVERED
+any non-terminal state -> CANCELLED
+```
+
+## Project Structure / Cấu Trúc Dự Án
+
+```text
 Crab_Mobile_Flutter/
 ├── apps/
-│   ├── backend/          # NestJS microservices (9 services)
-│   ├── mobile/           # Flutter mobile app
-│   └── web-admin/        # React admin dashboard
+│   ├── backend/          NestJS gateway, services, shared backend utilities
+│   ├── mobile/           Flutter mobile app
+│   └── web-admin/        React admin dashboard
 ├── packages/
-│   ├── common-types/     # Shared TypeScript interfaces and enums
-│   └── socket-events/    # Socket.IO event type definitions
-├── docker/               # Docker dev configs (compose lives at repo root)
-├── docs/                 # This documentation
-├── infra/                # Kubernetes manifests, IaC
-├── monitoring/           # Prometheus/Loki/Grafana configs
-└── .github/workflows/    # CI/CD pipelines
+│   ├── common-types/     Shared DTOs, enums, interfaces
+│   └── socket-events/    Shared Socket.IO event contracts
+├── docs/                 Public documentation and release media
+├── infra/k8s/            Kubernetes manifests
+├── monitoring/           Monitoring configs retained for canonicalization/reference
+└── .github/workflows/    CI/CD, scanners, SBOM, releases
 ```
 
-## Service Ports
+## Documentation Rules / Quy Tắc Tài Liệu
 
-| Service      | Port  | Healthz    |
-| ------------ | ----- | ---------- |
-| Gateway      | 3000  | `/health`  |
-| Auth         | 3001  | `/healthz` |
-| User         | 3002  | `/healthz` |
-| Ride         | 3003  | `/healthz` |
-| Food         | 3004  | `/healthz` |
-| Payment      | 3005  | `/healthz` |
-| Chat         | 3006  | `/healthz` |
-| Notification | 3007  | `/healthz` |
-| Rating       | 3008  | `/healthz` |
-| Web Admin    | 8080  | `/`        |
-| PostgreSQL   | 5432  | –          |
-| MongoDB      | 27017 | –          |
-| Redis        | 6379  | –          |
-
-Gateway prefixes every downstream call with `/api/v1`. Service ports above are reachable directly only inside the Docker network.
+- Public docs must not contain secrets, private keys, real tokens, production credentials, private emails, phone numbers, or payment details.
+- Tài liệu public không được chứa secrets, private keys, tokens thật, credentials production, email/số điện thoại/thanh toán thật.
+- Screenshots must show successful populated states unless the document explicitly explains an empty/error state.
+- Ảnh chụp phải thể hiện trạng thái thành công có dữ liệu, trừ khi tài liệu đang giải thích empty/error state.
+- Private planning files live under `.kilo/` or ignored private patterns and must not be committed.
+- File kế hoạch/private notes nằm trong `.kilo/` hoặc pattern private đã ignore và không được commit.
