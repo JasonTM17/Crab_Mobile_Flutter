@@ -159,102 +159,93 @@ class _HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SavedPlaces(),
-          const SizedBox(height: AppSpacing.lg),
-          const _SectionCard(
+          SavedPlaces(),
+          SizedBox(height: AppSpacing.md),
+          _SectionHeaderRow(
             title: 'Dịch vụ nổi bật',
-            subtitle:
-                'Di chuyển, ăn uống, ví và khuyến mãi ngay trong một màn hình.',
-            child: Padding(
-              padding: EdgeInsets.only(top: AppSpacing.md),
-              child: ServiceGrid(),
-            ),
+            subtitle: 'Đi xe, ăn uống, mua sắm và ví Crab trong một chạm.',
+            actionLabel: 'Tất cả',
+            route: '/services',
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            'Khám phá thêm',
-            style: theme.textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
+          SizedBox(height: AppSpacing.md),
+          ServiceGrid(),
+          SizedBox(height: AppSpacing.lg),
+          _SectionHeaderRow(
+            title: 'Khám phá thêm',
+            subtitle: 'Lối tắt cho những nhu cầu thường dùng trong ngày.',
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Lối tắt dành cho những nhu cầu thường dùng trong ngày.',
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: cs.onSurfaceVariant),
+          SizedBox(height: AppSpacing.md),
+          ServiceTabs(),
+          SizedBox(height: AppSpacing.lg),
+          _SectionHeaderRow(
+            title: 'Ưu đãi cho bạn',
+            subtitle: 'Deal nổi bật giúp chuyến đi và đơn hàng tiết kiệm hơn.',
+            actionLabel: 'Xem deal',
+            route: '/promos',
           ),
-          const SizedBox(height: AppSpacing.md),
-          const ServiceTabs(),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            'Ưu đãi cho bạn',
-            style: theme.textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Các deal nổi bật giúp chuyến đi và đơn hàng tiết kiệm hơn.',
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: cs.onSurfaceVariant),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          const PromoCarousel(),
+          SizedBox(height: AppSpacing.md),
+          PromoCarousel(),
         ],
       ),
     );
   }
 }
 
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({
+class _SectionHeaderRow extends StatelessWidget {
+  const _SectionHeaderRow({
     required this.title,
     required this.subtitle,
-    required this.child,
+    this.actionLabel,
+    this.route,
   });
 
   final String title;
   final String subtitle;
-  final Widget child;
+  final String? actionLabel;
+  final String? route;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(AppRadii.xl),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.84)),
-        boxShadow: theme.brightness == Brightness.dark
-            ? null
-            : AppShadows.shadowElevated,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: theme.textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.4,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: cs.onSurfaceVariant),
+        ),
+        if (actionLabel != null && route != null) ...[
+          const SizedBox(width: AppSpacing.sm),
+          TextButton(
+            onPressed: () => context.push(route!),
+            child: Text(actionLabel!),
           ),
-          child,
         ],
-      ),
+      ],
     );
   }
 }
@@ -283,6 +274,43 @@ class _HeroHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.local_fire_department_rounded,
+                      size: 12, color: Colors.white),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Crab Super App',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               _Avatar(url: avatarUrl, initials: initials),
@@ -325,28 +353,16 @@ class _HeroHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Hôm nay bạn muốn đi đâu, ăn gì, hay dùng ví Crab cho ưu đãi tiếp theo?',
+            'Đặt xe, ăn uống hay nạp ví - mọi thứ đều ở ngay trước mắt bạn.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: Colors.white.withValues(alpha: 0.92),
               height: 1.4,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          const Row(
-            children: [
-              Expanded(
-                  child: _QuickStat(
-                      icon: Icons.flash_on_rounded,
-                      label: 'Book nhanh',
-                      value: '24/7')),
-              SizedBox(width: AppSpacing.sm),
-              Expanded(
-                  child: _QuickStat(
-                      icon: Icons.local_offer_rounded,
-                      label: 'Ưu đãi',
-                      value: 'Mới hôm nay')),
-            ],
-          ),
+          const _HeroSearchBar(),
+          const SizedBox(height: AppSpacing.md),
+          const _HeroActionStrip(),
           const SizedBox(height: AppSpacing.md),
           const _WalletPill(),
         ],
@@ -366,58 +382,183 @@ class _HeroHeader extends StatelessWidget {
   }
 }
 
-class _QuickStat extends StatelessWidget {
-  const _QuickStat(
-      {required this.icon, required this.label, required this.value});
-
-  final IconData icon;
-  final String label;
-  final String value;
+class _HeroSearchBar extends StatelessWidget {
+  const _HeroSearchBar();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppRadii.lg),
+      child: InkWell(
+        onTap: () => context.push(
+          '/ride/search?title=Tìm kiếm dịch vụ&hint=Nhập điểm đến, món ăn hoặc ưu đãi',
+        ),
         borderRadius: BorderRadius.circular(AppRadii.lg),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadii.lg),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              const Expanded(
+                child: Text(
+                  'Tìm chuyến xe, món ăn, khuyến mãi...',
+                  style: TextStyle(
+                    color: AppColors.textSecondaryLight,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.tune_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: Colors.white, size: 18),
+    );
+  }
+}
+
+class _HeroActionStrip extends StatelessWidget {
+  const _HeroActionStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _HeroActionCard(
+            title: 'Đặt xe',
+            subtitle: 'Đi ngay',
+            icon: Icons.motorcycle_rounded,
+            gradient: AppGradients.ocean,
+            onTap: () => context.push('/ride/book'),
           ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800),
-                ),
-              ],
-            ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _HeroActionCard(
+            title: 'Đồ ăn',
+            subtitle: 'Giao nhanh',
+            icon: Icons.restaurant_rounded,
+            gradient: AppGradients.sunset,
+            onTap: () => context.push('/food'),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroActionCard extends StatelessWidget {
+  const _HeroActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.gradient,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final LinearGradient gradient;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        child: Ink(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(AppRadii.lg),
+            boxShadow: AppShadows.shadowGlow,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(16),
+                  border:
+                      Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                ),
+                child: Icon(icon, color: Colors.white, size: 22),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.86),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
