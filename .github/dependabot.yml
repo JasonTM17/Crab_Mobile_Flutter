@@ -7,13 +7,13 @@ updates:
     open-pull-requests-limit: 10
     groups:
       nestjs:
-        patterns: ["@nestjs/*"]
+        patterns: ['@nestjs/*']
       typescript:
-        patterns: ["typescript", "@types/*", "ts-*"]
+        patterns: ['typescript', '@types/*', 'ts-*']
       testing:
-        patterns: ["jest", "@types/jest", "ts-jest"]
+        patterns: ['jest', '@types/jest', 'ts-jest']
       linting:
-        patterns: ["eslint*", "prettier*", "@typescript-eslint/*"]
+        patterns: ['eslint*', 'prettier*', '@typescript-eslint/*']
   - package-ecosystem: docker
     directory: /
     schedule:
