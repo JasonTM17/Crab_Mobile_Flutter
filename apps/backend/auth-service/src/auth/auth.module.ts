@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { getRequiredJwtSecret } from '../security'
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { JwtStrategy } from './strategies/jwt.strategy'
@@ -19,7 +20,14 @@ import { LoginAttemptEntity } from './entities/login-attempt.entity'
   imports: [
     ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: getRequiredJwtSecret(config),
+        signOptions: { expiresIn: '15m' },
+      }),
+    }),
     TypeOrmModule.forFeature([
       UserEntity,
       RefreshTokenEntity,

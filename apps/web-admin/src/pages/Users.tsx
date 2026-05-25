@@ -57,8 +57,15 @@ export default function Users() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+      <div className="flex items-end justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+            Users
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Search accounts by name, email, or phone and page through recent signups.
+          </p>
+        </div>
         <Input
           type="text"
           placeholder="Search by name, email, phone..."
@@ -68,8 +75,13 @@ export default function Users() {
         />
       </div>
 
-      <div className="bg-card rounded-lg shadow border overflow-hidden">
-        <table className="w-full">
+      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b bg-muted/30 px-6 py-3 text-sm text-muted-foreground">
+          <span>{filtered.length} visible users</span>
+          <span>20 records per page</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase">
@@ -153,7 +165,8 @@ export default function Users() {
               ))
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       <div className="flex justify-center gap-2">

@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectQueue } from '@nestjs/bull'
 import type { Queue } from 'bull'
 
-import { RIDE_MATCHING_QUEUE } from './matching-queue.module'
+import { RIDE_MATCHING_QUEUE } from './matching-queue.constants'
 
 export interface RideMatchJob {
   rideId: string

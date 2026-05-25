@@ -12,6 +12,23 @@ export class OrdersController {
     return this.service.create(dto)
   }
 
+  @Get()
+  list(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('status') status?: OrderStatus,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ) {
+    return this.service.list({
+      page: page ? +page : 1,
+      limit: limit ? +limit : 20,
+      status,
+      fromDate: fromDate ? new Date(fromDate) : undefined,
+      toDate: toDate ? new Date(toDate) : undefined,
+    })
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findById(id)

@@ -2,6 +2,8 @@
 
 Thanks for your interest in contributing. This document outlines the process for getting changes into the Crab Super App monorepo.
 
+Cảm ơn bạn quan tâm đến dự án. Tài liệu này mô tả quy trình đưa thay đổi vào monorepo Crab Super App.
+
 ## Getting Started
 
 1. **Fork** the repository on GitHub: [JasonTM17/Crab_Mobile_Flutter](https://github.com/JasonTM17/Crab_Mobile_Flutter)
@@ -17,6 +19,10 @@ Thanks for your interest in contributing. This document outlines the process for
 4. **Create a branch** off `main` for your work (see [Branch Naming](#branch-naming)).
 
 ## Development Setup
+
+Use this section to prepare the local environment before running backend services, the admin dashboard, or the Flutter app.
+
+Phần này hướng dẫn chuẩn bị môi trường local trước khi chạy backend services, admin dashboard hoặc Flutter app.
 
 ### Prerequisites
 
@@ -140,10 +146,6 @@ Examples: `feature/ride-scheduling`, `fix/142-otp-resend-race`, `infra/grafana-d
 - **Bugs**: open a GitHub issue with reproduction steps, expected vs actual behavior, environment details, and logs.
 - **Security issues**: do **not** open a public issue. Follow [SECURITY.md](SECURITY.md).
 - **Feature requests**: open an issue describing the use case and the user problem before writing code.
-
-## Working with AI Agents
-
-If you use AI coding agents (Claude, Kilo, Cursor, etc.) on this repo, see [AGENTS.md](AGENTS.md) for the rules those agents must follow — chunked writes, commit hygiene, no AI signatures in commits, and the private-files exclusion list.
 
 ## License
 

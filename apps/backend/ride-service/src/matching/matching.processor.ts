@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import type { Job } from 'bull'
 
 import { MatchingService } from './matching.service'
-import { RIDE_MATCHING_QUEUE } from './matching-queue.module'
+import { RIDE_MATCHING_QUEUE } from './matching-queue.constants'
 import type { RideMatchJob } from './matching-queue.service'
 
 /**

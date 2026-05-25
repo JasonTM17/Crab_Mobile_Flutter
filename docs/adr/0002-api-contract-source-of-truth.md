@@ -47,6 +47,6 @@ Contract changes must follow this order:
 
 ## References
 
-- `AGENTS.md` status vocabulary and API conventions.
 - `docs/openapi.yaml` REST contract.
+- `docs/RIDE_MATCHING.md` and `docs/FOOD_DELIVERY.md` lifecycle vocabulary.
 - `packages/common-types/src/index.ts` shared enums.

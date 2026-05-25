@@ -52,6 +52,7 @@ Thumbs.db
 *.ipr
 *.iws
 .gradle/
+.gradle-local/
 local.properties
 GeneratedPluginRegistrant.java
 *.class
@@ -62,6 +63,7 @@ GeneratedPluginRegistrant.java
 *.dSYM.zip
 *.dSYM
 flutter/
+flutter_*.log
 
 # Docker
 docker-compose.override.yml
@@ -72,15 +74,11 @@ docker-compose.override.yml
 tmp/
 temp/
 
-# OMC (AI tooling state)
+# Local workspace state
 .omc/
-
-# Claude Code session/private state
 .claude/
 .claude-private/
 .claude/worktrees/
-
-# Kilo private state and plans
 .kilo/
 .private/
 
@@ -102,4 +100,14 @@ RULES.md
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Local screenshot scratch artifacts
+/docs/screenshots/*proof*.png
+/docs/screenshots/*current*.png
+/docs/screenshots/ui-*.png
+/docs/screenshots/ui.xml
+/*-populated.png
+/docs-*-final.png
+/final-*.png
+/*-live.png
 

@@ -234,7 +234,7 @@ flutter test integration_test
 
 `bloc_test ^9.1.7` and `mocktail ^1.0.4` are available for Bloc-level testing. `integration_test` is wired through `dev_dependencies`.
 
-## 10. Known Caveats
+## 10. Production Readiness Notes
 
 - **Hardcoded delivery coordinates**. `FoodRepository.placeOrder` defaults `deliveryLat = 10.7769` and `deliveryLng = 106.7009` (`apps/mobile/lib/features/food/data/repositories/food_repository.dart`). Callers from `FoodBloc.PlaceOrder` only pass `deliveryAddress`, so every checkout sends the same Ho Chi Minh City coordinates regardless of the address text. Wire real coordinates from a geocoding step or saved address before going to production.
 - **Status casing fragility on socket events**. Socket payloads are matched against typed enums via `OrderStatus`/`RideStatus` parsers. Backend changes to status casing or string values (e.g. `PICKED_UP` vs `picked_up`) silently fall back to default branches in `FoodBloc` (`socket.on('order:status', ...)`) and `RideBloc`, leaving stale UI state. Treat status strings as a contract and bump the API contract whenever the backend changes them.

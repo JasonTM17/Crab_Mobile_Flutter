@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM node:20-alpine AS builder
 WORKDIR /app
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY tsconfig.base.json ./
@@ -16,12 +18,13 @@ LABEL org.opencontainers.image.source="https://github.com/JasonTM17/Crab_Mobile_
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.revision=$VCS_REF
 RUN apk add --no-cache wget && \
-    mkdir -p /var/cache/nginx /var/run /var/log/nginx && \
-    chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx
+    sed -i 's|pid /run/nginx.pid;|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf && \
+    mkdir -p /var/cache/nginx /var/run /run /var/log/nginx && \
+    chown -R nginx:nginx /var/cache/nginx /var/run /run /var/log/nginx
 COPY --from=builder --chown=nginx:nginx /app/apps/web-admin/dist /usr/share/nginx/html
 COPY --chown=nginx:nginx apps/web-admin/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8080
 USER nginx
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD wget -qO- http://localhost:8080/health || exit 1
-CMD ["nginx", "-g", "daemon off; pid /tmp/nginx.pid;"]
+CMD ["nginx", "-g", "daemon off;"]

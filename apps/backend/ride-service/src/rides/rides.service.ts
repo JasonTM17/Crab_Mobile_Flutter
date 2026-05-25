@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { Between, FindOptionsWhere, Repository } from 'typeorm'
 import { RideEntity } from './entities/ride.entity'
 import { CreateRideDto } from './dto/create-ride.dto'
 import { UpdateRideStatusDto } from './dto/update-ride-status.dto'
@@ -9,6 +9,14 @@ import { MatchingService } from '../matching/matching.service'
 import { DriversService } from '../drivers/drivers.service'
 import { RideStatus } from '@crab/common-types'
 import { DriverStatus } from '../drivers/schemas/driver-location.schema'
+
+export interface RideListOptions {
+  page?: number
+  limit?: number
+  status?: RideStatus
+  fromDate?: Date
+  toDate?: Date
+}
 
 @Injectable()
 export class RidesService {
@@ -133,6 +141,26 @@ export class RidesService {
       where: { rider_id: riderId },
       order: { created_at: 'DESC' },
     })
+  }
+
+  async list(opts: RideListOptions = {}) {
+    const page = opts.page ?? 1
+    const limit = opts.limit ?? 20
+    const where: FindOptionsWhere<RideEntity> = {}
+
+    if (opts.status) where.status = opts.status
+    if (opts.fromDate && opts.toDate) {
+      where.created_at = Between(opts.fromDate, opts.toDate)
+    }
+
+    const [data, total] = await this.rideRepository.findAndCount({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { created_at: 'DESC' },
+    })
+
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 
   async updateStatus(id: string, dto: UpdateRideStatusDto): Promise<RideEntity> {
