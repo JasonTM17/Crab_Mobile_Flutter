@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Users, Car, ShoppingBag, DollarSign, RefreshCw, Activity, Store } from 'lucide-react'
 import {
@@ -105,7 +106,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl bg-gradient-to-br from-primary to-emerald-700 p-6 text-primary-foreground shadow-sm">
+      <div className="rounded-2xl bg-gradient-to-br from-primary to-emerald-700 p-4 sm:p-6 text-primary-foreground shadow-sm">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
@@ -115,7 +116,7 @@ export default function Dashboard() {
               Here's an overview of your platform.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="text-xs text-primary-foreground/80">
               Last refreshed at {formatTime(lastRefresh)}
             </span>
@@ -164,8 +165,8 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Rides per hour (24h)</CardTitle>
           </CardHeader>
@@ -177,6 +178,11 @@ export default function Dashboard() {
                 icon={<Activity className="h-5 w-5" />}
                 title="No ride activity yet"
                 description="Once rides come in, the hourly distribution will appear here."
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/dashboard/rides">Review rides</Link>
+                  </Button>
+                }
               />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -198,7 +204,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Top restaurants by orders</CardTitle>
           </CardHeader>
@@ -210,6 +216,11 @@ export default function Dashboard() {
                 icon={<Store className="h-5 w-5" />}
                 title="No orders yet"
                 description="Top performing restaurants will be ranked here."
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/dashboard/restaurants">Review restaurants</Link>
+                  </Button>
+                }
               />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -233,7 +244,7 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>Vehicle type distribution</CardTitle>
         </CardHeader>
@@ -241,11 +252,16 @@ export default function Dashboard() {
           {isLoading ? (
             <Skeleton className="h-full w-full" />
           ) : !data?.vehicleMix || data.vehicleMix.length === 0 ? (
-            <EmptyState
-              icon={<Car className="h-5 w-5" />}
-              title="No vehicle data"
-              description="Vehicle type distribution will appear once drivers register."
-            />
+              <EmptyState
+                icon={<Car className="h-5 w-5" />}
+                title="No vehicle data"
+                description="Vehicle type distribution will appear once drivers register."
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/dashboard/drivers">Review drivers</Link>
+                  </Button>
+                }
+              />
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
