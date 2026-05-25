@@ -1,5 +1,5 @@
 import { Bell } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -32,6 +32,7 @@ const pageTitles: Record<string, string> = {
 export default function Header() {
   const { logout, currentUser } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const title = pageTitles[location.pathname] ?? 'Dashboard'
 
   const fullName =
@@ -49,17 +50,24 @@ export default function Header() {
     : 'AD'
 
   return (
-    <header className="flex items-center justify-between h-16 px-6 border-b bg-card">
-      <h1 className="text-xl font-semibold">{title}</h1>
+    <header className="flex h-14 items-center justify-between gap-3 border-b bg-card px-3 sm:px-4 md:h-16 md:px-6">
+      <h1 className="min-w-0 truncate text-lg font-semibold md:text-xl">
+        {title}
+      </h1>
 
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Notifications">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Notifications"
+              onClick={() => navigate('/dashboard/notifications')}
+            >
               <Bell className="h-5 w-5" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Notifications coming soon</TooltipContent>
+          <TooltipContent side="bottom">Open notifications</TooltipContent>
         </Tooltip>
 
         <DropdownMenu>
@@ -80,9 +88,6 @@ export default function Header() {
                 </span>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>Profile</DropdownMenuItem>
-            <DropdownMenuItem disabled>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={logout}

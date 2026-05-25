@@ -2,15 +2,6 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {
-  LayoutDashboard,
-  Users,
-  Car,
-  Store,
-  MapPin,
-  ShoppingBag,
-  CreditCard,
-  Ticket,
-  Bell,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -18,6 +9,7 @@ import {
 } from 'lucide-react'
 import { Logo } from '@/components/ui/logo'
 import { Badge } from '@/components/ui/badge'
+import { navItems } from './navItems'
 import {
   Tooltip,
   TooltipContent,
@@ -32,18 +24,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/hooks/useAuth'
-
-const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/dashboard/users', icon: Users, label: 'Users' },
-  { to: '/dashboard/drivers', icon: Car, label: 'Drivers' },
-  { to: '/dashboard/merchants', icon: Store, label: 'Merchants' },
-  { to: '/dashboard/rides', icon: MapPin, label: 'Rides' },
-  { to: '/dashboard/orders', icon: ShoppingBag, label: 'Orders' },
-  { to: '/dashboard/promos', icon: Ticket, label: 'Promos' },
-  { to: '/dashboard/notifications', icon: Bell, label: 'Notifications' },
-  { to: '/dashboard/payments', icon: CreditCard, label: 'Payments' },
-]
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
@@ -68,7 +48,7 @@ export default function Sidebar() {
   return (
     <aside
       className={cn(
-        'relative flex flex-col bg-card border-r transition-all duration-300',
+        'relative hidden md:flex flex-col bg-card border-r transition-all duration-300',
         collapsed ? 'w-16' : 'w-64',
       )}
     >

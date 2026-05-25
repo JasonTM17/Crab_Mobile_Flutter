@@ -57,7 +57,7 @@ export const TooltipContent = React.forwardRef<
       ref={ref}
       role="tooltip"
       className={cn(
-        'pointer-events-none absolute z-50 whitespace-nowrap rounded-md border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md',
+        'pointer-events-none absolute z-50 hidden whitespace-nowrap rounded-md border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md sm:inline-flex',
         'opacity-0 group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100',
         'transition-opacity duration-150',
         positions[side],
