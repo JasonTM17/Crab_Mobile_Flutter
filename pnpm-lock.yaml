@@ -868,7 +868,7 @@ importers:
         specifier: ^20.14.0
         version: 20.19.41
       '@types/react':
-        specifier: ^18.3.0
+        specifier: ^18.3.27
         version: 18.3.29
       '@types/react-dom':
         specifier: ^18.3.0
