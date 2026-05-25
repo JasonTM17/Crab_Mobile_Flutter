@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { toast } from 'sonner'
 import { Ticket } from 'lucide-react'
 import api from '@/lib/axios'
@@ -79,8 +80,12 @@ export default function Promos() {
       setShowForm(false)
       setForm(initialForm)
       load()
-    } catch (err: any) {
-      toast.error(err.response?.data?.message ?? 'Failed to create promo')
+    } catch (err: unknown) {
+      toast.error(
+        axios.isAxiosError(err)
+          ? err.response?.data?.message ?? 'Failed to create promo'
+          : 'Failed to create promo',
+      )
     } finally {
       setSubmitting(false)
     }
@@ -93,8 +98,12 @@ export default function Promos() {
       toast.success(`Promo ${promo.code} deactivated`)
       setPendingDeactivate(null)
       load()
-    } catch (e: any) {
-      toast.error(e.response?.data?.message ?? 'Failed to deactivate')
+    } catch (e: unknown) {
+      toast.error(
+        axios.isAxiosError(e)
+          ? e.response?.data?.message ?? 'Failed to deactivate'
+          : 'Failed to deactivate',
+      )
     } finally {
       setSubmitting(false)
     }

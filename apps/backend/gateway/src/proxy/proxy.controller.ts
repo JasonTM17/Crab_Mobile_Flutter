@@ -4,6 +4,7 @@ import {
   Req,
   Res,
   Body,
+  ForbiddenException,
   HttpException,
   Get,
   UseGuards,
@@ -34,6 +35,15 @@ export class ProxyController {
     return this.handle('auth', req, res, body)
   }
 
+  @All('profiles')
+  async profilesRoot(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('user', req, res, body)
+  }
+
   @All('profiles/*')
   async profiles(
     @Req() req: Request,
@@ -58,7 +68,17 @@ export class ProxyController {
     @Res() res: Response,
     @Body() body: unknown,
   ) {
+    this.requireAdmin(req)
     return this.handle('user', req, res, body)
+  }
+
+  @All('rides')
+  async ridesRoot(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('ride', req, res, body)
   }
 
   @All('rides/*')
@@ -88,6 +108,15 @@ export class ProxyController {
     return this.handle('food', req, res, body)
   }
 
+  @All('orders')
+  async ordersRoot(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('food', req, res, body)
+  }
+
   @All('orders/*')
   async orders(
     @Req() req: Request,
@@ -108,6 +137,15 @@ export class ProxyController {
 
   @All('wallet/*')
   async wallet(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('payment', req, res, body)
+  }
+
+  @All('transactions')
+  async transactionsRoot(
     @Req() req: Request,
     @Res() res: Response,
     @Body() body: unknown,
@@ -187,6 +225,13 @@ export class ProxyController {
     return this.handle('rating', req, res, body)
   }
 
+  private requireAdmin(req: Request) {
+    const user = (req as Request & { user?: { role?: string } }).user
+    if (user?.role !== 'ADMIN') {
+      throw new ForbiddenException('Admin role required')
+    }
+  }
+
   private async handle(
     service: ServiceName,
     req: Request,
@@ -199,8 +244,11 @@ export class ProxyController {
       if (req.headers.authorization) {
         headers['Authorization'] = req.headers.authorization as string
       }
-      if (req.headers['x-user-id']) {
-        headers['X-User-Id'] = req.headers['x-user-id'] as string
+      const user = (req as Request & { user?: { sub?: string; role?: string; email?: string } }).user
+      if (user?.sub) {
+        headers['X-User-Id'] = user.sub
+        if (user.role) headers['X-User-Role'] = user.role
+        if (user.email) headers['X-User-Email'] = user.email
       }
       const data = await this.proxy.forward(
         service,

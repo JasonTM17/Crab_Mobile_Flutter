@@ -1,6 +1,4 @@
 # syntax: docker compose -f docker-compose.prod.yml up -d
-version: "3.9"
-
 x-restart: &restart
   restart: unless-stopped
 
@@ -83,7 +81,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/gateway/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/gateway:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-gateway:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
       replicas: 2
@@ -100,7 +98,8 @@ services:
       CHAT_SERVICE_URL: http://chat-service:3006
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
       RATING_SERVICE_URL: http://rating-service:3008
-      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
+      WS_CORS_ORIGIN: ${WS_CORS_ORIGIN:?required}
     depends_on:
       redis:
         condition: service_healthy
@@ -112,7 +111,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/auth-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/auth-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-auth-service:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
       replicas: 2
@@ -138,7 +137,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/user-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/user-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-user-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
@@ -159,7 +158,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/ride-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/ride-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-ride-service:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
       replicas: 3
@@ -182,7 +181,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/food-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/food-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-food-service:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
       replicas: 2
@@ -204,7 +203,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/payment-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/payment-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-payment-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
@@ -222,7 +221,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/chat-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/chat-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-chat-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
@@ -239,7 +238,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/notification-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/notification-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-notification-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
@@ -258,7 +257,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/rating-service/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/rating-service:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-rating-service:${TAG:-latest}
     <<: [*restart, *logging]
     environment:
       NODE_ENV: production
@@ -275,7 +274,7 @@ services:
     build:
       context: .
       dockerfile: apps/web-admin/Dockerfile
-    image: ${DOCKERHUB_NAMESPACE:-jasontm17}/web-admin:${TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-web-admin:${TAG:-latest}
     <<: [*restart, *logging]
     networks: [crab]
 

@@ -1,0 +1,88 @@
+name: Trivy
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  filesystem:
+    name: Trivy filesystem scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+      - name: Upload filesystem scan results
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-fs.sarif
+
+  images:
+    name: Trivy image scan (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: gateway
+            dockerfile: apps/backend/gateway/Dockerfile
+          - service: auth-service
+            dockerfile: apps/backend/auth-service/Dockerfile
+          - service: user-service
+            dockerfile: apps/backend/user-service/Dockerfile
+          - service: ride-service
+            dockerfile: apps/backend/ride-service/Dockerfile
+          - service: food-service
+            dockerfile: apps/backend/food-service/Dockerfile
+          - service: payment-service
+            dockerfile: apps/backend/payment-service/Dockerfile
+          - service: chat-service
+            dockerfile: apps/backend/chat-service/Dockerfile
+          - service: notification-service
+            dockerfile: apps/backend/notification-service/Dockerfile
+          - service: rating-service
+            dockerfile: apps/backend/rating-service/Dockerfile
+          - service: web-admin
+            dockerfile: apps/web-admin/Dockerfile
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build local image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          load: true
+          push: false
+          build-args: |
+            VCS_REF=${{ github.sha }}
+          tags: crab-mobile-${{ matrix.service }}:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: image
+          image-ref: crab-mobile-${{ matrix.service }}:scan
+          format: sarif
+          output: trivy-image-${{ matrix.service }}.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+      - name: Upload image scan results
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-image-${{ matrix.service }}.sarif

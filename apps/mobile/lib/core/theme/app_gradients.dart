@@ -8,7 +8,14 @@ class AppGradients {
   static const LinearGradient primary = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [AppColors.primary, AppColors.primaryDark],
+    colors: [Color(0xFF16C36A), AppColors.primary, AppColors.primaryDark],
+    stops: [0.0, 0.52, 1.0],
+  );
+
+  static const LinearGradient primarySoft = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFF4FFF8), Color(0xFFE7F8EE)],
   );
 
   static const LinearGradient sunset = LinearGradient(
@@ -32,7 +39,8 @@ class AppGradients {
   static const LinearGradient walletHero = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [AppColors.primary, AppColors.primaryLight],
+    colors: [Color(0xFF1AC86D), AppColors.primary, AppColors.primaryDark],
+    stops: [0.0, 0.56, 1.0],
   );
 
   static const LinearGradient shimmerLight = LinearGradient(

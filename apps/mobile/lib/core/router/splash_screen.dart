@@ -208,13 +208,14 @@ class _DotsLoaderState extends State<_DotsLoader>
         mainAxisSize: MainAxisSize.min,
         children: List.generate(3, (i) {
           final phase = (_c.value + i * 0.18) % 1.0;
-          final scale = 0.7 + (1 - (phase - 0.5).abs() * 2).clamp(0.0, 1.0) * 0.6;
+          final scale =
+              0.7 + (1 - (phase - 0.5).abs() * 2).clamp(0.0, 1.0) * 0.6;
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 5),
             width: 9,
             height: 9,
             transformAlignment: Alignment.center,
-            transform: Matrix4.identity()..scale(scale),
+            transform: Matrix4.identity()..scaleByDouble(scale, scale, 1, 1),
             decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,

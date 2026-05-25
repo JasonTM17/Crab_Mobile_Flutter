@@ -6,31 +6,48 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+
 jobs:
   lint-and-build:
-    name: Lint & Build (${{ matrix.service }})
+    name: Lint & Build (${{ matrix.name }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        service:
-          - common-types
-          - socket-events
-          - gateway
-          - auth-service
-          - user-service
-          - ride-service
-          - food-service
-          - payment-service
-          - chat-service
-          - notification-service
-          - rating-service
-          - web-admin
+        include:
+          - name: common-types
+            filter: '@crab/common-types'
+          - name: socket-events
+            filter: '@crab/socket-events'
+          - name: backend-shared
+            filter: '@crab/backend-shared'
+          - name: gateway
+            filter: '@crab/gateway'
+          - name: auth-service
+            filter: '@crab/auth-service'
+          - name: user-service
+            filter: '@crab/user-service'
+          - name: ride-service
+            filter: '@crab/ride-service'
+          - name: food-service
+            filter: '@crab/food-service'
+          - name: payment-service
+            filter: '@crab/payment-service'
+          - name: chat-service
+            filter: '@crab/chat-service'
+          - name: notification-service
+            filter: '@crab/notification-service'
+          - name: rating-service
+            filter: '@crab/rating-service'
+          - name: web-admin
+            filter: '@crab/web-admin'
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
         with:
-          version: 9.0.0
+          version: 10.0.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -42,55 +59,90 @@ jobs:
           pnpm --filter @crab/common-types build
           pnpm --filter @crab/socket-events build
           pnpm --filter @crab/backend-shared build
-      - name: Lint
-        run: |
-          if [ "${{ matrix.service }}" = "common-types" ] || [ "${{ matrix.service }}" = "socket-events" ]; then
-            pnpm --filter @crab/${{ matrix.service }} lint || true
-          elif [ "${{ matrix.service }}" = "web-admin" ]; then
-            pnpm --filter web-admin lint || true
-          else
-            pnpm --filter @crab/${{ matrix.service }} lint || true
-          fi
-      - name: Build
-        run: |
-          if [ "${{ matrix.service }}" = "web-admin" ]; then
-            pnpm --filter web-admin build
-          else
-            pnpm --filter @crab/${{ matrix.service }} build
-          fi
+      - name: Lint workspace package
+        run: pnpm --filter "${{ matrix.filter }}" lint
+      - name: Build workspace package
+        run: pnpm --filter "${{ matrix.filter }}" build
 
-  test:
-    name: Test
+  contract-check:
+    name: Contract check
     runs-on: ubuntu-latest
     needs: lint-and-build
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
         with:
-          version: 9.0.0
+          version: 10.0.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @crab/common-types build
-      - run: pnpm --filter @crab/socket-events build
-      - run: pnpm --filter @crab/backend-shared build
-      - run: pnpm test || true
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run contract guardrails
+        run: pnpm -w run contract:check
+
+  test:
+    name: Test (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    needs: [lint-and-build, contract-check]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: backend-shared
+            filter: '@crab/backend-shared'
+          - name: gateway
+            filter: '@crab/gateway'
+          - name: auth-service
+            filter: '@crab/auth-service'
+          - name: user-service
+            filter: '@crab/user-service'
+          - name: ride-service
+            filter: '@crab/ride-service'
+          - name: food-service
+            filter: '@crab/food-service'
+          - name: payment-service
+            filter: '@crab/payment-service'
+          - name: chat-service
+            filter: '@crab/chat-service'
+          - name: notification-service
+            filter: '@crab/notification-service'
+          - name: rating-service
+            filter: '@crab/rating-service'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build shared workspace packages first
+        run: |
+          pnpm --filter @crab/common-types build
+          pnpm --filter @crab/socket-events build
+          pnpm --filter @crab/backend-shared build
+      - name: Run package tests
+        run: pnpm --filter "${{ matrix.filter }}" test
 
   flutter:
-    name: Flutter analyze
+    name: Flutter analyze and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - run: flutter pub get
+      - name: Install Flutter dependencies
+        run: flutter pub get
         working-directory: apps/mobile
-      - run: flutter analyze
+      - name: Analyze Flutter app
+        run: flutter analyze
         working-directory: apps/mobile
-        continue-on-error: true
-      - run: flutter test
+      - name: Test Flutter app
+        run: flutter test
         working-directory: apps/mobile
-        continue-on-error: true

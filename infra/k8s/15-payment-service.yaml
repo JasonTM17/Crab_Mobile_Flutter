@@ -7,9 +7,15 @@ spec:
   template:
     metadata: { labels: { app: payment-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: payment-service
-          image: jasontm17/payment-service:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-payment-service:latest
           ports: [{ containerPort: 3005 }]
           envFrom:
             - configMapRef: { name: crab-config }

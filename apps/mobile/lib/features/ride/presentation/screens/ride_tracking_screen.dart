@@ -4,8 +4,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/utils/error_message.dart';
+import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/error_view.dart';
+import '../../../../shared/widgets/skeleton_list.dart';
+import '../../data/models/driver_model.dart' as driver_models;
+import '../../data/models/location_model.dart';
 import '../../data/models/ride_models.dart';
 import '../../data/repositories/ride_repository.dart';
+import '../widgets/driver_info_card.dart';
+import '../widgets/tracking_map.dart';
 
 class RideTrackingScreen extends StatefulWidget {
   final String rideId;
@@ -19,6 +26,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
     with SingleTickerProviderStateMixin {
   Ride? _ride;
   bool _loading = true;
+  String? _errorMessage;
   late final AnimationController _pulseCtrl;
 
   @override
@@ -38,16 +46,30 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
   }
 
   Future<void> _load() async {
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _errorMessage = null;
+      });
+    }
+
     try {
       final repo = sl<RideRepository>();
       final ride = await repo.getRide(widget.rideId);
-      if (mounted) setState(() { _ride = ride; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _ride = ride;
+          _loading = false;
+          _errorMessage = null;
+        });
+      }
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(mapErrorToMessage(e))),
-        );
+        setState(() {
+          _ride = null;
+          _loading = false;
+          _errorMessage = mapErrorToMessage(e);
+        });
       }
     }
   }
@@ -56,11 +78,17 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel ride?'),
-        content: const Text('Are you sure you want to cancel this ride?'),
+        title: const Text('Huy chuyen di?'),
+        content: const Text('Ban chac chan muon huy chuyen di nay?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Yes, cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Khong'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Co, huy'),
+          ),
         ],
       ),
     );
@@ -71,135 +99,251 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
       if (mounted) context.go('/home');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mapErrorToMessage(e))));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(mapErrorToMessage(e))));
       }
     }
   }
 
-  Future<void> _sos() async {
-    try {
-      await sl<RideRepository>().triggerSos(widget.rideId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('SOS triggered. Help is on the way.'), backgroundColor: Colors.red),
-        );
-      }
-    } catch (_) {}
+  void _openChat() {
+    final r = _ride;
+    if (r == null) return;
+    context.push('/chat/ride_${r.id}');
   }
 
-  int _progressIndex(RideStatus s) {
-    switch (s) {
+  void _call() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Dang ket noi cuoc goi...')),
+    );
+  }
+
+  driver_models.DriverModel _placeholderDriver() {
+    return const driver_models.DriverModel(
+      id: 'placeholder',
+      name: 'Tai xe Crab',
+      phone: '',
+      rating: 4.9,
+      totalRides: 1280,
+      vehicle: driver_models.VehicleModel(
+        plate: '51A-123.45',
+        model: 'Toyota Vios',
+        color: 'Trang',
+        type: 'CAR_4',
+      ),
+    );
+  }
+
+  String _statusTitle(RideStatus status) {
+    switch (status) {
       case RideStatus.requested:
-        return 0;
+        return 'Đang tìm tài xế';
+      case RideStatus.matched:
+        return 'Tài xế đã nhận chuyến';
+      case RideStatus.pickup:
+        return 'Tài xế đang đến điểm đón';
+      case RideStatus.inProgress:
+        return 'Bạn đang trên hành trình';
+      case RideStatus.completed:
+        return 'Chuyến đi đã hoàn tất';
+      case RideStatus.cancelled:
+        return 'Chuyến đi đã huỷ';
+    }
+  }
+
+  String _statusSubtitle(Ride ride) {
+    switch (ride.status) {
+      case RideStatus.requested:
       case RideStatus.matched:
       case RideStatus.pickup:
-        return 1;
+        return 'Dự kiến đón trong khoảng ${ride.durationMin} phút.';
       case RideStatus.inProgress:
-        return 2;
+        return 'Lộ trình còn khoảng ${ride.distanceKm.toStringAsFixed(1)} km.';
       case RideStatus.completed:
-        return 3;
+        return 'Cảm ơn bạn đã lựa chọn Crab cho chuyến đi này.';
       case RideStatus.cancelled:
-        return 0;
+        return 'Bạn có thể đặt lại chuyến xe bất cứ lúc nào.';
+    }
+  }
+
+  Color _statusColor(RideStatus status) {
+    switch (status) {
+      case RideStatus.requested:
+        return AppColors.warning;
+      case RideStatus.matched:
+      case RideStatus.pickup:
+        return AppColors.primary;
+      case RideStatus.inProgress:
+        return AppColors.info;
+      case RideStatus.completed:
+        return AppColors.success;
+      case RideStatus.cancelled:
+        return AppColors.error;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: _TrackingLoadingView());
     }
-    if (_ride == null) {
-      return const Scaffold(body: Center(child: Text('Ride not found')));
+
+    if (_errorMessage != null) {
+      return Scaffold(
+        body: _TrackingStateScaffold(
+          child: Center(
+            child: ErrorView(
+              title: 'Không thể tải hành trình',
+              message: _errorMessage,
+              retryLabel: 'Thử lại',
+              onRetry: _load,
+            ),
+          ),
+        ),
+      );
     }
-    final r = _ride!;
+
+    final r = _ride;
+    if (r == null) {
+      return const Scaffold(
+        body: _TrackingStateScaffold(
+          child: Center(
+            child: EmptyState(
+              icon: Icons.route_rounded,
+              title: 'Không tìm thấy chuyến đi',
+              subtitle:
+                  'Chuyến xe này có thể đã kết thúc hoặc không còn khả dụng.',
+              compact: true,
+            ),
+          ),
+        ),
+      );
+    }
+
     final etaMin = r.durationMin;
+    final statusColor = _statusColor(r.status);
 
     return Scaffold(
       body: Stack(
         children: [
-          // Map placeholder
           Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.grey.shade300,
-                    Colors.grey.shade200,
-                    Colors.grey.shade100,
-                  ],
-                ),
+            child: TrackingMap(
+              pickup: LocationModel(
+                latitude: r.pickup.latitude,
+                longitude: r.pickup.longitude,
+                address: r.pickup.address,
               ),
-              child: const Center(
-                child: Icon(Icons.map, size: 96, color: Colors.white),
+              dropoff: LocationModel(
+                latitude: r.dropoff.latitude,
+                longitude: r.dropoff.longitude,
+                address: r.dropoff.address,
               ),
             ),
           ),
-          // Top fade + back + status pill
-          _TopOverlay(
-            statusLabel: 'Driver is $etaMin min away',
-            pulseCtrl: _pulseCtrl,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.14),
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.10),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-          // Bottom draggable sheet
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _CircularBackButton(
+                    onPressed: () => Navigator.maybePop(context),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _StatusChip(
+                      title: _statusTitle(r.status),
+                      subtitle: _statusSubtitle(r),
+                      color: statusColor,
+                      pulseCtrl: _pulseCtrl,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           DraggableScrollableSheet(
-            initialChildSize: 0.42,
-            minChildSize: 0.22,
-            maxChildSize: 0.85,
+            initialChildSize: 0.38,
+            minChildSize: 0.38,
+            maxChildSize: 0.68,
+            snap: true,
+            snapSizes: const [0.38, 0.68],
             builder: (context, scrollController) {
               return Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(24)),
+                      BorderRadius.vertical(top: Radius.circular(28)),
                   boxShadow: [
                     BoxShadow(
                       color: Color(0x1A000000),
-                      blurRadius: 24,
-                      offset: Offset(0, -8),
+                      blurRadius: 28,
+                      offset: Offset(0, -10),
                     ),
                   ],
                 ),
                 child: ListView(
                   controller: scrollController,
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
                   children: [
-                    const SizedBox(height: 12),
                     Center(
                       child: Container(
                         width: 44,
-                        height: 4,
+                        height: 5,
                         decoration: BoxDecoration(
                           color: AppColors.borderLight,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(999),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _TripProgress(activeIndex: _progressIndex(r.status)),
-                    ),
-                    const SizedBox(height: 18),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _DriverPlaceholderCard(pulseCtrl: _pulseCtrl),
-                    ),
-                    const SizedBox(height: 14),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _ActionRow(
-                        onChat: () => context.push('/chat/ride_${r.id}'),
-                        onCancel: _cancel,
-                        onSos: _sos,
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Thông tin chuyến đi',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimaryLight,
                       ),
                     ),
-                    const SizedBox(height: 18),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _TripDetails(ride: r),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Theo dõi tài xế và xem nhanh chi tiết hành trình của bạn.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.35,
+                        color: AppColors.textSecondaryLight,
+                      ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
+                    DriverInfoCard(
+                      driver: _placeholderDriver(),
+                      etaMinutes:
+                          r.status == RideStatus.inProgress ? null : etaMin,
+                      statusLabel: _statusTitle(r.status),
+                      onCall: _call,
+                      onChat: _openChat,
+                      onCancel: _cancel,
+                    ),
+                    const SizedBox(height: 16),
+                    _TripMetaRow(ride: r, statusColor: statusColor),
+                    const SizedBox(height: 16),
+                    _TripSummary(ride: r),
                   ],
                 ),
               );
@@ -211,280 +355,239 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
   }
 }
 
-class _TopOverlay extends StatelessWidget {
-  final String statusLabel;
-  final AnimationController pulseCtrl;
-
-  const _TopOverlay({required this.statusLabel, required this.pulseCtrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      ignoring: false,
-      child: Stack(
-        children: [
-          Container(
-            height: 220,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withOpacity(0.85),
-                  Colors.white.withOpacity(0),
-                ],
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.10),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      iconSize: 20,
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                      onPressed: () => Navigator.maybePop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(99),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          AnimatedBuilder(
-                            animation: pulseCtrl,
-                            builder: (_, __) {
-                              final t = pulseCtrl.value;
-                              return Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Opacity(
-                                    opacity: (1 - t).clamp(0, 1),
-                                    child: Container(
-                                      width: 16 * (1 + t),
-                                      height: 16 * (1 + t),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary
-                                            .withOpacity(0.4),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              statusLabel,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TripProgress extends StatelessWidget {
-  final int activeIndex;
-  const _TripProgress({required this.activeIndex});
-
-  static const _labels = ['Matched', 'Pickup', 'On trip', 'Done'];
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(_labels.length, (i) {
-        final active = i <= activeIndex;
-        final isLast = i == _labels.length - 1;
-        return Expanded(
-          child: Row(
-            children: [
-              Column(
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: active ? AppColors.primary : AppColors.borderLight,
-                      boxShadow: active
-                          ? [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.4),
-                                blurRadius: 10,
-                              ),
-                            ]
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _labels[i],
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: active
-                          ? AppColors.textPrimaryLight
-                          : AppColors.textSecondaryLight,
-                    ),
-                  ),
-                ],
-              ),
-              if (!isLast)
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(
-                        bottom: 18, left: 4, right: 4),
-                    height: 2,
-                    color: i < activeIndex
-                        ? AppColors.primary
-                        : AppColors.borderLight,
-                  ),
-                ),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class _DriverPlaceholderCard extends StatelessWidget {
-  final AnimationController pulseCtrl;
-  const _DriverPlaceholderCard({required this.pulseCtrl});
+class _CircularBackButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _CircularBackButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Row(
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              const CircleAvatar(
-                radius: 26,
-                backgroundColor: AppColors.primary,
-                child: Icon(Icons.person, color: Colors.white, size: 26),
-              ),
-              Positioned(
-                right: -2,
-                bottom: -2,
-                child: AnimatedBuilder(
-                  animation: pulseCtrl,
-                  builder: (_, __) {
-                    return Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: AppColors.success,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.14),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Your driver',
-                  style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.star_rounded,
-                        color: Colors.amber, size: 16),
-                    const SizedBox(width: 2),
-                    const Text('4.9',
-                        style: TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w600)),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: AppColors.borderLight),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        '51-A 123.45',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'monospace',
-                          letterSpacing: 1.2,
+        ],
+      ),
+      child: IconButton(
+        iconSize: 20,
+        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Color color;
+  final AnimationController pulseCtrl;
+
+  const _StatusChip({
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.pulseCtrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      elevation: 4,
+      borderRadius: BorderRadius.circular(22),
+      shadowColor: Colors.black.withValues(alpha: 0.15),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedBuilder(
+              animation: pulseCtrl,
+              builder: (_, __) {
+                final t = pulseCtrl.value;
+                return SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Opacity(
+                        opacity: (1 - t).clamp(0.0, 1.0),
+                        child: Container(
+                          width: 8 + 10 * t,
+                          height: 8 + 10 * t,
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.35),
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      color: AppColors.textPrimaryLight,
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      height: 1.35,
+                      color: AppColors.textSecondaryLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TrackingStateScaffold extends StatelessWidget {
+  final Widget child;
+
+  const _TrackingStateScaffold({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.backgroundLight,
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Row(
+                children: [
+                  _CircularBackButton(
+                    onPressed: () => Navigator.maybePop(context),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(child: child),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TrackingLoadingView extends StatelessWidget {
+  const _TrackingLoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return _TrackingStateScaffold(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
                 ),
               ],
+            ),
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: Color(0x1A00B14F),
+                  child: Icon(
+                    Icons.route_rounded,
+                    color: AppColors.primary,
+                    size: 32,
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Đang tải hành trình',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Crab đang đồng bộ vị trí tài xế và lộ trình mới nhất cho bạn.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    color: AppColors.textSecondaryLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          const SkeletonList(
+            itemCount: 2,
+            itemHeight: 92,
+            spacing: 12,
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: AppColors.borderLight.withValues(alpha: 0.8),
+              ),
+            ),
+            child: const SkeletonList(
+              itemCount: 3,
+              itemHeight: 44,
+              spacing: 10,
             ),
           ),
         ],
@@ -493,140 +596,226 @@ class _DriverPlaceholderCard extends StatelessWidget {
   }
 }
 
-class _ActionRow extends StatelessWidget {
-  final VoidCallback onChat;
-  final VoidCallback onCancel;
-  final VoidCallback onSos;
+class _TripMetaRow extends StatelessWidget {
+  final Ride ride;
+  final Color statusColor;
 
-  const _ActionRow({
-    required this.onChat,
-    required this.onCancel,
-    required this.onSos,
-  });
+  const _TripMetaRow({required this.ride, required this.statusColor});
+
+  String _shortStatus(RideStatus status) {
+    switch (status) {
+      case RideStatus.requested:
+        return 'Đang tìm';
+      case RideStatus.matched:
+        return 'Đã ghép';
+      case RideStatus.pickup:
+        return 'Đón khách';
+      case RideStatus.inProgress:
+        return 'Đang đi';
+      case RideStatus.completed:
+        return 'Hoàn tất';
+      case RideStatus.cancelled:
+        return 'Đã huỷ';
+    }
+  }
+
+  String _formatPrice(int value) {
+    final rounded = value.round().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < rounded.length; i++) {
+      if (i > 0 && (rounded.length - i) % 3 == 0) buffer.write('.');
+      buffer.write(rounded[i]);
+    }
+    return '$buffer' 'đ';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _CircleAction(
-          icon: Icons.phone_rounded,
-          label: 'Call',
-          color: AppColors.primary,
-          onTap: () {},
+        Expanded(
+          child: _MetaCard(
+            label: 'Trạng thái',
+            value: _shortStatus(ride.status),
+            accentColor: statusColor,
+          ),
         ),
-        _CircleAction(
-          icon: Icons.chat_bubble_rounded,
-          label: 'Chat',
-          color: AppColors.info,
-          onTap: onChat,
+        const SizedBox(width: 10),
+        Expanded(
+          child: _MetaCard(
+            label: 'Thời gian',
+            value: '${ride.durationMin} phút',
+            accentColor: AppColors.info,
+          ),
         ),
-        _CircleAction(
-          icon: Icons.warning_amber_rounded,
-          label: 'SOS',
-          color: AppColors.error,
-          onTap: onSos,
-        ),
-        _CircleAction(
-          icon: Icons.close_rounded,
-          label: 'Cancel',
-          color: AppColors.textSecondaryLight,
-          onTap: onCancel,
+        const SizedBox(width: 10),
+        Expanded(
+          child: _MetaCard(
+            label: 'Cước phí',
+            value: _formatPrice(ride.fare),
+            accentColor: AppColors.primary,
+          ),
         ),
       ],
     );
   }
 }
 
-class _CircleAction extends StatelessWidget {
-  final IconData icon;
+class _MetaCard extends StatelessWidget {
   final String label;
-  final Color color;
-  final VoidCallback onTap;
+  final String value;
+  final Color accentColor;
 
-  const _CircleAction({
-    required this.icon,
+  const _MetaCard({
     required this.label,
-    required this.color,
-    required this.onTap,
+    required this.value,
+    required this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.8)),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: 10,
+            height: 10,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.10),
+              color: accentColor,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 22),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSecondaryLight,
+            ),
           ),
           const SizedBox(height: 6),
-          Text(label,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimaryLight,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _TripDetails extends StatelessWidget {
+class _TripSummary extends StatelessWidget {
   final Ride ride;
-  const _TripDetails({required this.ride});
+  const _TripSummary({required this.ride});
+
+  String _formatPrice(int value) {
+    final rounded = value.round().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < rounded.length; i++) {
+      if (i > 0 && (rounded.length - i) % 3 == 0) buffer.write('.');
+      buffer.write(rounded[i]);
+    }
+    return '$buffer' 'đ';
+  }
+
+  String _vehicleLabel(String raw) {
+    switch (raw) {
+      case 'BIKE':
+        return 'CrabBike';
+      case 'CAR_4':
+        return 'CrabCar';
+      case 'CAR_7':
+        return 'CrabCar 7';
+      default:
+        return raw.replaceAll('_', ' ');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final rideCode = ride.id.length > 8 ? ride.id.substring(0, 8) : ride.id;
+
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.backgroundLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderLight),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.9)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text(
+            'Lộ trình và thanh toán',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimaryLight,
+            ),
+          ),
+          const SizedBox(height: 14),
           _RouteRow(
             icon: Icons.my_location_rounded,
             iconColor: AppColors.success,
-            label: 'Pickup',
+            label: 'Điểm đón',
             value: ride.pickup.address ?? '-',
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: EdgeInsets.symmetric(vertical: 10),
             child: Divider(height: 1, color: AppColors.borderLight),
           ),
           _RouteRow(
             icon: Icons.location_on_rounded,
             iconColor: AppColors.error,
-            label: 'Dropoff',
+            label: 'Điểm đến',
             value: ride.dropoff.address ?? '-',
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${ride.distanceKm.toStringAsFixed(1)} km - ${ride.durationMin} min',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondaryLight,
-                  fontWeight: FontWeight.w500,
+              Expanded(
+                child: Text(
+                  'Mã chuyến #${rideCode.toUpperCase()} • ${_vehicleLabel(ride.vehicleType)}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondaryLight,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
+              const SizedBox(width: 12),
               Text(
-                '${ride.fare} VND',
+                _formatPrice(ride.fare),
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimaryLight,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${ride.distanceKm.toStringAsFixed(1)} km • ${ride.durationMin} phút',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondaryLight,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -658,16 +847,23 @@ class _RouteRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondaryLight,
-                    fontWeight: FontWeight.w500,
-                  )),
-              const SizedBox(height: 2),
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textSecondaryLight,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimaryLight,
+                ),
+              ),
             ],
           ),
         ),

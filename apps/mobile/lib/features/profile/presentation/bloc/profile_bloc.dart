@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/storage_keys.dart';
 import '../../../../shared/utils/error_message.dart';
 import '../../data/repositories/profile_repository.dart';
 import 'profile_event.dart';
@@ -70,8 +70,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     LogoutRequested event,
     Emitter<ProfileState> emit,
   ) async {
-    await _storage.delete(key: ApiConstants.accessTokenKey);
-    await _storage.delete(key: ApiConstants.refreshTokenKey);
+    await _storage.delete(key: StorageKeys.accessToken);
+    await _storage.delete(key: StorageKeys.refreshToken);
     emit(const LoggedOut());
   }
 }

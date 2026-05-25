@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ShoppingBag } from 'lucide-react'
 import api from '@/lib/axios'
 import { Button } from '@/components/ui/button'
@@ -41,14 +41,17 @@ export default function Orders() {
     }
   }
 
-  useEffect(() => {
-    setLoading(false)
-  }, [])
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
+      <div className="flex items-end justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+            Orders
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Load recent orders for a restaurant and inspect customer, status, and payment totals.
+          </p>
+        </div>
         <div className="flex gap-2">
           <Input
             value={restaurantId}
@@ -62,8 +65,13 @@ export default function Orders() {
         </div>
       </div>
 
-      <div className="bg-card rounded-lg shadow border overflow-hidden">
-        <table className="w-full">
+      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b bg-muted/30 px-6 py-3 text-sm text-muted-foreground">
+          <span>{orders.length} orders loaded</span>
+          <span>Lookup by restaurant ID</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase">ID</th>
@@ -141,7 +149,8 @@ export default function Orders() {
               ))
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   )
@@ -153,15 +162,12 @@ function OrderStatusBadge({ status }: { status: string }) {
     'success' | 'destructive' | 'secondary' | 'warning' | 'info'
   > = {
     DELIVERED: 'success',
-    COMPLETED: 'success',
+    PICKED_UP: 'info',
     PREPARING: 'info',
     READY: 'info',
-    OUT_FOR_DELIVERY: 'info',
-    PENDING: 'warning',
+    CONFIRMED: 'info',
     PLACED: 'warning',
     CANCELLED: 'destructive',
-    CANCELED: 'destructive',
-    REFUNDED: 'destructive',
   }
   return <Badge variant={variant[status] ?? 'secondary'}>{status}</Badge>
 }

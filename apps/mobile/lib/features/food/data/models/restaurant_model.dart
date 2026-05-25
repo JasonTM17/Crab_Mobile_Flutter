@@ -33,17 +33,22 @@ class RestaurantModel {
     return RestaurantModel(
       id: json['id'] as String,
       name: json['name'] as String,
-      imageUrl: json['imageUrl'] as String?,
+      imageUrl: json['imageUrl'] as String? ?? json['coverImageUrl'] as String?,
       description: json['description'] as String?,
-      category: json['category'] as String? ?? 'Restaurant',
-      rating: (json['rating'] as num?)?.toDouble() ?? 0,
+      category: json['category'] as String? ??
+          json['cuisineType'] as String? ??
+          'Restaurant',
+      rating: _asDouble(json['rating']),
       totalReviews: (json['totalReviews'] as num?)?.toInt() ?? 0,
-      deliveryTimeMinutes:
-          (json['deliveryTimeMinutes'] as num?)?.toInt() ?? 30,
-      deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0,
-      minOrderAmount: (json['minOrderAmount'] as num?)?.toDouble() ?? 0,
+      deliveryTimeMinutes: (json['deliveryTimeMinutes'] as num?)?.toInt() ??
+          (json['avgPrepTimeMin'] as num?)?.toInt() ??
+          30,
+      deliveryFee: _asDouble(json['deliveryFee']),
+      minOrderAmount: _asDouble(
+        json['minOrderAmount'] ?? json['minOrderValue'],
+      ),
       isOpen: json['isOpen'] as bool? ?? true,
-      distanceKm: (json['distanceKm'] as num?)?.toDouble(),
+      distanceKm: _asNullableDouble(json['distanceKm'] ?? json['distance_km']),
       address: json['address'] as String?,
     );
   }
@@ -63,4 +68,17 @@ class RestaurantModel {
         'distanceKm': distanceKm,
         'address': address,
       };
+}
+
+double _asDouble(Object? value, [double fallback = 0]) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? fallback;
+  return fallback;
+}
+
+double? _asNullableDouble(Object? value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
 }

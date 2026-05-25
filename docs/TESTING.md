@@ -162,9 +162,8 @@ describe('AuthController (Integration)', () => {
         .send({ email: 'test@example.com', password: 'SecurePass123!' })
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('accessToken');
-          expect(res.body).toHaveProperty('refreshToken');
-          expect(res.body.expiresIn).toBe(900);
+          expect(res.body).toHaveProperty('tokens.access_token');
+          expect(res.body).toHaveProperty('tokens.refresh_token');
         });
     });
 
@@ -207,30 +206,30 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 
 export default function () {
   // Login flow
-  const loginRes = http.post(`${BASE_URL}/api/auth/login`, JSON.stringify({
+  const loginRes = http.post(`${BASE_URL}/api/v1/auth/login`, JSON.stringify({
     email: `user${__VU}@test.com`,
     password: 'TestPass123!',
   }), { headers: { 'Content-Type': 'application/json' } });
 
   check(loginRes, {
     'login status 200': (r) => r.status === 200,
-    'has access token': (r) => JSON.parse(r.body).accessToken !== undefined,
+    'has access token': (r) => JSON.parse(r.body).tokens?.access_token !== undefined,
   }) || errorRate.add(1);
 
   if (loginRes.status === 200) {
-    const token = JSON.parse(loginRes.body).accessToken;
+    const token = JSON.parse(loginRes.body).tokens.access_token;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     };
 
     // Get profile
-    const profileRes = http.get(`${BASE_URL}/api/users/me`, { headers });
+    const profileRes = http.get(`${BASE_URL}/api/v1/profiles/${__VU}`, { headers });
     check(profileRes, { 'profile status 200': (r) => r.status === 200 });
 
     // List restaurants
     const restaurantsRes = http.get(
-      `${BASE_URL}/api/food/restaurants?lat=10.77&lng=106.70&radius=5`,
+      `${BASE_URL}/api/v1/restaurants/search?latitude=10.77&longitude=106.70&radiusKm=5`,
       { headers }
     );
     check(restaurantsRes, { 'restaurants status 200': (r) => r.status === 200 });
@@ -289,34 +288,24 @@ describe('Ride WebSocket (E2E)', () => {
     driverSocket.disconnect();
   });
 
-  it('should complete full ride flow', (done) => {
-    let rideId: string;
-
-    // Driver receives ride request
+  it('should broadcast a ride request', (done) => {
     driverSocket.on('ride:new_request', (data) => {
-      rideId = data.rideId;
-      expect(data.vehicleType).toBe('car');
-      driverSocket.emit('ride:accept', { rideId });
-    });
-
-    // Rider receives acceptance
-    riderSocket.on('ride:accepted', (data) => {
-      expect(data.rideId).toBe(rideId);
-      expect(data.driver).toHaveProperty('name');
+      expect(data.pickup).toBeDefined();
+      expect(data.dropoff).toBeDefined();
       done();
     });
 
-    // Rider requests ride
     riderSocket.emit('ride:request', {
-      pickupLocation: { lat: 10.77, lng: 106.70, address: 'Test' },
-      dropoffLocation: { lat: 10.80, lng: 106.71, address: 'Test 2' },
-      vehicleType: 'car',
+      riderId: 'rider-id',
+      pickup: { lat: 10.77, lng: 106.70, address: 'Test' },
+      dropoff: { lat: 10.80, lng: 106.71, address: 'Test 2' },
+      paymentMethod: 'wallet',
     });
   });
 
   it('should handle ride cancellation', (done) => {
-    riderSocket.on('ride:status_changed', (data) => {
-      expect(data.status).toBe('CANCELLED');
+    riderSocket.on('ride:cancelled', (data) => {
+      expect(data.rideId).toBe('test-id');
       done();
     });
 
@@ -334,7 +323,7 @@ import * as request from 'supertest';
 describe('Rate Limiting', () => {
   it('should enforce rate limits (100 req/min)', async () => {
     const requests = Array.from({ length: 105 }, () =>
-      request(app).get('/api/users/me').set('Authorization', `Bearer ${token}`)
+      request(app).get('/api/v1/profiles/test-user-id').set('Authorization', `Bearer ${token}`)
     );
 
     const responses = await Promise.all(requests);
@@ -346,7 +335,7 @@ describe('Rate Limiting', () => {
 
   it('should return rate limit headers', async () => {
     const res = await request(app)
-      .get('/api/users/me')
+      .get('/api/v1/profiles/test-user-id')
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.headers).toHaveProperty('x-ratelimit-limit');

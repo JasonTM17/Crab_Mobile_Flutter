@@ -97,7 +97,7 @@ The driver has **15 seconds** to accept. Three outcomes:
 
 | Outcome     | Server action                                                              |
 |-------------|----------------------------------------------------------------------------|
-| Accept      | `ride.status = ACCEPTED`. Job complete. Publish `ride:status ACCEPTED`.   |
+| Accept      | Keep `ride.status = MATCHED`. Job complete. Publish `ride:status MATCHED`. |
 | Explicit reject | Add driver to `excludeDriverIds`. Re-enqueue job with `attempt + 1`.   |
 | Timeout (no response) | Treated like a reject. Driver gets a soft strike (3 timeouts in 1h triggers a 10-minute cool-down). |
 
@@ -120,11 +120,11 @@ If the matching processor returns `null` (no eligible drivers in radius) **or** 
 - `attempt + 1`.
 - Backoff scaled by attempt count.
 
-After 5 attempts the job is dead-lettered and the rider is notified via `ride:status NO_DRIVERS_AVAILABLE`. They can retry — a new request creates a new job from scratch.
+After 5 attempts the job is dead-lettered, the ride is marked `CANCELLED` with reason `NO_DRIVER`, and the rider receives `ride:cancelled`. They can retry — a new request creates a new job from scratch.
 
 ## Cancellation
 
-A rider cancelling at `REQUESTED` simply marks the ride `CANCELLED` and removes the queue job. A rider cancelling at `MATCHED`/`ACCEPTED` does the same plus emits `ride:cancelled` to `driver:<id>`. Cancellations after `IN_TRIP` are blocked at the API layer and require dispatcher intervention.
+A rider cancelling at `REQUESTED` simply marks the ride `CANCELLED` and removes the queue job. A rider cancelling at `MATCHED` does the same plus emits `ride:cancelled` to `driver:<id>`. Cancellations after `IN_PROGRESS` are blocked at the API layer and require dispatcher intervention.
 
 ## Observability
 
@@ -141,7 +141,7 @@ Grafana dashboard `dashboards/matching.json` plots p95 match time and the no-dri
 | Symptom                              | Likely cause                        | Where to look                              |
 |--------------------------------------|-------------------------------------|--------------------------------------------|
 | Job stuck in `waiting`               | BullMQ worker not running           | `pnpm --filter @crab/ride-service start` logs |
-| Every request → `NO_DRIVERS_AVAILABLE` | Geo index empty                  | `redis-cli ZCARD drivers:geo`              |
+| Every request exhausts matching attempts | Geo index empty                  | `redis-cli ZCARD drivers:geo`              |
 | Drivers see no offers                | Wrong namespace / stale token        | Gateway handshake logs                     |
 | Surge stuck > 1.0 with low demand    | `online_drivers` query slow         | `EXPLAIN` in [DATABASE.md](./DATABASE.md)  |
 

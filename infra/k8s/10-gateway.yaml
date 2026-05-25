@@ -12,9 +12,15 @@ spec:
     metadata:
       labels: { app: gateway, tier: api }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: gateway
-          image: jasontm17/gateway:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-gateway:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000

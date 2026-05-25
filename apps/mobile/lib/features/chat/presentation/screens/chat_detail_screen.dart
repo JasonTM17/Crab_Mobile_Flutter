@@ -58,8 +58,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   ),
                   BlocBuilder<ChatBloc, ChatState>(
                     builder: (context, state) {
-                      final typing =
-                          state is MessagesLoaded && state.isTyping;
+                      final typing = state is MessagesLoaded && state.isTyping;
                       return Row(
                         children: [
                           Container(
@@ -68,8 +67,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                             decoration: BoxDecoration(
                               color: typing
                                   ? const Color(0xFF22C55E)
-                                  : cs.onSurfaceVariant
-                                      .withValues(alpha: 0.5),
+                                  : cs.onSurfaceVariant.withValues(alpha: 0.5),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -131,8 +129,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                                 width: 64,
                                 height: 64,
                                 decoration: BoxDecoration(
-                                  color:
-                                      cs.primary.withValues(alpha: 0.10),
+                                  color: cs.primary.withValues(alpha: 0.10),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -212,8 +209,7 @@ class _HeaderAvatar extends StatelessWidget {
               color: cs.primary.withValues(alpha: 0.12),
               image: hasAvatar
                   ? DecorationImage(
-                      image: NetworkImage(
-                          conversation.otherParticipantAvatar!),
+                      image: NetworkImage(conversation.otherParticipantAvatar!),
                       fit: BoxFit.cover,
                     )
                   : null,

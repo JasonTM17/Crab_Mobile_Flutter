@@ -63,7 +63,45 @@ export class DriversService {
 
   async setDriverStatus(driverId: string, status: DriverStatus): Promise<void> {
     await this.driverLocationModel
-      .findOneAndUpdate({ driver_id: driverId }, { status, updated_at: new Date() })
+      .findOneAndUpdate(
+        { driver_id: { $eq: driverId } },
+        {
+          $set: { status, updated_at: new Date() },
+          $setOnInsert: {
+            driver_id: driverId,
+            location: { type: 'Point', coordinates: [106.7009, 10.7769] },
+            vehicle_type: VehicleType.MOTORBIKE,
+            rating: 5.0,
+          },
+        },
+        { upsert: true },
+      )
+      .exec()
+  }
+
+  async updateLocation(
+    driverId: string,
+    latitude: number,
+    longitude: number,
+    status?: DriverStatus,
+  ): Promise<void> {
+    await this.driverLocationModel
+      .findOneAndUpdate(
+        { driver_id: { $eq: driverId } },
+        {
+          $set: {
+            location: { type: 'Point', coordinates: [longitude, latitude] },
+            ...(status ? { status } : {}),
+            updated_at: new Date(),
+          },
+          $setOnInsert: {
+            driver_id: driverId,
+            vehicle_type: VehicleType.MOTORBIKE,
+            rating: 5.0,
+          },
+        },
+        { upsert: true },
+      )
       .exec()
   }
 

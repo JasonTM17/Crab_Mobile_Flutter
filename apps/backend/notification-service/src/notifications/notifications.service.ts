@@ -100,8 +100,9 @@ export class NotificationsService {
     return this.model.countDocuments({ userId, read: false })
   }
 
-  async delete(notificationId: string, userId: string) {
-    return this.model.deleteOne({ _id: notificationId, userId })
+  async delete(notificationId: string, userId: string): Promise<{ acknowledged: boolean; deletedCount: number }> {
+    const result = await this.model.deleteOne({ _id: notificationId, userId })
+    return { acknowledged: result.acknowledged, deletedCount: result.deletedCount }
   }
 
   private async getOrCreatePreferences(userId: string): Promise<PreferencesDocument> {

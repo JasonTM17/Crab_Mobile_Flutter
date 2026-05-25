@@ -32,9 +32,10 @@ const socket = io('http://localhost:3000/ride', {
 Rider requests a new ride.
 ```javascript
 socket.emit('ride:request', {
-  pickupLocation: { lat: 10.7769, lng: 106.7009, address: '123 Nguyen Hue' },
-  dropoffLocation: { lat: 10.8021, lng: 106.7146, address: '456 Le Van Sy' },
-  vehicleType: 'car'
+  riderId: 'uuid',
+  pickup: { lat: 10.7769, lng: 106.7009, address: '123 Nguyen Hue' },
+  dropoff: { lat: 10.8021, lng: 106.7146, address: '456 Le Van Sy' },
+  paymentMethod: 'wallet'
 });
 ```
 
@@ -82,10 +83,26 @@ socket.emit('ride:complete', { rideId: 'uuid', actualFare: 48000 });
 ### Server → Client Events
 
 #### `ride:new_request`
-Broadcast to nearby drivers when a ride is requested.
+Broadcast to nearby drivers when a rider requests a ride.
 ```javascript
 socket.on('ride:new_request', (data) => {
-  // data: { rideId, pickupLocation, dropoffLocation, vehicleType, estimatedFare }
+  // data: { riderId, pickup, dropoff, paymentMethod }
+});
+```
+
+#### `ride:request_received`
+Acknowledges that the gateway received the rider request.
+```javascript
+socket.emit('ride:request', payload, (ack) => {
+  // ack: { status }
+});
+```
+
+#### `ride:matched`
+Broadcast to a nearby driver when the matching engine offers them a ride. Drivers should reply via `ride:accept` within the offer window.
+```javascript
+socket.on('ride:matched', (data) => {
+  // data: { rideId, driver, estimatedArrival }
 });
 ```
 
@@ -97,28 +114,36 @@ socket.on('ride:accepted', (data) => {
 });
 ```
 
-#### `ride:driver_location`
-Real-time driver location updates for rider.
+#### `ride:location`
+Real-time driver location updates for the rider (and rider location for driver during pickup leg).
 ```javascript
-socket.on('ride:driver_location', (data) => {
+socket.on('ride:location', (data) => {
   // data: { rideId, lat, lng, heading, speed, eta }
 });
 ```
 
-#### `ride:status_changed`
+#### `ride:status`
 Ride status transition notification.
 ```javascript
-socket.on('ride:status_changed', (data) => {
+socket.on('ride:status', (data) => {
   // data: { rideId, status, timestamp }
-  // status: ACCEPTED | ARRIVING | IN_PROGRESS | COMPLETED | CANCELLED
+  // status: REQUESTED | MATCHED | PICKUP | IN_PROGRESS | COMPLETED | CANCELLED
 });
 ```
 
-#### `ride:no_driver`
-No driver found within timeout.
+#### `ride:completed`
+Ride summary after the driver marks the trip complete.
 ```javascript
-socket.on('ride:no_driver', (data) => {
-  // data: { rideId, message: 'No drivers available' }
+socket.on('ride:completed', (data) => {
+  // data: { rideId, actualFare, distanceKm, durationSec, completedAt }
+});
+```
+
+#### `ride:cancelled`
+Ride cancelled by rider, driver, or system (no-driver timeout).
+```javascript
+socket.on('ride:cancelled', (data) => {
+  // data: { rideId, reason, cancelledBy: 'rider' | 'driver' | 'system' }
 });
 ```
 
@@ -142,27 +167,19 @@ socket.emit('order:untrack', { orderId: 'uuid' });
 
 ### Server → Client Events
 
-#### `order:status_changed`
+#### `order:status`
 Order status update.
 ```javascript
-socket.on('order:status_changed', (data) => {
+socket.on('order:status', (data) => {
   // data: { orderId, status, timestamp, estimatedTime }
-  // status: CONFIRMED | PREPARING | READY | PICKED_UP | DELIVERED
+  // status: PLACED | CONFIRMED | PREPARING | READY | PICKED_UP | DELIVERED | CANCELLED
 });
 ```
 
-#### `order:driver_assigned`
-Delivery driver assigned to order.
+#### `order:tracking`
+Live courier location while the order is in transit.
 ```javascript
-socket.on('order:driver_assigned', (data) => {
-  // data: { orderId, driver: { id, name, avatar, phone, vehiclePlate } }
-});
-```
-
-#### `order:driver_location`
-Delivery driver location during transit.
-```javascript
-socket.on('order:driver_location', (data) => {
+socket.on('order:tracking', (data) => {
   // data: { orderId, lat, lng, eta }
 });
 ```

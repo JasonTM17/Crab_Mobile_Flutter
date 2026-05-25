@@ -7,9 +7,15 @@ spec:
   template:
     metadata: { labels: { app: chat-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: chat-service
-          image: jasontm17/chat-service:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-chat-service:latest
           ports: [{ containerPort: 3006 }]
           envFrom:
             - configMapRef: { name: crab-config }

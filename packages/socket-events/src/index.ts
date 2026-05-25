@@ -42,14 +42,38 @@ export interface RideCompletedPayload {
   distance: number; // meters
 }
 
+export interface RideCancelPayload {
+  rideId: string;
+  reason?: string;
+}
+
 export interface RideCancelledPayload {
   rideId: string;
   cancelledBy: string;
   reason?: string;
 }
 
+export type RideNewRequestPayload = RideRequestPayload;
+
+export interface RideRequestReceivedPayload {
+  status: 'searching';
+}
+
+export interface RideJoinPayload {
+  rideId: string;
+}
+
+export interface RideJoinedPayload {
+  rideId: string;
+}
+
 export interface RideNamespaceEvents {
   'ride:request': RideRequestPayload;
+  'ride:new_request': RideNewRequestPayload;
+  'ride:request_received': RideRequestReceivedPayload;
+  'ride:join': RideJoinPayload;
+  'ride:joined': RideJoinedPayload;
+  'ride:cancel': RideCancelPayload;
   'ride:matched': RideMatchedPayload;
   'ride:accepted': RideAcceptedPayload;
   'ride:location': RideLocationPayload;

@@ -7,9 +7,15 @@ spec:
   template:
     metadata: { labels: { app: food-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: food-service
-          image: jasontm17/food-service:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: nguyenson1710/crab-mobile-food-service:latest
           ports: [{ containerPort: 3004 }]
           envFrom:
             - configMapRef: { name: crab-config }

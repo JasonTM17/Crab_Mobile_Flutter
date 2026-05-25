@@ -28,7 +28,7 @@ class _BadgeDotState extends State<BadgeDot>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-    _opacity = Tween<double>(begin: 1.0, end: 0.5).animate(
+    _opacity = Tween<double>(begin: 1.0, end: 0.55).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
     if (widget.pulse) {
@@ -55,8 +55,8 @@ class _BadgeDotState extends State<BadgeDot>
 
   @override
   Widget build(BuildContext context) {
-    final dotColor =
-        widget.color ?? Theme.of(context).colorScheme.primary;
+    final scheme = Theme.of(context).colorScheme;
+    final dotColor = widget.color ?? scheme.primary;
 
     final dot = Container(
       width: widget.size,
@@ -64,6 +64,17 @@ class _BadgeDotState extends State<BadgeDot>
       decoration: BoxDecoration(
         color: dotColor,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: scheme.surface,
+          width: widget.size <= 8 ? 1 : 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: dotColor.withValues(alpha: widget.pulse ? 0.26 : 0.18),
+            blurRadius: widget.size,
+            spreadRadius: widget.pulse ? 0.4 : 0,
+          ),
+        ],
       ),
     );
 
