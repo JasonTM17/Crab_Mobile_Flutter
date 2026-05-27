@@ -30,7 +30,7 @@ interface TooltipTriggerProps
 export const TooltipTrigger = React.forwardRef<
   HTMLSpanElement,
   TooltipTriggerProps
->(({ children, className, ...props }, ref) => (
+>(({ children, className, asChild: _asChild, ...props }, ref) => (
   <span ref={ref} className={cn('inline-flex', className)} {...props}>
     {children}
   </span>

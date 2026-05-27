@@ -15,6 +15,7 @@ Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ
 | [Environment](./ENVIRONMENT.md) | Env variable matrix and safe placeholders | Bảng env variables và placeholder an toàn |
 | [Packages](./PACKAGES.md) | Workspace package catalog, Docker Hub images, GHCR packages, mobile artifacts | Catalog package workspace, Docker Hub images, GHCR packages và mobile artifacts |
 | [Release Media](./screenshots/README.md) | Verified screenshots and GIF gallery | Bộ screenshot và GIF đã xác minh |
+| [Brand Logo](./assets/crab-logo.svg) | Public Crab Super App logo used in the README and portfolio docs | Logo public của Crab Super App dùng trong README và tài liệu portfolio |
 | [Troubleshooting](./TROUBLESHOOTING.md) | Common local/CI failures and fixes | Lỗi thường gặp và cách xử lý |
 
 ## Architecture & Contracts / Kiến Trúc & Contract

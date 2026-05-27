@@ -71,6 +71,24 @@ if (!dockerPublishWorkflow.includes('ghcr.io')) {
 
 const screenshotsReadme = read('docs/screenshots/README.md')
 for (const image of [
+  'admin-01-login.png',
+  'admin-02-dashboard.png',
+  'admin-03-users.png',
+  'admin-04-drivers.png',
+  'admin-05-rides.png',
+  'admin-06-orders.png',
+  'admin-07-dashboard-final.png',
+  'admin-mobile-01-dashboard.png',
+  'admin-mobile-02-login.png',
+  'admin-mobile-03-users.png',
+  'admin-mobile-04-drivers.png',
+  'admin-mobile-05-rides.png',
+  'admin-mobile-06-orders.png',
+]) {
+  assertReleaseMedia('docs/screenshots/README.md', 'docs/screenshots', image, 10_000)
+}
+
+for (const image of [
   'mobile-01-onboarding.png',
   'mobile-client-01-login.png',
   'mobile-client-02-home.png',
@@ -78,12 +96,7 @@ for (const image of [
   'mobile-client-04-food.png',
   'mobile-client-05-wallet-profile.png',
 ]) {
-  if (!screenshotsReadme.includes(image)) {
-    fail(`docs/screenshots/README.md must reference ${image}`)
-  }
-  if (!fs.existsSync(path.join(root, 'docs/screenshots', image))) {
-    fail(`Missing release screenshot: docs/screenshots/${image}`)
-  }
+  assertReleaseMedia('docs/screenshots/README.md', 'docs/screenshots', image, 1)
 }
 
 const mobileGif = 'mobile-client-flow.gif'
@@ -135,6 +148,25 @@ function assertNoScratchMediaReferences(relativePath, content) {
   const matches = content.match(scratchMediaReference)
   if (matches) {
     fail(`${relativePath} must not embed local scratch media: ${matches.join(', ')}`)
+  }
+}
+
+function assertReleaseMedia(indexPath, mediaDir, fileName, minBytes) {
+  if (!screenshotsReadme.includes(fileName)) {
+    fail(`${indexPath} must reference ${fileName}`)
+  }
+
+  const mediaPath = path.join(root, mediaDir, fileName)
+  if (!fs.existsSync(mediaPath)) {
+    fail(`Missing release media: ${mediaDir}/${fileName}`)
+    return
+  }
+
+  const size = fs.statSync(mediaPath).size
+  if (size < minBytes) {
+    fail(
+      `${mediaDir}/${fileName} is suspiciously small (${size} bytes). Regenerate release media before publishing.`,
+    )
   }
 }
 

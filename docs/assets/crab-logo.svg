@@ -1,0 +1,21 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Crab Super App logo</title>
+  <desc id="desc">A green rounded-square mark with a stylized crab for the Crab Super App portfolio.</desc>
+  <rect width="160" height="160" rx="36" fill="url(#bg)"/>
+  <path d="M40 107C28 94 25 73 34 55C43 37 61 26 80 26C99 26 117 37 126 55C135 73 132 94 120 107C111 117 96 124 80 124C64 124 49 117 40 107Z" fill="white" fill-opacity="0.14"/>
+  <path d="M50 82C50 63 63 51 80 51C97 51 110 63 110 82C110 98 97 109 80 109C63 109 50 98 50 82Z" fill="white"/>
+  <path d="M56 64L38 52C33 49 28 52 27 58C26 64 31 68 36 66L51 61" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M104 64L122 52C127 49 132 52 133 58C134 64 129 68 124 66L109 61" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M56 103L42 119M68 110L61 130M104 103L118 119M92 110L99 130" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="70" cy="76" r="6" fill="#047A3B"/>
+  <circle cx="90" cy="76" r="6" fill="#047A3B"/>
+  <path d="M66 92C73 98 87 98 94 92" stroke="#047A3B" stroke-width="6" stroke-linecap="round"/>
+  <path d="M38 58C50 35 70 24 94 28" stroke="white" stroke-opacity="0.35" stroke-width="7" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bg" x1="22" y1="15" x2="140" y2="148" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#05C861"/>
+      <stop offset="0.58" stop-color="#00A84F"/>
+      <stop offset="1" stop-color="#007B55"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -54,6 +54,18 @@ category, nhưng không copy logo, palette hoặc asset độc quyền. Trọng 
 ra quyết định nhanh: đặt xe, gọi món, kiểm tra ví, chat với tài xế, nhận thông
 báo và đánh giá sau khi hoàn tất.
 
+## Brand Identity / Nhận Diện Thương Hiệu
+
+The public brand asset is [`docs/assets/crab-logo.svg`](assets/crab-logo.svg).
+It uses an original crab mark, a green mobility/commerce palette, and rounded
+geometry that matches the friendly daily-utility category without copying Grab
+or Be brand assets.
+
+Asset nhận diện public nằm tại [`docs/assets/crab-logo.svg`](assets/crab-logo.svg).
+Logo dùng crab mark tự thiết kế, bảng màu xanh cho mobility/commerce và hình
+khối bo nhẹ để hợp nhóm sản phẩm tiện ích hằng ngày nhưng không sao chép asset
+thương hiệu của Grab hoặc Be.
+
 ### What A Reviewer Should See / Người Review Nên Thấy Gì
 
 | Signal | English | Tiếng Việt |

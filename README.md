@@ -7,6 +7,7 @@
 [![Issues][issues-badge]][issues-url]
 
 <div align="center">
+  <img src="docs/assets/crab-logo.svg" alt="Crab Super App logo" width="112" />
   <h1>Crab Super App</h1>
   <p><strong>English:</strong> Production-like full-stack portfolio for ride-hailing, food delivery, wallet, realtime chat, and admin operations.</p>
   <p><strong>Tiếng Việt:</strong> Portfolio full-stack production-like cho gọi xe, giao đồ ăn, ví, chat realtime và vận hành admin.</p>

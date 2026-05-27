@@ -16,6 +16,12 @@ The admin gallery shows populated operations screens: login, dashboard, users, d
 
 Bộ ảnh admin thể hiện các màn vận hành có dữ liệu: đăng nhập, dashboard, users, drivers, rides, orders và kiểm tra responsive mobile viewport.
 
+Refresh admin release screenshots with:
+
+```bash
+pnpm run admin:screenshots
+```
+
 | Screen | Preview | Notes |
 | --- | --- | --- |
 | Login | ![Admin login](admin-01-login.png) | Phone/email login form with JWT auth flow |

@@ -16,6 +16,8 @@ const requiredReferences = [
   {
     file: 'README.md',
     refs: [
+      'docs/assets/crab-logo.svg',
+      'Crab Super App logo',
       '<a id="english-overview"></a>',
       '<a id="tong-quan-tieng-viet"></a>',
       '## English Overview',
@@ -43,6 +45,8 @@ const requiredReferences = [
     ],
   },
 ]
+
+const requiredFiles = ['docs/assets/crab-logo.svg']
 
 const requiredBilingualTables = [
   {
@@ -98,6 +102,12 @@ for (const requirement of requiredReferences) {
     if (!content.includes(ref)) {
       fail(`${requirement.file} must reference ${ref}`)
     }
+  }
+}
+
+for (const relativePath of requiredFiles) {
+  if (!fs.existsSync(path.join(root, relativePath))) {
+    fail(`Missing required documentation asset: ${relativePath}`)
   }
 }
 
