@@ -2,34 +2,51 @@
 
 [![CI][ci-badge]][ci-url]
 [![Docker][docker-badge]][docker-url]
+[![GHCR][ghcr-badge]][ghcr-url]
 [![License][license-badge]][license-url]
 [![Issues][issues-badge]][issues-url]
 
 <div align="center">
   <h1>Crab Super App</h1>
-  <p><strong>Ride-hailing, food delivery, wallet, chat, and admin operations in one production-minded monorepo.</strong></p>
-  <p><strong>Super app gọi xe, giao đồ ăn, ví, chat và vận hành admin trong một monorepo hướng production.</strong></p>
+  <p><strong>Production-like full-stack portfolio for ride-hailing, food delivery, wallet, realtime chat, and admin operations.</strong></p>
+  <p><strong>Portfolio full-stack production-like cho gọi xe, giao đồ ăn, ví, chat realtime và vận hành admin.</strong></p>
   <p>
     <a href="docs/PORTFOLIO_CASE_STUDY.md">Portfolio Case Study</a> ·
     <a href="docs/INDEX.md">Documentation</a> ·
     <a href="docs/QUICKSTART.md">Quickstart</a> ·
+    <a href="docs/PACKAGES.md">Packages</a> ·
     <a href="docs/API.md">API</a> ·
-    <a href="docs/DEPLOYMENT.md">Deployment</a> ·
-    <a href="docs/MOBILE.md">Mobile</a>
+    <a href="docs/MOBILE.md">Mobile</a> ·
+    <a href="docs/DEPLOYMENT.md">Deployment</a>
   </p>
 </div>
 
 ---
 
-## About / Giới Thiệu
+## Portfolio Positioning / Định Vị Portfolio
 
-Crab is a full-stack super-app platform inspired by Grab and Be. It separates the Flutter mobile client, React admin dashboard, and NestJS backend services so each surface can be developed, tested, deployed, and scaled independently.
+Crab is a Vietnam-first super-app portfolio project inspired by the product category of Grab and Be, with its own implementation, visual language, and production-like local demo path. It is designed to show end-to-end engineering depth: Flutter mobile, React operations admin, NestJS microservices, REST/Socket.IO contracts, Dockerized infrastructure, validation scripts, security scans, and release media.
 
-Crab là nền tảng super-app full-stack lấy cảm hứng từ Grab và Be. Hệ thống tách riêng Flutter mobile, React admin dashboard và các NestJS backend services để từng phần có thể phát triển, kiểm thử, triển khai và mở rộng độc lập.
+Crab là dự án portfolio super-app ưu tiên bối cảnh Việt Nam, lấy cảm hứng ở cấp độ ngành sản phẩm từ Grab và Be, nhưng có implementation, visual language và luồng demo production-like riêng. Repo được xây để thể hiện năng lực full-stack từ đầu tới cuối: Flutter mobile, React admin vận hành, NestJS microservices, contract REST/Socket.IO, Docker infrastructure, validation scripts, security scans và release media.
 
 GitHub About suggestion: `Flutter + React admin + NestJS microservices monorepo for a ride-hailing and food-delivery super app.`
 
 Suggested topics: `flutter`, `nestjs`, `react`, `vite`, `typescript`, `microservices`, `ride-hailing`, `food-delivery`, `docker`, `socket-io`, `postgresql`, `mongodb`, `redis`.
+
+## Reviewer Fast Path / Lộ Trình Review Nhanh
+
+| Step | English | Tiếng Việt |
+| --- | --- | --- |
+| 1 | Read the polished case study with screenshots and validation evidence | Đọc case study có screenshot và bằng chứng kiểm chứng |
+| 2 | Scan the architecture and package/artifact catalog | Xem kiến trúc và catalog package/artifact |
+| 3 | Run the local Docker demo path if you want proof beyond screenshots | Chạy demo Docker local nếu muốn kiểm chứng ngoài screenshot |
+| 4 | Review CI, security scans, E2E, load tests, and mobile checks | Review CI, security scan, E2E, load test và mobile checks |
+
+Primary reading path:
+
+```text
+README -> docs/PORTFOLIO_CASE_STUDY.md -> docs/INDEX.md -> docs/QUICKSTART.md
+```
 
 | Area | English | Tiếng Việt |
 | --- | --- | --- |
@@ -72,15 +89,26 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full service catalog,
 | Chat | Conversations, message threads, typing/read primitives, Socket.IO transport |
 | Notifications | In-app notifications, unread counts, preferences, broadcast entrypoints |
 | Admin | KPI dashboard, users, drivers, restaurants, rides, orders, payments, promos, notifications |
-| Platform | Dockerized services, CI gates, Docker Hub publish, scanners, K8s manifests, monitoring stack |
+| Platform | Dockerized services, CI gates, Docker Hub/GHCR publish, scanners, K8s manifests, monitoring stack |
 
-## Packages / Gói Workspace
+## Packages & Public Artifacts / Gói & Artifact Public
 
-This repository does not publish public npm packages or a public Flutter package. The root package and workspace packages are private implementation packages used inside the monorepo, while runtime artifacts are distributed through Docker images and GitHub Releases. See [`docs/PACKAGES.md`](docs/PACKAGES.md) for the full package and artifact catalog.
+GitHub's sidebar only shows packages published to GitHub Packages. Crab now publishes container images to GHCR for GitHub visibility and keeps Docker Hub as the canonical external namespace.
 
-Repo này không publish npm package hoặc Flutter package public. Root package và workspace packages là package private dùng trong monorepo; runtime artifacts được phát hành qua Docker images và GitHub Releases. Xem [`docs/PACKAGES.md`](docs/PACKAGES.md) để biết catalog package và artifact đầy đủ.
+Sidebar Packages trên GitHub chỉ hiện artifact được publish lên GitHub Packages. Crab hiện publish container image lên GHCR để GitHub hiển thị package, đồng thời vẫn giữ Docker Hub là namespace external chính.
 
-| Package / Artifact | Path | Purpose |
+| Registry / Artifact | Public Name | Purpose |
+| --- | --- | --- |
+| Docker Hub | `nguyenson1710/crab-mobile-<service>` | Canonical public runtime images |
+| GitHub Packages / GHCR | `ghcr.io/jasontm17/crab-mobile-<service>` | GitHub-visible container packages for portfolio review |
+| GitHub Releases | `vX.Y.Z` | Versioned release notes and source snapshots |
+| Mobile artifacts | APK/AAB/IPA local outputs | Store/distribution artifacts, never committed |
+
+This repository does not publish public npm packages or a public Flutter package. The root package and workspace packages are private implementation packages used inside the monorepo. See [`docs/PACKAGES.md`](docs/PACKAGES.md) for the full package, image, and release artifact catalog.
+
+Repo này không publish npm package hoặc Flutter package public. Root package và workspace packages là package private dùng trong monorepo. Xem [`docs/PACKAGES.md`](docs/PACKAGES.md) để biết catalog package, image và artifact phát hành đầy đủ.
+
+| Workspace Package | Path | Purpose |
 | --- | --- | --- |
 | `crab-super-app` | `/` | Root pnpm workspace, CI, verification, and release scripts |
 | `@crab/common-types` | `packages/common-types` | Shared DTOs, enums, and interfaces used by backend, admin, and clients |
@@ -233,6 +261,7 @@ pnpm run verify:portfolio
 - Production-like compose validation: `docker compose --env-file .env.production.example -f docker-compose.prod.yml config`
 - Kubernetes manifests: `kubectl apply -f infra/k8s/`
 - Docker images: `nguyenson1710/crab-mobile-<service>`
+- GitHub Packages: `ghcr.io/jasontm17/crab-mobile-<service>`
 
 Release tags use the `vX.Y.Z` format. `.github/workflows/release.yml` creates the GitHub Release entry, while `.github/workflows/docker-publish.yml` publishes service images with `latest`, `sha-<short>`, and semver tags.
 
@@ -260,6 +289,8 @@ MIT. See [`LICENSE`](LICENSE).
 [ci-url]: https://github.com/JasonTM17/Crab_Mobile_Flutter/actions
 [docker-badge]: https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white
 [docker-url]: docs/DEPLOYMENT.md
+[ghcr-badge]: https://img.shields.io/badge/GHCR-GitHub%20Packages-24292F?style=for-the-badge&logo=github&logoColor=white
+[ghcr-url]: docs/PACKAGES.md
 [license-badge]: https://img.shields.io/github/license/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge
 [license-url]: LICENSE
 [issues-badge]: https://img.shields.io/github/issues/JasonTM17/Crab_Mobile_Flutter?style=for-the-badge

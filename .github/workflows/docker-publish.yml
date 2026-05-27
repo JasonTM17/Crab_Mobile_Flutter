@@ -9,10 +9,10 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 env:
-  REGISTRY: docker.io
-  NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE || secrets.DOCKERHUB_USERNAME || 'nguyenson1710' }}
+  DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE || secrets.DOCKERHUB_USERNAME || 'nguyenson1710' }}
   IMAGE_PREFIX: crab-mobile
 
 jobs:
@@ -50,6 +50,12 @@ jobs:
       - uses: actions/checkout@v6
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Docker Hub
         if: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
         uses: docker/login-action@v4
@@ -60,16 +66,29 @@ jobs:
         id: publish
         run: |
           if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "dockerhub=true" >> "$GITHUB_OUTPUT"
           else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Docker Hub secrets are not configured; building images without pushing."
+            echo "dockerhub=false" >> "$GITHUB_OUTPUT"
+            echo "Docker Hub secrets are not configured; publishing to GHCR only."
           fi
+      - name: Prepare image names
+        id: images
+        shell: bash
+        run: |
+          ghcr_owner="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          {
+            echo "images<<EOF"
+            echo "ghcr.io/${ghcr_owner}/${IMAGE_PREFIX}-${{ matrix.service }}"
+            if [ "${{ steps.publish.outputs.dockerhub }}" = "true" ]; then
+              echo "${DOCKERHUB_NAMESPACE}/${IMAGE_PREFIX}-${{ matrix.service }}"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ${{ env.NAMESPACE }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
+          images: ${{ steps.images.outputs.images }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=sha-,format=short
@@ -79,8 +98,7 @@ jobs:
         with:
           context: .
           file: ${{ matrix.dockerfile }}
-          push: ${{ steps.publish.outputs.enabled == 'true' }}
-          load: ${{ steps.publish.outputs.enabled != 'true' }}
+          push: true
           build-args: |
             VCS_REF=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}

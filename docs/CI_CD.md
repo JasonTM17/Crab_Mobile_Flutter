@@ -9,7 +9,7 @@ Tài liệu này mô tả các kiểm tra tự động, release flow, publish Do
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
 | `.github/workflows/ci.yml` | push/PR to `main`, `develop` | lint, build, contract check, tests, Flutter codegen/analyze/test |
-| `.github/workflows/docker-publish.yml` | push to `main`, `v*`, manual | build Docker images; push only when Docker Hub secrets are configured |
+| `.github/workflows/docker-publish.yml` | push to `main`, `v*`, manual | build Docker images; publish GHCR packages and optionally push Docker Hub when secrets are configured |
 | `.github/workflows/release.yml` | `v*.*.*` tags | create GitHub Release with changelog |
 | `.github/workflows/codeql.yml` | push/PR/schedule | static analysis |
 | `.github/workflows/gitleaks.yml` | push/PR | secret scanning |
@@ -48,14 +48,26 @@ pnpm run docker:config
 pnpm run verify:portfolio
 ```
 
-## Docker Publish / Publish Docker
+## Docker Publish & GitHub Packages / Publish Docker & GitHub Packages
 
-Docker images are published to Docker Hub using this naming convention:
+The Docker workflow publishes runtime images to GitHub Packages through GHCR so
+the repository sidebar can show real packages. It also pushes to Docker Hub when
+Docker Hub secrets are configured.
 
-Docker images được publish lên Docker Hub theo quy ước:
+Workflow Docker publish runtime image lên GitHub Packages qua GHCR để sidebar
+repo hiển thị package thật. Workflow cũng push Docker Hub khi đã cấu hình Docker
+Hub secrets.
+
+Canonical Docker Hub naming:
 
 ```text
 nguyenson1710/crab-mobile-<service>
+```
+
+GitHub Packages / GHCR naming:
+
+```text
+ghcr.io/jasontm17/crab-mobile-<service>
 ```
 
 Examples:
@@ -64,16 +76,22 @@ Examples:
 nguyenson1710/crab-mobile-gateway
 nguyenson1710/crab-mobile-auth-service
 nguyenson1710/crab-mobile-web-admin
+ghcr.io/jasontm17/crab-mobile-gateway
+ghcr.io/jasontm17/crab-mobile-auth-service
+ghcr.io/jasontm17/crab-mobile-web-admin
 ```
 
-Tags include `latest`, short SHA, branch/tag refs, and semver tags when applicable. If Docker Hub secrets are missing, the workflow still builds every image but skips pushing so CI can remain green on public repos.
+Tags include `latest`, short SHA, and semver tags when applicable. If Docker Hub
+secrets are missing, the workflow still publishes GHCR images with
+`GITHUB_TOKEN` and skips only the Docker Hub tags.
 
 ## Required Secrets / Secrets Bắt Buộc
 
 | Secret | Purpose |
 | --- | --- |
-| `DOCKERHUB_USERNAME` | Docker Hub username/namespace |
-| `DOCKERHUB_TOKEN` | Docker Hub access token |
+| `GITHUB_TOKEN` | Built-in token used for GHCR publishing through GitHub Actions |
+| `DOCKERHUB_USERNAME` | Optional Docker Hub username/namespace |
+| `DOCKERHUB_TOKEN` | Optional Docker Hub access token |
 
 Never print these values in logs or documentation.
 

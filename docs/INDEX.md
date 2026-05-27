@@ -8,11 +8,11 @@ Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ
 
 | Document | English | Tiếng Việt |
 | --- | --- | --- |
-| [About](../README.md#about--gii-thiu) | Project scope, product surface, and repository map | Phạm vi dự án, bề mặt sản phẩm và cấu trúc repo |
+| [Portfolio Positioning](../README.md) | Project scope, product surface, reviewer path, and repository map | Phạm vi dự án, bề mặt sản phẩm, lộ trình reviewer và cấu trúc repo |
 | [Portfolio Case Study](./PORTFOLIO_CASE_STUDY.md) | Bilingual portfolio narrative with screenshots, architecture, demo path, validation evidence, and self-review scorecard | Hồ sơ portfolio song ngữ có screenshot, kiến trúc, luồng demo, bằng chứng kiểm chứng và bảng tự chấm điểm |
 | [Quickstart](./QUICKSTART.md) | Run the full stack locally | Chạy full stack trên máy local |
 | [Environment](./ENVIRONMENT.md) | Env variable matrix and safe placeholders | Bảng env variables và placeholder an toàn |
-| [Packages](./PACKAGES.md) | Workspace package catalog, Docker images, mobile artifacts | Catalog package workspace, Docker images và mobile artifacts |
+| [Packages](./PACKAGES.md) | Workspace package catalog, Docker Hub images, GHCR packages, mobile artifacts | Catalog package workspace, Docker Hub images, GHCR packages và mobile artifacts |
 | [Release Media](./screenshots/README.md) | Verified screenshots and GIF gallery | Bộ screenshot và GIF đã xác minh |
 | [Troubleshooting](./TROUBLESHOOTING.md) | Common local/CI failures and fixes | Lỗi thường gặp và cách xử lý |
 
@@ -77,6 +77,7 @@ Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ
 | Socket.IO namespaces | `/ride`, `/food`, `/chat`, `/notification` |
 | Health endpoints | `/health`, `/healthz`, `/readyz`, `/metrics` outside `/api/v1` |
 | Docker image prefix | `nguyenson1710/crab-mobile-<service>` |
+| GitHub Packages image prefix | `ghcr.io/jasontm17/crab-mobile-<service>` |
 | Portfolio verification | `pnpm run verify:portfolio` |
 | Local smoke | `pnpm run test:e2e` after Docker + seed |
 | Demo seed path | `pnpm run db:migrate && pnpm run db:seed` |

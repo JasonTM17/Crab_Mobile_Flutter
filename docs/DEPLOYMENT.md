@@ -5,14 +5,14 @@
 This repository ships four kinds of release artifacts:
 
 1. **GitHub release** created by `.github/workflows/release.yml` on semantic tags like `v1.2.3`
-2. **Docker images** published by `.github/workflows/docker-publish.yml` to Docker Hub
+2. **Container images** published by `.github/workflows/docker-publish.yml` to GHCR and Docker Hub
 3. **Deployable runtime configs** for Docker Compose and Kubernetes under repo root / `infra/k8s/`
 4. **Release media** under `docs/screenshots/` and `docs/gifs/`, using verified screenshots and regenerated GIFs
 
 Repo này phát hành bốn nhóm artifact chính:
 
 1. **GitHub release** được tạo bởi `.github/workflows/release.yml` khi push semantic tag như `v1.2.3`
-2. **Docker images** được publish lên Docker Hub bởi `.github/workflows/docker-publish.yml`
+2. **Container images** được publish lên GHCR và Docker Hub bởi `.github/workflows/docker-publish.yml`
 3. **Runtime configs** cho Docker Compose và Kubernetes ở repo root / `infra/k8s/`
 4. **Release media** trong `docs/screenshots/` và `docs/gifs/`, dùng screenshots đã xác minh và GIF được tạo lại
 
@@ -20,18 +20,14 @@ The public Docker Hub namespace for this project is:
 
 - `nguyenson1710`
 
-Image naming follows this convention:
+GitHub Packages / GHCR uses the repository owner namespace:
 
-- `nguyenson1710/crab-mobile-gateway`
-- `nguyenson1710/crab-mobile-auth-service`
-- `nguyenson1710/crab-mobile-user-service`
-- `nguyenson1710/crab-mobile-ride-service`
-- `nguyenson1710/crab-mobile-food-service`
-- `nguyenson1710/crab-mobile-payment-service`
-- `nguyenson1710/crab-mobile-chat-service`
-- `nguyenson1710/crab-mobile-notification-service`
-- `nguyenson1710/crab-mobile-rating-service`
-- `nguyenson1710/crab-mobile-web-admin`
+- `ghcr.io/jasontm17`
+
+Image naming follows these conventions:
+
+- Docker Hub: `nguyenson1710/crab-mobile-<service>`
+- GHCR: `ghcr.io/jasontm17/crab-mobile-<service>`
 
 ## Packages and Images
 
@@ -41,7 +37,9 @@ This repository does not publish public npm packages or a public Flutter package
 - pnpm workspace packages such as `@crab/common-types`, `@crab/socket-events`, and `@crab/backend-shared` are internal packages
 - `apps/mobile/pubspec.yaml` uses `publish_to: 'none'`
 
-Runtime services are published as Docker images under `nguyenson1710/crab-mobile-<service>`.
+Runtime services are published as container images under
+`nguyenson1710/crab-mobile-<service>` and
+`ghcr.io/jasontm17/crab-mobile-<service>`.
 
 Docker tags use these semantics:
 
@@ -75,8 +73,9 @@ Set these at:
 
 | Secret | Required | Purpose |
 |---|---:|---|
-| `DOCKERHUB_USERNAME` | no for build-only CI, yes for pushing | Docker Hub username; expected value: `nguyenson1710` |
-| `DOCKERHUB_TOKEN` | no for build-only CI, yes for pushing | Docker Hub access token used by docker publish workflow |
+| `GITHUB_TOKEN` | yes, built in | GitHub Actions token used to publish GHCR packages |
+| `DOCKERHUB_USERNAME` | no for GHCR-only publish, yes for Docker Hub pushing | Docker Hub username; expected value: `nguyenson1710` |
+| `DOCKERHUB_TOKEN` | no for GHCR-only publish, yes for Docker Hub pushing | Docker Hub access token used by docker publish workflow |
 
 Do **not** commit credentials, keystores, or private env files to the repo.
 
@@ -96,7 +95,7 @@ What it checks:
 - Flutter analyze
 - Flutter tests
 
-### 2. Docker Publish
+### 2. Docker Publish and GitHub Packages
 
 File: `.github/workflows/docker-publish.yml`
 
@@ -108,8 +107,10 @@ Runs on:
 
 What it does:
 
-- logs in to Docker Hub
+- logs in to GitHub Container Registry
+- logs in to Docker Hub when optional Docker Hub secrets exist
 - builds all backend service images plus web-admin
+- publishes images to `ghcr.io/jasontm17/crab-mobile-<service>` so GitHub Packages is populated
 - publishes images to `nguyenson1710/crab-mobile-<service>` when Docker Hub secrets are configured
 - emits tags including:
   - `latest` on default branch

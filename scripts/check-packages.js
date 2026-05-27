@@ -56,6 +56,17 @@ for (const relativePath of docsToCheck) {
   if (!content.includes('nguyenson1710/crab-mobile-')) {
     fail(`${relativePath} must document the canonical Docker namespace`)
   }
+  if (!content.includes('ghcr.io/jasontm17/crab-mobile-')) {
+    fail(`${relativePath} must document the GitHub Packages/GHCR namespace`)
+  }
+}
+
+const dockerPublishWorkflow = read('.github/workflows/docker-publish.yml')
+if (!dockerPublishWorkflow.includes('packages: write')) {
+  fail('.github/workflows/docker-publish.yml must grant packages: write for GHCR publishing')
+}
+if (!dockerPublishWorkflow.includes('ghcr.io')) {
+  fail('.github/workflows/docker-publish.yml must publish GitHub Packages/GHCR images')
 }
 
 const screenshotsReadme = read('docs/screenshots/README.md')

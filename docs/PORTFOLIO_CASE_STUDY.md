@@ -167,6 +167,32 @@ Tiếng Việt:
 - Không đưa thông tin khách hàng thật, dữ liệu thanh toán thật hoặc provider
   credential thật vào screenshot portfolio.
 
+## Public Artifact Strategy / Chiến Lược Artifact Public
+
+English:
+
+- Source packages stay private because this is an application monorepo, not a
+  reusable npm or pub.dev library.
+- Docker Hub remains the canonical external runtime registry:
+  `nguyenson1710/crab-mobile-<service>`.
+- GitHub Packages is populated through GHCR for portfolio visibility:
+  `ghcr.io/jasontm17/crab-mobile-<service>`.
+- GitHub Releases carry semantic release notes and source snapshots.
+- Mobile APK/AAB/IPA outputs are generated locally or in release pipelines and
+  are never committed to the repository.
+
+Tiếng Việt:
+
+- Source package giữ private vì đây là monorepo ứng dụng, không phải thư viện
+  npm hoặc pub.dev để tái sử dụng public.
+- Docker Hub là external runtime registry chính:
+  `nguyenson1710/crab-mobile-<service>`.
+- GitHub Packages được populate qua GHCR để portfolio hiển thị package ngay trên
+  GitHub: `ghcr.io/jasontm17/crab-mobile-<service>`.
+- GitHub Releases chứa release notes theo semver và source snapshot.
+- APK/AAB/IPA mobile được tạo local hoặc trong release pipeline, không commit
+  vào repository.
+
 ## Validation Evidence / Bằng Chứng Kiểm Chứng
 
 Latest validated gates for the portfolio pass:
