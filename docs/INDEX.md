@@ -8,7 +8,8 @@ Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ
 
 | Document | English | Tiếng Việt |
 | --- | --- | --- |
-| [Portfolio Positioning](../README.md) | Project scope, product surface, reviewer path, and repository map | Phạm vi dự án, bề mặt sản phẩm, lộ trình reviewer và cấu trúc repo |
+| [English README](../README.md#english-overview) | English portfolio overview, reviewer signals, and proof path | Bản tổng quan tiếng Anh cho reviewer |
+| [README Tiếng Việt](../README.md#tong-quan-tieng-viet) | Vietnamese overview with the same portfolio proof path | Bản tổng quan tiếng Việt cùng lộ trình kiểm chứng |
 | [Portfolio Case Study](./PORTFOLIO_CASE_STUDY.md) | Bilingual portfolio narrative with screenshots, architecture, demo path, validation evidence, and self-review scorecard | Hồ sơ portfolio song ngữ có screenshot, kiến trúc, luồng demo, bằng chứng kiểm chứng và bảng tự chấm điểm |
 | [Quickstart](./QUICKSTART.md) | Run the full stack locally | Chạy full stack trên máy local |
 | [Environment](./ENVIRONMENT.md) | Env variable matrix and safe placeholders | Bảng env variables và placeholder an toàn |

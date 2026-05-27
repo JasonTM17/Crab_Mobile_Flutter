@@ -16,6 +16,10 @@ const requiredReferences = [
   {
     file: 'README.md',
     refs: [
+      '<a id="english-overview"></a>',
+      '<a id="tong-quan-tieng-viet"></a>',
+      '## English Overview',
+      '## Tổng Quan Tiếng Việt',
       'nguyenson1710/crab-mobile-<service>',
       'ghcr.io/jasontm17/crab-mobile-<service>',
       'docs/PORTFOLIO_CASE_STUDY.md',
@@ -37,6 +41,28 @@ const requiredReferences = [
       'ghcr.io/jasontm17/crab-mobile-<service>',
       'pnpm run verify:portfolio',
     ],
+  },
+]
+
+const requiredBilingualTables = [
+  {
+    file: 'README.md',
+    headings: [
+      '| Reviewer signal | What to look for | Evidence |',
+      '| Tín hiệu review | Cần xem gì | Bằng chứng |',
+      '| Area | English capability | Tính năng tiếng Việt |',
+      '| Registry / Artifact | Public name | English purpose | Vai trò tiếng Việt |',
+      '| Surface | Preview | English notes | Ghi chú tiếng Việt |',
+      '| Document | English purpose | Mục đích tiếng Việt |',
+    ],
+  },
+  {
+    file: 'docs/INDEX.md',
+    headings: ['[English README](../README.md#english-overview)', '[README Tiếng Việt](../README.md#tong-quan-tieng-viet)'],
+  },
+  {
+    file: 'docs/PORTFOLIO_CASE_STUDY.md',
+    headings: ['## Bilingual Reading Model / Mô Hình Đọc Song Ngữ'],
   },
 ]
 
@@ -71,6 +97,15 @@ for (const requirement of requiredReferences) {
   for (const ref of requirement.refs) {
     if (!content.includes(ref)) {
       fail(`${requirement.file} must reference ${ref}`)
+    }
+  }
+}
+
+for (const requirement of requiredBilingualTables) {
+  const content = read(requirement.file)
+  for (const heading of requirement.headings) {
+    if (!content.includes(heading)) {
+      fail(`${requirement.file} must include explicit bilingual structure: ${heading}`)
     }
   }
 }

@@ -26,6 +26,22 @@ Dự án được định nghĩa là demo portfolio production-like chạy local
 launch cloud thật. SMS thật, cổng thanh toán thật, FCM thật, app store release
 và URL cloud public không nằm trong phạm vi portfolio này.
 
+## Bilingual Reading Model / Mô Hình Đọc Song Ngữ
+
+This portfolio is intentionally written for two audiences: English-speaking
+technical reviewers and Vietnamese hiring/interview contexts. The README now
+starts with explicit language anchors instead of mixed English-first copy:
+
+- [English Overview](../README.md#english-overview)
+- [Tổng Quan Tiếng Việt](../README.md#tong-quan-tieng-viet)
+
+Portfolio này được viết cho hai nhóm người đọc: reviewer kỹ thuật dùng tiếng
+Anh và bối cảnh tuyển dụng/phỏng vấn tại Việt Nam. README hiện có anchor ngôn
+ngữ rõ ràng ngay từ đầu thay vì chỉ xen vài câu dịch vào nội dung English-first:
+
+- [English Overview](../README.md#english-overview)
+- [Tổng Quan Tiếng Việt](../README.md#tong-quan-tieng-viet)
+
 ## Product Story / Câu Chuyện Sản Phẩm
 
 Crab takes the familiar daily-utility pattern of apps like Grab and Be as a
@@ -232,7 +248,7 @@ lặp lại, release media và phạm vi đã được tài liệu hóa.
 
 | Category | Score | Evidence | Gap | Next Improvement |
 | --- | ---: | --- | --- | --- |
-| Documentation & portfolio presentation / Tài liệu & trình bày portfolio | 19 / 20 | README, docs index, case study, screenshots gallery, bilingual narrative | Some older domain docs are still mostly English | Gradually make core domain docs bilingual too |
+| Documentation & portfolio presentation / Tài liệu & trình bày portfolio | 19 / 20 | Explicit EN/VI README anchors, docs index, case study, screenshots gallery, bilingual narrative | Some older domain docs are still mostly English | Gradually make core domain docs bilingual too |
 | Mobile UI/UX and release media / UI/UX mobile & release media | 13 / 15 | Flutter screenshots, mobile GIF, UI/UX redesign guide, screenshot tests | Not a real app-store build/release | Add signed release artifacts and device captures for a real release track |
 | Backend architecture and API contracts / Kiến trúc backend & API contract | 14 / 15 | Gateway, NestJS services, OpenAPI, contract checks, service docs | Some provider integrations are demo/local only | Add real provider adapters behind explicit environment flags |
 | E2E, load, and mobile validation / E2E, load test & mobile validation | 19 / 20 | `test:e2e`, k6 baseline, ride/order load flows, `verify:portfolio`, Flutter analyze/test | Load profile is local-demo sized, not stress-test sized | Add a separate stress profile with throttling/infra expectations |
