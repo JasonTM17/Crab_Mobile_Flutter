@@ -18,10 +18,16 @@ const requiredReferences = [
     refs: [
       'docs/assets/crab-logo.svg',
       'Crab Super App logo',
+      '<!-- EN:START -->',
+      '<!-- EN:END -->',
+      '<!-- VI:START -->',
+      '<!-- VI:END -->',
+      '<a id="english-track"></a>',
+      '<a id="vietnamese-track"></a>',
       '<a id="english-overview"></a>',
       '<a id="tong-quan-tieng-viet"></a>',
-      '## English Overview',
-      '## Tổng Quan Tiếng Việt',
+      '## English Track',
+      '## Vietnamese Track',
       'nguyenson1710/crab-mobile-<service>',
       'ghcr.io/jasontm17/crab-mobile-<service>',
       'docs/PORTFOLIO_CASE_STUDY.md',
@@ -29,8 +35,27 @@ const requiredReferences = [
     ],
   },
   {
+    file: 'docs/INDEX.md',
+    refs: [
+      '<!-- INDEX-EN:START -->',
+      '<!-- INDEX-EN:END -->',
+      '<!-- INDEX-VI:START -->',
+      '<!-- INDEX-VI:END -->',
+      '## English Documentation Index',
+      '## Vietnamese Documentation Index',
+      '[English README](../README.md#english-track)',
+      '[README tiếng Việt](../README.md#vietnamese-track)',
+    ],
+  },
+  {
     file: 'docs/PACKAGES.md',
     refs: [
+      '<!-- PACKAGES-EN:START -->',
+      '<!-- PACKAGES-EN:END -->',
+      '<!-- PACKAGES-VI:START -->',
+      '<!-- PACKAGES-VI:END -->',
+      '## English Packages And Release Artifacts',
+      '## Vietnamese Packages And Release Artifacts',
       'nguyenson1710/crab-mobile-<service>',
       'ghcr.io/jasontm17/crab-mobile-<service>',
       'ghcr.io/jasontm17/crab-mobile-gateway',
@@ -39,47 +64,98 @@ const requiredReferences = [
   {
     file: 'docs/PORTFOLIO_CASE_STUDY.md',
     refs: [
+      '<!-- CASE-STUDY-EN:START -->',
+      '<!-- CASE-STUDY-EN:END -->',
+      '<!-- CASE-STUDY-VI:START -->',
+      '<!-- CASE-STUDY-VI:END -->',
+      '## English Case Study',
+      '## Vietnamese Case Study',
       'nguyenson1710/crab-mobile-<service>',
       'ghcr.io/jasontm17/crab-mobile-<service>',
       'pnpm run verify:portfolio',
+    ],
+  },
+  {
+    file: 'docs/screenshots/README.md',
+    refs: [
+      '<!-- SCREENSHOTS-EN:START -->',
+      '<!-- SCREENSHOTS-EN:END -->',
+      '<!-- SCREENSHOTS-VI:START -->',
+      '<!-- SCREENSHOTS-VI:END -->',
+      '## English Screenshots Gallery',
+      '## Vietnamese Screenshots Gallery',
+      'admin-02-dashboard.png',
+      'mobile-client-05-wallet-profile.png',
+      '../gifs/mobile-client-flow.gif',
     ],
   },
 ]
 
 const requiredFiles = ['docs/assets/crab-logo.svg']
 
-const requiredBilingualTables = [
+const separatedLanguageTracks = [
   {
     file: 'README.md',
-    headings: [
-      '| Reviewer signal | What to look for | Evidence |',
-      '| Tín hiệu review | Cần xem gì | Bằng chứng |',
-      '| Area | English capability | Tính năng tiếng Việt |',
-      '| Registry / Artifact | Public name | English purpose | Vai trò tiếng Việt |',
-      '| Surface | Preview | English notes | Ghi chú tiếng Việt |',
-      '| Document | English purpose | Mục đích tiếng Việt |',
-    ],
+    englishStart: '<!-- EN:START -->',
+    englishEnd: '<!-- EN:END -->',
+    vietnameseStart: '<!-- VI:START -->',
+    vietnameseEnd: '<!-- VI:END -->',
+    englishHeading: '## English Track',
+    vietnameseHeading: '## Vietnamese Track',
   },
   {
     file: 'docs/INDEX.md',
-    headings: ['[English README](../README.md#english-overview)', '[README Tiếng Việt](../README.md#tong-quan-tieng-viet)'],
+    englishStart: '<!-- INDEX-EN:START -->',
+    englishEnd: '<!-- INDEX-EN:END -->',
+    vietnameseStart: '<!-- INDEX-VI:START -->',
+    vietnameseEnd: '<!-- INDEX-VI:END -->',
+    englishHeading: '## English Documentation Index',
+    vietnameseHeading: '## Vietnamese Documentation Index',
+  },
+  {
+    file: 'docs/PACKAGES.md',
+    englishStart: '<!-- PACKAGES-EN:START -->',
+    englishEnd: '<!-- PACKAGES-EN:END -->',
+    vietnameseStart: '<!-- PACKAGES-VI:START -->',
+    vietnameseEnd: '<!-- PACKAGES-VI:END -->',
+    englishHeading: '## English Packages And Release Artifacts',
+    vietnameseHeading: '## Vietnamese Packages And Release Artifacts',
   },
   {
     file: 'docs/PORTFOLIO_CASE_STUDY.md',
-    headings: ['## Bilingual Reading Model / Mô Hình Đọc Song Ngữ'],
+    englishStart: '<!-- CASE-STUDY-EN:START -->',
+    englishEnd: '<!-- CASE-STUDY-EN:END -->',
+    vietnameseStart: '<!-- CASE-STUDY-VI:START -->',
+    vietnameseEnd: '<!-- CASE-STUDY-VI:END -->',
+    englishHeading: '## English Case Study',
+    vietnameseHeading: '## Vietnamese Case Study',
+  },
+  {
+    file: 'docs/screenshots/README.md',
+    englishStart: '<!-- SCREENSHOTS-EN:START -->',
+    englishEnd: '<!-- SCREENSHOTS-EN:END -->',
+    vietnameseStart: '<!-- SCREENSHOTS-VI:START -->',
+    vietnameseEnd: '<!-- SCREENSHOTS-VI:END -->',
+    englishHeading: '## English Screenshots Gallery',
+    vietnameseHeading: '## Vietnamese Screenshots Gallery',
   },
 ]
 
+const indexReferences = [
+  '[English README](../README.md#english-track)',
+  '[README tiếng Việt](../README.md#vietnamese-track)',
+]
+
 const mojibakeNeedles = [
-  'Ã',
-  'Â',
-  'á»',
-  'áº',
-  'Ä',
-  'Æ',
-  'â€',
-  'â†',
-  'â”',
+  'Ãƒ',
+  'Ã‚',
+  'Ã¡Â»',
+  'Ã¡Âº',
+  'Ã„',
+  'Ã†',
+  'Ã¢â‚¬',
+  'Ã¢â€ ',
+  'Ã¢â€',
   '\uFFFD',
 ]
 
@@ -111,12 +187,17 @@ for (const relativePath of requiredFiles) {
   }
 }
 
-for (const requirement of requiredBilingualTables) {
+for (const requirement of separatedLanguageTracks) {
   const content = read(requirement.file)
-  for (const heading of requirement.headings) {
-    if (!content.includes(heading)) {
-      fail(`${requirement.file} must include explicit bilingual structure: ${heading}`)
-    }
+  assertSeparatedLanguageTracks(requirement.file, content, requirement)
+  assertNoMixedLanguageHeadings(requirement.file, content)
+  assertNoMixedLanguageTables(requirement.file, content)
+}
+
+const indexContent = read('docs/INDEX.md')
+for (const ref of indexReferences) {
+  if (!indexContent.includes(ref)) {
+    fail(`docs/INDEX.md must keep the README language entrypoint: ${ref}`)
   }
 }
 
@@ -148,7 +229,7 @@ function assertBilingual(relativePath, content) {
     fail(`${relativePath} must include English content`)
   }
 
-  if (!/[À-ỹĐđ]/u.test(content)) {
+  if (!/[\u00C0-\u1EF9\u0110\u0111]/u.test(content)) {
     fail(`${relativePath} must include Vietnamese content with proper UTF-8 diacritics`)
   }
 }
@@ -182,6 +263,66 @@ function assertLocalMarkdownTargets(relativePath, content) {
     if (!fs.existsSync(resolved)) {
       fail(`${relativePath} has missing local link or media target: ${target}`)
     }
+  }
+}
+
+function assertSeparatedLanguageTracks(relativePath, content, config) {
+  const englishStart = content.indexOf(config.englishStart)
+  const englishEnd = content.indexOf(config.englishEnd)
+  const vietnameseStart = content.indexOf(config.vietnameseStart)
+  const vietnameseEnd = content.indexOf(config.vietnameseEnd)
+
+  if (englishStart === -1 || englishEnd === -1 || vietnameseStart === -1 || vietnameseEnd === -1) {
+    fail(`${relativePath} must include explicit English and Vietnamese block markers`)
+    return
+  }
+
+  if (!(englishStart < englishEnd && englishEnd < vietnameseStart && vietnameseStart < vietnameseEnd)) {
+    fail(`${relativePath} must place the complete English block before the Vietnamese block`)
+    return
+  }
+
+  const englishBlock = content.slice(englishStart, englishEnd)
+  const vietnameseBlock = content.slice(vietnameseStart, vietnameseEnd)
+
+  if (!englishBlock.includes(config.englishHeading)) {
+    fail(`${relativePath} English block must include ${config.englishHeading}`)
+  }
+
+  if (!vietnameseBlock.includes(config.vietnameseHeading)) {
+    fail(`${relativePath} Vietnamese block must include ${config.vietnameseHeading}`)
+  }
+
+  if (englishBlock.includes(config.vietnameseStart) || englishBlock.includes(config.vietnameseHeading)) {
+    fail(`${relativePath} English block must not contain Vietnamese block markers or headings`)
+  }
+
+  if (vietnameseBlock.includes(config.englishStart) || vietnameseBlock.includes(config.englishHeading)) {
+    fail(`${relativePath} Vietnamese block must not contain English block markers or headings`)
+  }
+}
+
+function assertNoMixedLanguageHeadings(relativePath, content) {
+  const mixedHeading = content
+    .split(/\r?\n/)
+    .find((line) => /^#{1,4}\s+.+\s\/\s.+$/.test(line))
+
+  if (mixedHeading) {
+    fail(`${relativePath} must not use mixed-language slash headings: ${mixedHeading}`)
+  }
+}
+
+function assertNoMixedLanguageTables(relativePath, content) {
+  const lines = content.split(/\r?\n/)
+  const mixedTable = lines.find((line, index) => {
+    const nextLine = lines[index + 1] || ''
+    const isHeader = /^\|.*\|$/.test(line) && /^\|\s*:?-{3,}:?\s*\|/.test(nextLine)
+
+    return isHeader && /^\|.*English.*(Vietnamese|Ti.ng Vi.t).*\|/i.test(line)
+  })
+
+  if (mixedTable) {
+    fail(`${relativePath} must not use mixed English/Vietnamese table headers: ${mixedTable}`)
   }
 }
 

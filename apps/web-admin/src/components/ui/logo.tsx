@@ -20,30 +20,31 @@ export function Logo({ className, showText = true, size = 'md' }: LogoProps) {
     >
       <svg
         viewBox="0 0 48 48"
-        fill="currentColor"
+        fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={cn(dim.box, 'shrink-0')}
         aria-hidden="true"
       >
-        {/* Body */}
-        <ellipse cx="24" cy="28" rx="14" ry="10" />
-        {/* Eyes */}
-        <circle cx="19" cy="22" r="2.2" fill="white" />
-        <circle cx="29" cy="22" r="2.2" fill="white" />
-        <circle cx="19" cy="22" r="1" fill="currentColor" />
-        <circle cx="29" cy="22" r="1" fill="currentColor" />
-        {/* Left pincer */}
-        <path d="M6 20 L12 26 L8 30 L4 26 Z" />
-        <path d="M6 20 Q2 18 4 14 L8 17 Z" />
-        {/* Right pincer */}
-        <path d="M42 20 L36 26 L40 30 L44 26 Z" />
-        <path d="M42 20 Q46 18 44 14 L40 17 Z" />
-        {/* Legs */}
         <path
-          d="M11 32 L7 38 M14 36 L11 42 M37 32 L41 38 M34 36 L37 42"
+          d="M32 13.5C29.4 11.4 25.9 10.4 22.2 11.1C15.9 12.5 11.2 17.8 11.2 24.2C11.2 30.8 16.2 36.3 22.9 37C27 37.4 31 36.1 34 33.4"
           stroke="currentColor"
-          strokeWidth="2.5"
+          strokeWidth="5.4"
           strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M21.5 24H37"
+          stroke="currentColor"
+          strokeWidth="5.4"
+          strokeLinecap="round"
+        />
+        <circle cx="38" cy="24" r="2.6" fill="currentColor" />
+        <path
+          d="M16.2 17L12.4 13.2M16.2 31.4L12.4 35.2M30.7 17L34.5 13.2M30.7 31.4L34.5 35.2"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          opacity="0.72"
         />
       </svg>
       {showText && (
