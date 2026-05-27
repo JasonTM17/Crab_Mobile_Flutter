@@ -9,9 +9,10 @@ Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ
 | Document | English | Tiếng Việt |
 | --- | --- | --- |
 | [About](../README.md#about--gii-thiu) | Project scope, product surface, and repository map | Phạm vi dự án, bề mặt sản phẩm và cấu trúc repo |
+| [Portfolio Case Study](./PORTFOLIO_CASE_STUDY.md) | Bilingual portfolio narrative with screenshots, architecture, demo path, validation evidence, and self-review scorecard | Hồ sơ portfolio song ngữ có screenshot, kiến trúc, luồng demo, bằng chứng kiểm chứng và bảng tự chấm điểm |
 | [Quickstart](./QUICKSTART.md) | Run the full stack locally | Chạy full stack trên máy local |
 | [Environment](./ENVIRONMENT.md) | Env variable matrix and safe placeholders | Bảng env variables và placeholder an toàn |
-| [Packages](../README.md#packages--gi-workspace) | Private workspace packages and published runtime images | Package workspace private và runtime images được publish |
+| [Packages](./PACKAGES.md) | Workspace package catalog, Docker images, mobile artifacts | Catalog package workspace, Docker images và mobile artifacts |
 | [Release Media](./screenshots/README.md) | Verified screenshots and GIF gallery | Bộ screenshot và GIF đã xác minh |
 | [Troubleshooting](./TROUBLESHOOTING.md) | Common local/CI failures and fixes | Lỗi thường gặp và cách xử lý |
 
@@ -39,6 +40,7 @@ Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ
 | Document | English | Tiếng Việt |
 | --- | --- | --- |
 | [Mobile App](./MOBILE.md) | Flutter architecture and feature map | Kiến trúc Flutter và bản đồ tính năng |
+| [Mobile UI/UX Redesign](./MOBILE_UI_UX_REDESIGN.md) | A-Z customer mobile redesign plan, accessibility gates, and release media checklist | Kế hoạch hoàn thiện UI/UX mobile user, accessibility và release media |
 | [Admin Dashboard](./ADMIN.md) | React admin architecture and pages | Kiến trúc và trang của React admin |
 | [Screenshots](./screenshots/README.md) | Curated admin and client gallery | Bộ ảnh admin và client đã chọn lọc |
 
@@ -53,6 +55,7 @@ Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ
 | [Operations Runbook](./OPERATIONS_RUNBOOK.md) | Health, logs, backup, rollback, incidents | Health, logs, backup, rollback, sự cố |
 | [Observability](./OBSERVABILITY.md) | Metrics, logs, traces, dashboards | Metrics, logs, traces, dashboards |
 | [Testing](./TESTING.md) | Unit, integration, load, mobile tests | Unit, integration, load, mobile tests |
+| [Packages](./PACKAGES.md) | Package and release artifact catalog | Catalog package và artifact phát hành |
 
 ## Repository & Community / Repo & Cộng Đồng
 
@@ -74,6 +77,9 @@ Tài liệu Crab được sắp xếp theo lộ trình đọc: bắt đầu từ
 | Socket.IO namespaces | `/ride`, `/food`, `/chat`, `/notification` |
 | Health endpoints | `/health`, `/healthz`, `/readyz`, `/metrics` outside `/api/v1` |
 | Docker image prefix | `nguyenson1710/crab-mobile-<service>` |
+| Portfolio verification | `pnpm run verify:portfolio` |
+| Local smoke | `pnpm run test:e2e` after Docker + seed |
+| Demo seed path | `pnpm run db:migrate && pnpm run db:seed` |
 
 ## Canonical Status Vocabulary / Bộ Trạng Thái Chuẩn
 

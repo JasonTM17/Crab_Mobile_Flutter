@@ -9,7 +9,7 @@ Tài liệu này mô tả các kiểm tra tự động, release flow, publish Do
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
 | `.github/workflows/ci.yml` | push/PR to `main`, `develop` | lint, build, contract check, tests, Flutter codegen/analyze/test |
-| `.github/workflows/docker-publish.yml` | push to `main`, `v*`, manual | build and push Docker images |
+| `.github/workflows/docker-publish.yml` | push to `main`, `v*`, manual | build Docker images; push only when Docker Hub secrets are configured |
 | `.github/workflows/release.yml` | `v*.*.*` tags | create GitHub Release with changelog |
 | `.github/workflows/codeql.yml` | push/PR/schedule | static analysis |
 | `.github/workflows/gitleaks.yml` | push/PR | secret scanning |
@@ -32,21 +32,20 @@ CI chạy các nhóm kiểm tra sau:
 Flutter codegen is intentional. Generated `*.g.dart` files stay ignored, so CI must run:
 
 ```bash
-cd apps/mobile
-dart run build_runner build --delete-conflicting-outputs
+pnpm --filter @crab/mobile run codegen
 ```
 
 ## Local Verification / Kiểm Tra Local
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm run lint
-pnpm run build
+pnpm run package:check
 pnpm run contract:check
-pnpm run test
+pnpm --filter @crab/web-admin build
 pnpm run mobile:analyze
 pnpm run mobile:test
-pnpm --filter @crab/web-admin build
+pnpm run docker:config
+pnpm run verify:portfolio
 ```
 
 ## Docker Publish / Publish Docker
@@ -67,7 +66,7 @@ nguyenson1710/crab-mobile-auth-service
 nguyenson1710/crab-mobile-web-admin
 ```
 
-Tags include `latest`, short SHA, branch/tag refs, and semver tags when applicable.
+Tags include `latest`, short SHA, branch/tag refs, and semver tags when applicable. If Docker Hub secrets are missing, the workflow still builds every image but skips pushing so CI can remain green on public repos.
 
 ## Required Secrets / Secrets Bắt Buộc
 

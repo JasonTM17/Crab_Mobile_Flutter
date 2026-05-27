@@ -12,11 +12,16 @@ abstract class RideEvent extends Equatable {
 class RequestRide extends RideEvent {
   final LocationModel pickup;
   final LocationModel dropoff;
+  final String vehicleType;
 
-  const RequestRide({required this.pickup, required this.dropoff});
+  const RequestRide({
+    required this.pickup,
+    required this.dropoff,
+    this.vehicleType = 'BIKE',
+  });
 
   @override
-  List<Object?> get props => [pickup, dropoff];
+  List<Object?> get props => [pickup, dropoff, vehicleType];
 }
 
 class CancelRide extends RideEvent {

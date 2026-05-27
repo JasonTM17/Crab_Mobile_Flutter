@@ -79,6 +79,8 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Run package metadata guardrails
+        run: pnpm -w run package:check
       - name: Run contract guardrails
         run: pnpm -w run contract:check
 
@@ -134,18 +136,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Install Flutter dependencies
-        run: flutter pub get
-        working-directory: apps/mobile
-      - name: Generate Flutter code
-        run: dart run build_runner build --delete-conflicting-outputs
-        working-directory: apps/mobile
+        run: node scripts/run-mobile-tool.js flutter pub get
       - name: Analyze Flutter app
-        run: flutter analyze
-        working-directory: apps/mobile
+        run: pnpm run mobile:analyze
       - name: Test Flutter app
-        run: flutter test
-        working-directory: apps/mobile
+        run: pnpm run mobile:test

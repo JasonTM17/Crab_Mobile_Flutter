@@ -4,20 +4,20 @@ class AppColors {
   const AppColors._();
 
   static const Color primary = Color(0xFF00B14F);
-  static const Color primaryDark = Color(0xFF008A3D);
+  static const Color primaryDark = Color(0xFF007A3D);
   static const Color primaryLight = Color(0xFF4CD787);
-  static const Color secondary = Color(0xFFFFC247);
-  static const Color accent = Color(0xFF14B8A6);
+  static const Color secondary = Color(0xFFFFB020);
+  static const Color accent = Color(0xFF0F9F8F);
   static const Color success = Color(0xFF16A34A);
   static const Color warning = Color(0xFFD97706);
   static const Color error = Color(0xFFDC2626);
   static const Color info = Color(0xFF2563EB);
 
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color backgroundLight = Color(0xFFF4F7F5);
+  static const Color backgroundLight = Color(0xFFF6F8F4);
   static const Color textPrimaryLight = Color(0xFF101828);
-  static const Color textSecondaryLight = Color(0xFF667085);
-  static const Color borderLight = Color(0xFFD7DEE4);
+  static const Color textSecondaryLight = Color(0xFF5F6B7A);
+  static const Color borderLight = Color(0xFFDCE5DF);
 
   static const Color surfaceDark = Color(0xFF141A1F);
   static const Color backgroundDark = Color(0xFF0B1116);
@@ -315,42 +315,42 @@ class AppTheme {
         fontSize: 34,
         height: 1.08,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.8,
+        letterSpacing: 0,
         color: primary,
       ),
       displayMedium: TextStyle(
         fontSize: 30,
         height: 1.1,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.6,
+        letterSpacing: 0,
         color: primary,
       ),
       headlineLarge: TextStyle(
         fontSize: 28,
         height: 1.14,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.5,
+        letterSpacing: 0,
         color: primary,
       ),
       headlineMedium: TextStyle(
         fontSize: 24,
         height: 1.16,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.4,
+        letterSpacing: 0,
         color: primary,
       ),
       titleLarge: TextStyle(
         fontSize: 20,
         height: 1.22,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.2,
+        letterSpacing: 0,
         color: primary,
       ),
       titleMedium: TextStyle(
         fontSize: 18,
         height: 1.24,
         fontWeight: FontWeight.w600,
-        letterSpacing: -0.1,
+        letterSpacing: 0,
         color: primary,
       ),
       titleSmall: TextStyle(

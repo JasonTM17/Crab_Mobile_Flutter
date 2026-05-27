@@ -8,13 +8,12 @@ class OrderStatusStepper extends StatelessWidget {
   const OrderStatusStepper({super.key, required this.currentStatus});
 
   static const _steps = [
-    _StepData(OrderStatus.pending, 'Order Placed', Icons.receipt_long),
-    _StepData(OrderStatus.confirmed, 'Confirmed', Icons.check_circle),
-    _StepData(OrderStatus.preparing, 'Preparing', Icons.restaurant),
-    _StepData(OrderStatus.readyForPickup, 'Ready', Icons.takeout_dining),
-    _StepData(
-        OrderStatus.outForDelivery, 'Out for Delivery', Icons.delivery_dining),
-    _StepData(OrderStatus.delivered, 'Delivered', Icons.home),
+    _StepData(OrderStatus.pending, 'Đã tạo đơn', Icons.receipt_long),
+    _StepData(OrderStatus.confirmed, 'Quán xác nhận', Icons.check_circle),
+    _StepData(OrderStatus.preparing, 'Đang chuẩn bị', Icons.restaurant),
+    _StepData(OrderStatus.readyForPickup, 'Sẵn sàng', Icons.takeout_dining),
+    _StepData(OrderStatus.outForDelivery, 'Đang giao', Icons.delivery_dining),
+    _StepData(OrderStatus.delivered, 'Đã giao', Icons.home),
   ];
 
   @override

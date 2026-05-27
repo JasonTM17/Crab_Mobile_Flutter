@@ -4,7 +4,7 @@ import { NotFoundException } from '@nestjs/common'
 import { RideStatus } from '@crab/common-types'
 import { RidesService } from './rides.service'
 import { RideEntity } from './entities/ride.entity'
-import { FareService } from '../fare/fare.service'
+import { FareService, VehicleType } from '../fare/fare.service'
 import { MatchingService } from '../matching/matching.service'
 import { DriversService } from '../drivers/drivers.service'
 import { DriverStatus } from '../drivers/schemas/driver-location.schema'
@@ -25,7 +25,12 @@ describe('RidesService', () => {
     calculateSurge: jest.fn().mockReturnValue(1.0),
     estimate: jest
       .fn()
-      .mockReturnValue({ total_fare: 50000, distance_km: 5, duration_min: 12 }),
+      .mockReturnValue({
+        vehicleType: VehicleType.BIKE,
+        total_fare: 50000,
+        distance_km: 5,
+        duration_min: 12,
+      }),
   }
 
   const mockMatching = {

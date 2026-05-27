@@ -118,8 +118,8 @@ class _RideBookingScreenState extends State<RideBookingScreen>
       context,
       MaterialPageRoute(
         builder: (_) => const LocationSearchScreen(
-          title: 'Select Pickup',
-          hint: 'Where are you?',
+          title: 'Chọn điểm đón',
+          hint: 'Nhập tên toà nhà, khu vực hoặc địa chỉ',
         ),
       ),
     );
@@ -141,8 +141,8 @@ class _RideBookingScreenState extends State<RideBookingScreen>
       context,
       MaterialPageRoute(
         builder: (_) => const LocationSearchScreen(
-          title: 'Select Destination',
-          hint: 'Where to?',
+          title: 'Chọn điểm đến',
+          hint: 'Bạn muốn đến đâu?',
         ),
       ),
     );
@@ -182,11 +182,12 @@ class _RideBookingScreenState extends State<RideBookingScreen>
     }
   }
 
-  void _bookRide() {
+  void _bookRide(String vehicleType) {
     if (_pickup == null || _dropoff == null) return;
     context.read<RideBloc>().add(RequestRide(
           pickup: _pickup!,
           dropoff: _dropoff!,
+          vehicleType: vehicleType,
         ));
   }
 
@@ -209,7 +210,8 @@ class _RideBookingScreenState extends State<RideBookingScreen>
             children: [
               Positioned.fill(
                 child: DecoratedBox(
-                  decoration: const BoxDecoration(color: AppColors.backgroundLight),
+                  decoration:
+                      const BoxDecoration(color: AppColors.backgroundLight),
                   child: GoogleMap(
                     initialCameraPosition: const CameraPosition(
                       target: _defaultCenter,
@@ -351,7 +353,7 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                 ),
                 const SizedBox(height: 22),
                 const Text(
-                  'Đang tìm tài xế gần bạn',
+                  'Đang gửi yêu cầu chuyến đi',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 22,
@@ -361,7 +363,7 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Crab đang gửi yêu cầu đến các tài xế phù hợp để đón bạn nhanh hơn.',
+                  'Crab đang kiểm tra lộ trình và gửi yêu cầu đến tài xế phù hợp.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.textSecondaryLight,
@@ -389,7 +391,7 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Thường mất dưới 1 phút trong khu vực trung tâm.',
+                          'Bạn có thể huỷ yêu cầu trước khi tài xế xác nhận chuyến.',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,

@@ -21,7 +21,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crab}"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,7 +36,7 @@ services:
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand('ping').ok"]
+      test: ["CMD-SHELL", "mongosh --quiet --username \"$$MONGO_INITDB_ROOT_USERNAME\" --password \"$$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\""]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -84,7 +84,9 @@ services:
     image: ${DOCKERHUB_NAMESPACE:-nguyenson1710}/crab-mobile-gateway:${TAG:-latest}
     <<: [*restart, *logging]
     deploy:
-      replicas: 2
+      # Local Docker Compose publishes gateway on a fixed host port, so keep the
+      # edge singleton here. Scale the gateway behind a load balancer in Swarm/K8s.
+      replicas: 1
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -123,9 +125,10 @@ services:
       DB_USER: ${POSTGRES_USER:-crab}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB:-crab_db}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:?required}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?required}
       REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -149,8 +152,12 @@ services:
       MINIO_ENDPOINT: minio
       MINIO_ACCESS_KEY: ${MINIO_USER:-crab_minio}
       MINIO_SECRET_KEY: ${MINIO_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks: [crab]
 
@@ -171,6 +178,7 @@ services:
       DB_NAME: ${POSTGRES_DB:-crab_db}
       MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_rides?authSource=admin
       REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
     depends_on:
       postgres: { condition: service_healthy }
       mongodb: { condition: service_healthy }
@@ -194,6 +202,7 @@ services:
       DB_NAME: ${POSTGRES_DB:-crab_db}
       MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_food?authSource=admin
       REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
     depends_on:
       postgres: { condition: service_healthy }
       mongodb: { condition: service_healthy }
@@ -213,6 +222,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB:-crab_db}
       REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
     depends_on:
       postgres: { condition: service_healthy }
     networks: [crab]
@@ -228,7 +238,8 @@ services:
       PORT: 3006
       MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_chat?authSource=admin
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:?required}
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
     depends_on:
       mongodb: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -245,9 +256,10 @@ services:
       PORT: 3007
       MONGODB_URI: mongodb://${MONGO_USER:-crab}:${MONGO_PASSWORD}@mongodb:27017/crab_notifications?authSource=admin
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:?required}
       FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
       FCM_CREDENTIALS_JSON: ${FCM_CREDENTIALS_JSON:-}
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
     depends_on:
       mongodb: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -266,8 +278,11 @@ services:
       DB_USER: ${POSTGRES_USER:-crab}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB:-crab_db}
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: ${CORS_ORIGIN:?required}
     depends_on:
       postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
     networks: [crab]
 
   web-admin:

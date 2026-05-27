@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_gradients.dart';
 import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/animated_dot_indicator.dart';
 import '../../shared/widgets/gradient_button.dart';
 
@@ -22,23 +23,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardSlide(
       icon: Icons.directions_car_filled_rounded,
       gradient: AppGradients.primary,
-      title: 'Rides on demand',
+      title: 'Đi rõ giá, đến đúng giờ',
       body:
-          'Book bikes, cars and 7-seaters in seconds. See real-time fare and live ETA from matched drivers.',
+          'Đặt xe máy, ô tô và 7 chỗ với giá minh bạch, thông tin chuyến đi dễ kiểm tra trước khi xác nhận.',
+      proof: 'Giá rõ ràng • Chọn điểm đón • Kiểm tra trước khi đặt',
     ),
     _OnboardSlide(
       icon: Icons.restaurant_menu_rounded,
       gradient: AppGradients.sunset,
-      title: 'Food, Mart, Express',
+      title: 'Ăn ngon giao nhanh',
       body:
-          'Order from your favorite restaurants, get groceries, send packages — all in one beautiful app.',
+          'Khám phá quán quen, món mới và ưu đãi mỗi ngày trong một trải nghiệm ấm áp, dễ chọn.',
+      proof: 'Quán tuyển chọn • Deal mỗi ngày • Giao tận cửa',
     ),
     _OnboardSlide(
       icon: Icons.account_balance_wallet_rounded,
-      gradient: AppGradients.violet,
-      title: 'Pay your way',
+      gradient: AppGradients.walletHero,
+      title: 'Thanh toán linh hoạt',
       body:
-          'Use Crab Wallet or cash. Earn loyalty points and apply promo codes at checkout — instantly.',
+          'Dùng CrabPay hoặc tiền mặt, theo dõi ưu đãi và quản lý chi tiêu an toàn trong một nơi.',
+      proof: 'OTP bảo mật • Ví CrabPay • Điểm thưởng',
     ),
   ];
 
@@ -81,9 +85,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     style: TextButton.styleFrom(
                       foregroundColor: theme.colorScheme.onSurfaceVariant,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Skip',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -120,9 +126,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                           foregroundColor: theme.colorScheme.onSurface,
                         ),
-                        child: const Text(
+                        child: Text(
                           'Sign up',
-                          style: TextStyle(
+                          style: theme.textTheme.titleSmall?.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -164,11 +170,13 @@ class _OnboardSlide {
   final LinearGradient gradient;
   final String title;
   final String body;
+  final String proof;
   const _OnboardSlide({
     required this.icon,
     required this.gradient,
     required this.title,
     required this.body,
+    required this.proof,
   });
 }
 
@@ -186,28 +194,28 @@ class _SlideView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           AnimatedScale(
-            scale: active ? 1.0 : 0.92,
+            scale: active ? 1.0 : 0.94,
             duration: AppMotion.normal,
             curve: AppMotion.standard,
             child: Container(
-              width: 220,
-              height: 220,
+              width: 188,
+              height: 188,
               decoration: BoxDecoration(
                 gradient: slide.gradient,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(56),
                 boxShadow: [
                   BoxShadow(
-                    color: slide.gradient.colors.first.withValues(alpha: 0.32),
-                    blurRadius: 36,
-                    spreadRadius: 4,
-                    offset: const Offset(0, 16),
+                    color: slide.gradient.colors.first.withValues(alpha: 0.24),
+                    blurRadius: 28,
+                    spreadRadius: -2,
+                    offset: const Offset(0, 14),
                   ),
                 ],
               ),
-              child: Icon(slide.icon, size: 96, color: Colors.white),
+              child: Icon(slide.icon, size: 78, color: Colors.white),
             ),
           ),
-          const SizedBox(height: 44),
+          const SizedBox(height: 36),
           AnimatedSlide(
             offset: active ? Offset.zero : const Offset(0, 0.04),
             duration: AppMotion.normal,
@@ -221,7 +229,7 @@ class _SlideView extends StatelessWidget {
                     slide.title,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -0.4,
+                      letterSpacing: 0,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -230,9 +238,32 @@ class _SlideView extends StatelessWidget {
                     slide.body,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
-                      height: 1.5,
+                      height: 1.46,
                     ),
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                      border: Border.all(
+                        color:
+                            theme.colorScheme.primary.withValues(alpha: 0.14),
+                      ),
+                    ),
+                    child: Text(
+                      slide.proof,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ),
                 ],
               ),

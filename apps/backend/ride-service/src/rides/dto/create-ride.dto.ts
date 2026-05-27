@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsLatitude, IsLongitude } from 'class-validator'
+import { IsString, IsNumber, IsLatitude, IsLongitude, IsEnum, IsOptional } from 'class-validator'
+import { VehicleType } from '../../fare/fare.service'
 
 export class CreateRideDto {
   @IsString()
@@ -25,6 +26,10 @@ export class CreateRideDto {
 
   @IsString()
   dropoff_address!: string
+
+  @IsOptional()
+  @IsEnum(VehicleType)
+  vehicle_type?: VehicleType
 }
 
 export class EstimateRideDto {

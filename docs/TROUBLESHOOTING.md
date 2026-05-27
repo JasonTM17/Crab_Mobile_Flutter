@@ -18,12 +18,11 @@ Nguyên nhân thường là file lock local, không nhất thiết là lỗi loc
 
 ## Flutter missing generated files / Flutter thiếu file generated
 
-Run code generation before analyze/test:
+Run the wrapper-backed mobile checks; they run code generation before analyze/test:
 
 ```bash
-cd apps/mobile
-flutter pub get
-flutter analyze
+pnpm --filter @crab/mobile lint
+pnpm --filter @crab/mobile test
 ```
 
 Generated `*.g.dart` files are intentionally ignored; CI also runs codegen.

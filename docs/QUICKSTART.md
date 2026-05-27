@@ -36,6 +36,16 @@ docker compose up -d
 docker compose ps
 ```
 
+For the production-like portfolio demo, use the production compose file and seed
+the demo data:
+
+```bash
+docker compose --env-file .env.production.example -f docker-compose.prod.yml up -d
+pnpm run db:migrate
+pnpm run db:seed
+pnpm run test:e2e
+```
+
 Public entrypoints:
 
 | Surface | URL |
@@ -68,11 +78,10 @@ pnpm --filter @crab/web-admin dev
 Android emulator default:
 
 ```bash
+node scripts/run-mobile-tool.js flutter pub get
+pnpm --filter @crab/mobile lint
+pnpm --filter @crab/mobile test
 cd apps/mobile
-flutter pub get
-dart run build_runner build --delete-conflicting-outputs
-flutter analyze
-flutter test
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api/v1 --dart-define=SOCKET_URL=http://10.0.2.2:3000
 ```
 
@@ -96,17 +105,19 @@ Các endpoint health nằm ngoài `/api/v1` vì code exclude `health`, `healthz`
 ## 6. Useful Verification / Lệnh Kiểm Tra Hữu Ích
 
 ```bash
+pnpm run package:check
 pnpm run contract:check
 pnpm --filter @crab/common-types build
 pnpm --filter @crab/socket-events build
 pnpm --filter @crab/web-admin build
 pnpm --filter @crab/ride-service test -- drivers.service.spec.ts
+pnpm run mobile:screenshots
 ```
 
-Full verification:
+Portfolio verification:
 
 ```bash
-pnpm run verify
+pnpm run verify:portfolio
 ```
 
 ## 7. Stop the Stack / Dừng Stack

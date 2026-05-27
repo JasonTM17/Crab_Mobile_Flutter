@@ -52,6 +52,7 @@ class RideRepository {
   Future<RideModel> createRide({
     required loc.LocationModel pickup,
     required loc.LocationModel dropoff,
+    String vehicleType = 'BIKE',
   }) async {
     final riderId = await _requireUserId();
     final response = await dio.post(
@@ -64,6 +65,7 @@ class RideRepository {
         'dropoff_lat': dropoff.latitude,
         'dropoff_lng': dropoff.longitude,
         'dropoff_address': dropoff.name ?? dropoff.address ?? '',
+        'vehicle_type': vehicleType,
       },
     );
 

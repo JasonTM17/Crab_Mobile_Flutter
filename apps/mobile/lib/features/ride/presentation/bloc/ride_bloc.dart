@@ -72,6 +72,7 @@ class RideBloc extends Bloc<RideEvent, RideState> {
       final ride = await _rideRepository.createRide(
         pickup: event.pickup,
         dropoff: event.dropoff,
+        vehicleType: event.vehicleType,
       );
       emit(RideSearchingDriver(ride: ride));
     } catch (e) {

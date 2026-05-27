@@ -75,8 +75,8 @@ Set these at:
 
 | Secret | Required | Purpose |
 |---|---:|---|
-| `DOCKERHUB_USERNAME` | yes | Docker Hub username; expected value: `nguyenson1710` |
-| `DOCKERHUB_TOKEN` | yes | Docker Hub access token used by docker publish workflow |
+| `DOCKERHUB_USERNAME` | no for build-only CI, yes for pushing | Docker Hub username; expected value: `nguyenson1710` |
+| `DOCKERHUB_TOKEN` | no for build-only CI, yes for pushing | Docker Hub access token used by docker publish workflow |
 
 Do **not** commit credentials, keystores, or private env files to the repo.
 
@@ -110,7 +110,7 @@ What it does:
 
 - logs in to Docker Hub
 - builds all backend service images plus web-admin
-- publishes images to `nguyenson1710/crab-mobile-<service>`
+- publishes images to `nguyenson1710/crab-mobile-<service>` when Docker Hub secrets are configured
 - emits tags including:
   - `latest` on default branch
   - short git SHA
@@ -153,19 +153,16 @@ From repo root:
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm -w run lint
-pnpm -w run build
-pnpm -w run contract:check
-pnpm -w run test
+pnpm run verify:portfolio
 ```
 
-For mobile:
+For full local Docker smoke evidence:
 
 ```bash
-cd apps/mobile
-flutter pub get
-flutter analyze
-flutter test
+docker compose --env-file .env.production.example -f docker-compose.prod.yml up -d
+pnpm run db:migrate
+pnpm run db:seed
+pnpm run test:e2e
 ```
 
 ### Local Verification Notes
@@ -209,7 +206,7 @@ Required variables include at least:
 Example config validation:
 
 ```bash
-docker compose -f docker-compose.prod.yml config
+docker compose --env-file .env.production.example -f docker-compose.prod.yml config
 ```
 
 ## Mobile Release Notes
@@ -272,11 +269,15 @@ Use this checklist before tagging a release:
 
 - [ ] `pnpm -w run lint` is green
 - [ ] `pnpm -w run build` is green
+- [ ] `pnpm run package:check` is green
 - [ ] `pnpm -w run contract:check` is green
 - [ ] `pnpm -w run test` is green, or environment-only local blocker is understood and CI is green
-- [ ] `flutter analyze` is green
-- [ ] `flutter test` is green
-- [ ] `docker compose -f docker-compose.prod.yml config` is green
+- [ ] `pnpm --filter @crab/mobile lint` is green
+- [ ] `pnpm --filter @crab/mobile test` is green
+- [ ] `pnpm run mobile:screenshots` regenerated release media
+- [ ] `pnpm run verify:portfolio` is green
+- [ ] `docker compose --env-file .env.production.example -f docker-compose.prod.yml config` is green
+- [ ] local Docker smoke is green after `pnpm run db:migrate && pnpm run db:seed && pnpm run test:e2e`
 - [ ] required GitHub Actions secrets are present
 - [ ] Android release signing material is configured locally / in CI as needed
 - [ ] release endpoints use HTTPS/WSS

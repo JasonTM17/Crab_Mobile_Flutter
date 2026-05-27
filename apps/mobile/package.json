@@ -4,9 +4,9 @@
   "private": true,
   "description": "Crab Mobile Flutter app",
   "scripts": {
-    "codegen": "dart run build_runner build --delete-conflicting-outputs",
-    "lint": "flutter analyze",
-    "test": "flutter test",
-    "clean": "flutter clean"
+    "codegen": "node ../../scripts/run-mobile-tool.js flutter pub run build_runner build --delete-conflicting-outputs",
+    "lint": "pnpm run codegen && node ../../scripts/run-mobile-tool.js flutter analyze",
+    "test": "pnpm run codegen && node ../../scripts/run-mobile-tool.js flutter test",
+    "clean": "node ../../scripts/run-mobile-tool.js flutter clean"
   }
 }

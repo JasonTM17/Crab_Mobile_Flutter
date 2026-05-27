@@ -121,12 +121,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     NavigationDestination(
                       icon: Icon(Icons.home_outlined),
                       selectedIcon: Icon(Icons.home_rounded),
-                      label: 'Home',
+                      label: 'Trang chủ',
                     ),
                     NavigationDestination(
                       icon: Icon(Icons.history_rounded),
                       selectedIcon: Icon(Icons.history_toggle_off_rounded),
-                      label: 'Activity',
+                      label: 'Hoạt động',
                     ),
                     NavigationDestination(
                       icon: Icon(Icons.chat_bubble_outline_rounded),
@@ -136,12 +136,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     NavigationDestination(
                       icon: Icon(Icons.notifications_outlined),
                       selectedIcon: Icon(Icons.notifications_rounded),
-                      label: 'Alerts',
+                      label: 'Thông báo',
                     ),
                     NavigationDestination(
                       icon: Icon(Icons.person_outline_rounded),
                       selectedIcon: Icon(Icons.person_rounded),
-                      label: 'Profile',
+                      label: 'Hồ sơ',
                     ),
                   ],
                 ),
@@ -225,14 +225,17 @@ class _SectionHeaderRow extends StatelessWidget {
                 title,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w900,
-                  letterSpacing: -0.4,
+                  letterSpacing: 0,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
+                  height: 1.32,
                 ),
               ),
             ],
@@ -242,7 +245,13 @@ class _SectionHeaderRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           TextButton(
             onPressed: () => context.push(route!),
-            child: Text(actionLabel!),
+            child: Text(
+              actionLabel!,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ],
       ],
@@ -353,16 +362,18 @@ class _HeroHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Đặt xe, ăn uống hay nạp ví - mọi thứ đều ở ngay trước mắt bạn.',
+            'Đặt xe, gọi món và quản lý ví CrabPay trong một màn hình rõ ràng, đáng tin cậy.',
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: Colors.white.withValues(alpha: 0.92),
-              height: 1.4,
+              color: Colors.white.withValues(alpha: 0.9),
+              height: 1.38,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
           const _HeroSearchBar(),
           const SizedBox(height: AppSpacing.md),
           const _HeroActionStrip(),
+          const SizedBox(height: AppSpacing.md),
+          const _LiveStatusStrip(),
           const SizedBox(height: AppSpacing.md),
           const _WalletPill(),
         ],
@@ -468,7 +479,7 @@ class _HeroActionStrip extends StatelessWidget {
         Expanded(
           child: _HeroActionCard(
             title: 'Đặt xe',
-            subtitle: 'Đi ngay',
+            subtitle: 'Giá rõ ràng',
             icon: Icons.motorcycle_rounded,
             gradient: AppGradients.ocean,
             onTap: () => context.push('/ride/book'),
@@ -478,7 +489,7 @@ class _HeroActionStrip extends StatelessWidget {
         Expanded(
           child: _HeroActionCard(
             title: 'Đồ ăn',
-            subtitle: 'Giao nhanh',
+            subtitle: 'Quán gần bạn',
             icon: Icons.restaurant_rounded,
             gradient: AppGradients.sunset,
             onTap: () => context.push('/food'),
@@ -559,6 +570,100 @@ class _HeroActionCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LiveStatusStrip extends StatelessWidget {
+  const _LiveStatusStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(
+          child: _LiveStatusPill(
+            icon: Icons.near_me_rounded,
+            value: 'Đi rõ',
+            label: 'Thông tin dễ kiểm tra',
+          ),
+        ),
+        SizedBox(width: AppSpacing.xs),
+        Expanded(
+          child: _LiveStatusPill(
+            icon: Icons.restaurant_menu_rounded,
+            value: 'Giao rõ',
+            label: 'Trạng thái từng bước',
+          ),
+        ),
+        SizedBox(width: AppSpacing.xs),
+        Expanded(
+          child: _LiveStatusPill(
+            icon: Icons.local_offer_rounded,
+            value: 'Ưu đãi',
+            label: 'Cập nhật trong app',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LiveStatusPill extends StatelessWidget {
+  const _LiveStatusPill({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.13),
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: Colors.white, size: 16),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.76),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              height: 1.18,
+            ),
+          ),
+        ],
       ),
     );
   }

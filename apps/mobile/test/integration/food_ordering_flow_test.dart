@@ -137,8 +137,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Phở 24'), findsAtLeast(1));
-      expect(find.text('Confirmed'), findsOneWidget);
-      expect(find.text('Delivered'), findsOneWidget);
+      expect(find.text('Quán xác nhận'), findsOneWidget);
+      expect(find.text('Đã giao'), findsOneWidget);
     });
 
     testWidgets('Order history empty state', (tester) async {
@@ -153,7 +153,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('No orders yet'), findsOneWidget);
+      expect(find.text('Chưa có đơn món'), findsOneWidget);
     });
 
     testWidgets('Order history shows track button for active orders',
@@ -169,7 +169,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Track'), findsOneWidget);
+      expect(find.text('Theo dõi'), findsOneWidget);
     });
 
     testWidgets('Order status transitions via BLoC stream', (tester) async {

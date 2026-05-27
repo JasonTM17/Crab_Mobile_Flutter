@@ -32,7 +32,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       appBar: AppBar(
         title: const Text(
           'Messages',
-          style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.2),
+          style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0),
         ),
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -211,7 +211,7 @@ class _ConversationTile extends StatelessWidget {
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight:
                                   unread ? FontWeight.w800 : FontWeight.w600,
-                              letterSpacing: -0.1,
+                              letterSpacing: 0,
                             ),
                           ),
                         ),

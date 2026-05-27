@@ -21,24 +21,15 @@ build: ## Build all services
 lint: ## Run linter on all services
 	pnpm lint
 
-lint-fix: ## Run linter with auto-fix
-	pnpm lint:fix
-
 format: ## Format all files with Prettier
-	pnpm format
+	pnpm exec prettier --write .
 
 format-check: ## Check formatting without modifying
-	pnpm format:check
+	pnpm exec prettier --check .
 
 # Testing
 test: ## Run unit tests
 	pnpm test
-
-test-watch: ## Run tests in watch mode
-	pnpm test:watch
-
-test-cov: ## Run tests with coverage report
-	pnpm test:cov
 
 test-e2e: ## Run end-to-end tests
 	pnpm test:e2e
@@ -46,11 +37,11 @@ test-e2e: ## Run end-to-end tests
 test-load: ## Run full load test suite (requires k6)
 	pnpm test:load
 
-test-load-rate: ## Run rate limiting load test
-	pnpm test:load:rate
+test-load-baseline: ## Run gateway baseline load test (requires k6)
+	CRAB_LOAD_SCRIPTS=tests/load/baseline-smoke.js pnpm test:load
 
 test-load-ride: ## Run ride service load test
-	pnpm test:load:ride
+	CRAB_LOAD_SCRIPTS=tests/load/ride-flow.js pnpm test:load
 
 # Database
 db-migrate: ## Run database migrations
@@ -60,7 +51,7 @@ db-seed: ## Seed database with demo data
 	pnpm db:seed
 
 db-reset: ## Reset database (WARNING: destroys all data)
-	pnpm db:reset
+	docker compose --env-file .env.production.example -f docker-compose.prod.yml down -v
 
 # Docker
 docker-up: ## Start all services with Docker
@@ -83,13 +74,6 @@ docker-restart: ## Restart all services
 
 docker-clean: ## Remove all containers, volumes, and images
 	docker compose down -v --rmi all
-
-# Monitoring
-monitoring-up: ## Start monitoring stack (Prometheus + Grafana)
-	pnpm monitoring:up
-
-monitoring-down: ## Stop monitoring stack
-	pnpm monitoring:down
 
 # Kubernetes
 k8s-deploy: ## Deploy to Kubernetes
@@ -114,15 +98,7 @@ clean: ## Clean build artifacts
 	find . -name '.turbo' -type d -exec rm -rf {} + 2>/dev/null || true
 
 health: ## Check health of all services
-	@echo "$(CYAN)Checking service health...$(RESET)"
-	@for port in 3000 3001 3002 3003 3004 3005 3006 3007 3008; do \
-		status=$$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$$port/health 2>/dev/null); \
-		if [ "$$status" = "200" ]; then \
-			echo "  $(GREEN)Port $$port: OK$(RESET)"; \
-		else \
-			echo "  $(YELLOW)Port $$port: DOWN ($$status)$(RESET)"; \
-		fi \
-	done
+	pnpm test:e2e
 
 setup: ## Initial project setup
 	@echo "$(CYAN)Setting up Crab Super App...$(RESET)"

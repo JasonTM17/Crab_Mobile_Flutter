@@ -77,7 +77,7 @@ class IncomingRideCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
                     color: Colors.white,
-                    letterSpacing: -0.2,
+                    letterSpacing: 0,
                   ),
                 ),
                 const Spacer(),

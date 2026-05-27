@@ -67,7 +67,9 @@ class DriverModeScreen extends StatelessWidget {
                       value: state.isAutoAcceptEnabled,
                       activeThumbColor: const Color(0xFF22C55E),
                       onChanged: (value) {
-                        context.read<DriverBloc>().add(const ToggleAutoAccept());
+                        context
+                            .read<DriverBloc>()
+                            .add(const ToggleAutoAccept());
                       },
                     ),
                   ],
@@ -186,7 +188,7 @@ class _OfflineView extends StatelessWidget {
               "You're offline",
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
-                letterSpacing: -0.4,
+                letterSpacing: 0,
               ),
             ),
             const SizedBox(height: 8),
@@ -294,7 +296,7 @@ class _WaitingViewState extends State<_WaitingView>
                 'Waiting for rides…',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
-                  letterSpacing: -0.4,
+                  letterSpacing: 0,
                 ),
               ),
               const SizedBox(height: 8),
@@ -312,7 +314,8 @@ class _WaitingViewState extends State<_WaitingView>
               const SizedBox(height: 24),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 48),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(16),
@@ -358,7 +361,9 @@ class _WaitingViewState extends State<_WaitingView>
                       value: state.isAutoAcceptEnabled,
                       activeThumbColor: cs.primary,
                       onChanged: (value) {
-                        context.read<DriverBloc>().add(const ToggleAutoAccept());
+                        context
+                            .read<DriverBloc>()
+                            .add(const ToggleAutoAccept());
                       },
                     ),
                   ],

@@ -171,6 +171,15 @@ export class ProxyController {
     return this.handle('payment', req, res, body)
   }
 
+  @All('promo')
+  async promoRoot(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('payment', req, res, body)
+  }
+
   @All('chats/*')
   async chats(
     @Req() req: Request,
@@ -198,6 +207,15 @@ export class ProxyController {
     return this.handle('notification', req, res, body)
   }
 
+  @All('notifications')
+  async notificationsRoot(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('notification', req, res, body)
+  }
+
   @All('preferences/*')
   async preferences(
     @Req() req: Request,
@@ -218,6 +236,15 @@ export class ProxyController {
 
   @All('ratings/*')
   async ratings(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: unknown,
+  ) {
+    return this.handle('rating', req, res, body)
+  }
+
+  @All('ratings')
+  async ratingsRoot(
     @Req() req: Request,
     @Res() res: Response,
     @Body() body: unknown,

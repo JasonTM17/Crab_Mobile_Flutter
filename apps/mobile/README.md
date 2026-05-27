@@ -23,6 +23,6 @@ gateway during development.
 ## Verify
 
 ```powershell
-flutter analyze
-flutter test
+pnpm --filter @crab/mobile lint
+pnpm --filter @crab/mobile test
 ```

@@ -107,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.lg),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.12),
+                              color: Colors.white.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(AppRadii.xl),
                               border: Border.all(
                                   color: Colors.white.withValues(alpha: 0.14)),
@@ -140,9 +140,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 const SizedBox(height: AppSpacing.xs),
                                 Text(
-                                  'Book rides, track food, and manage your wallet from one calm, premium home base.',
+                                  'Đăng nhập để đặt xe, gọi món và quản lý CrabPay trong một trải nghiệm rõ ràng, an toàn.',
                                   style: theme.textTheme.bodyLarge?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.92),
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    height: 1.42,
                                   ),
                                 ),
                                 const SizedBox(height: AppSpacing.md),
@@ -151,14 +152,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   runSpacing: AppSpacing.xs,
                                   children: [
                                     _HeroChip(
-                                        icon: Icons.flash_on_rounded,
-                                        label: 'Fast booking'),
+                                        icon: Icons.sms_rounded,
+                                        label: 'OTP nhanh'),
                                     _HeroChip(
                                         icon: Icons.shield_outlined,
-                                        label: 'Secure login'),
+                                        label: 'Bảo mật'),
                                     _HeroChip(
-                                        icon: Icons.card_giftcard_rounded,
-                                        label: 'Reward perks'),
+                                        icon: Icons.local_offer_rounded,
+                                        label: 'Ưu đãi mỗi ngày'),
                                   ],
                                 ),
                               ],
@@ -185,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 const SizedBox(height: AppSpacing.xs),
                                 Text(
-                                  'Choose your quickest way back in.',
+                                  'Chọn cách đăng nhập phù hợp nhất với bạn.',
                                   style: theme.textTheme.bodyMedium
                                       ?.copyWith(color: cs.onSurfaceVariant),
                                 ),
@@ -226,8 +227,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(height: AppSpacing.sm),
                                 Text(
                                   _usePhone
-                                      ? 'We will send a one-time verification code to your phone.'
-                                      : 'Use the same account across rides, food, and wallet.',
+                                      ? 'Mã OTP chỉ dùng một lần và giúp bảo vệ tài khoản Crab của bạn.'
+                                      : 'Một tài khoản dùng xuyên suốt cho đi xe, đồ ăn và ví CrabPay.',
                                   textAlign: TextAlign.center,
                                   style: theme.textTheme.bodySmall
                                       ?.copyWith(color: cs.onSurfaceVariant),
@@ -236,8 +237,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: AppSpacing.md),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
                                 "Don't have an account? ",
@@ -247,9 +249,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               TextButton(
                                 onPressed: () => context.push('/register'),
-                                child: const Text(
+                                child: Text(
                                   'Sign Up',
-                                  style: TextStyle(
+                                  style: theme.textTheme.labelLarge?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w800),
                                 ),
@@ -276,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
         AuthTextField(
           controller: _phoneController,
           label: 'Phone number',
-          hint: '+84 901 234 567',
+          hint: 'Số điện thoại demo',
           prefixIcon: Icons.phone_rounded,
           keyboardType: TextInputType.phone,
           textInputAction: TextInputAction.done,

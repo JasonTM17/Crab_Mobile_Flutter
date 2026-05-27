@@ -280,7 +280,7 @@ class _BalanceCard extends StatelessWidget {
               color: Colors.white,
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              letterSpacing: -0.6,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 14),

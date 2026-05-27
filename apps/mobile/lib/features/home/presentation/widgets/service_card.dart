@@ -30,57 +30,68 @@ class ServiceCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadii.lg),
         child: Ink(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.sm,
-            AppSpacing.sm,
-            AppSpacing.sm,
-            AppSpacing.sm,
-          ),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                tint.withValues(alpha: isDark ? 0.30 : 0.18),
-                cs.surface,
-              ],
-            ),
+            color: cs.surface,
             borderRadius: BorderRadius.circular(AppRadii.lg),
-            border:
-                Border.all(color: tint.withValues(alpha: isDark ? 0.26 : 0.18)),
-            boxShadow:
-                isDark ? null : AppShadows.coloredGlow(tint, opacity: 0.16),
+            border: Border.all(
+              color: tint.withValues(alpha: isDark ? 0.24 : 0.14),
+            ),
+            boxShadow: isDark ? null : AppShadows.shadowSoft,
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [tint, gradientEnd],
-                  ),
-                  borderRadius: BorderRadius.circular(21),
-                  boxShadow: AppShadows.coloredGlow(tint, opacity: 0.22),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final tileSide = constraints.biggest.shortestSide;
+              final horizontalPadding =
+                  (constraints.maxWidth * 0.12).clamp(8.0, 12.0);
+              final verticalPadding =
+                  (constraints.maxHeight * 0.08).clamp(6.0, 12.0);
+              final iconBoxSize = (tileSide * 0.38).clamp(34.0, 42.0);
+              final iconSize = (iconBoxSize * 0.58).clamp(19.0, 24.0);
+              final gap = (constraints.maxHeight * 0.04).clamp(4.0, 8.0);
+              final textStyle = theme.textTheme.labelSmall?.copyWith(
+                color: cs.onSurface,
+                fontSize: (tileSide * 0.13).clamp(10.0, 11.0),
+                fontWeight: FontWeight.w800,
+                height: 1.05,
+                letterSpacing: 0,
+              );
+
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: verticalPadding,
                 ),
-                child: Icon(icon, color: Colors.white, size: 27),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: cs.onSurface,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: iconBoxSize,
+                      height: iconBoxSize,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [tint, gradientEnd],
+                        ),
+                        borderRadius: BorderRadius.circular(iconBoxSize * 0.36),
+                        boxShadow: AppShadows.coloredGlow(tint, opacity: 0.22),
+                      ),
+                      child: Icon(icon, color: Colors.white, size: iconSize),
+                    ),
+                    SizedBox(height: gap),
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: textStyle,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),

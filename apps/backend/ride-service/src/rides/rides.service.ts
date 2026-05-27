@@ -46,6 +46,7 @@ export class RidesService {
       dto.dropoff_lat,
       dto.dropoff_lng,
       surgeMultiplier,
+      dto.vehicle_type,
     )
 
     const ride = this.rideRepository.create({
@@ -61,6 +62,7 @@ export class RidesService {
       distance_km: estimate.distance_km,
       duration_min: estimate.duration_min,
       surge_multiplier: surgeMultiplier,
+      vehicle_type: dto.vehicle_type ?? estimate.vehicleType,
     })
 
     const saved = await this.rideRepository.save(ride)

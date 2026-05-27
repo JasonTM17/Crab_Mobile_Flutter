@@ -4,6 +4,8 @@ The mobile client lives in `apps/mobile`. It is the rider, driver, and food cust
 
 This document describes how the app is structured, how state, DI, networking, and routing are wired, and what each feature module does.
 
+For the A-Z customer-facing UI/UX completion plan, design-system rules, accessibility gates, and release media checklist, see [Mobile UI/UX Redesign](./MOBILE_UI_UX_REDESIGN.md).
+
 ## 1. Architecture
 
 The codebase follows a feature-first Clean Architecture layout. Cross-cutting plumbing lives under `lib/core/`, and every feature is a self-contained module under `lib/features/<name>/`.
@@ -194,14 +196,14 @@ Both themes share `_textTheme(primary, secondary)` for consistent typography. Th
 
 ## 8. Build and Run
 
-All commands run from `apps/mobile/`.
+Run workspace commands from the repo root. Run device/emulator commands from `apps/mobile/`.
 
 ```bash
 # install Dart packages
-flutter pub get
+node scripts/run-mobile-tool.js flutter pub get
 
-# generate JSON serializers, injectable, etc. (only if you regenerate code)
-dart run build_runner build --delete-conflicting-outputs
+# generate JSON serializers, injectable, etc. only when needed outside lint/test
+pnpm --filter @crab/mobile run codegen
 
 # run on a connected device or emulator with the dev backend (Android emulator default)
 flutter run
@@ -223,22 +225,44 @@ flutter build ios --release   # macOS only
 
 ```bash
 # static analysis (uses analysis_options + flutter_lints ^6.0.0)
-flutter analyze
+pnpm --filter @crab/mobile lint
 
 # unit + widget + bloc tests
-flutter test
+pnpm --filter @crab/mobile test
 
 # integration tests (device/emulator required)
+cd apps/mobile
 flutter test integration_test
 ```
 
 `bloc_test ^9.1.7` and `mocktail ^1.0.4` are available for Bloc-level testing. `integration_test` is wired through `dev_dependencies`.
 
-## 10. Production Readiness Notes
+## 10. Release Media
+
+Portfolio mobile media is generated from Flutter widget tests so screenshots
+stay tied to the current widget tree.
+
+```bash
+pnpm run mobile:screenshots
+```
+
+Canonical mobile release assets:
+
+| Asset | Path |
+| --- | --- |
+| Onboarding | `docs/screenshots/mobile-01-onboarding.png` |
+| Login | `docs/screenshots/mobile-client-01-login.png` |
+| Signed-in home | `docs/screenshots/mobile-client-02-home.png` |
+| Ride booking | `docs/screenshots/mobile-client-03-ride-booking.png` |
+| Food discovery | `docs/screenshots/mobile-client-04-food.png` |
+| Wallet/profile trust | `docs/screenshots/mobile-client-05-wallet-profile.png` |
+| Client walkthrough GIF | `docs/gifs/mobile-client-flow.gif` |
+
+## 11. Production Readiness Notes
 
 - **Hardcoded delivery coordinates**. `FoodRepository.placeOrder` defaults `deliveryLat = 10.7769` and `deliveryLng = 106.7009` (`apps/mobile/lib/features/food/data/repositories/food_repository.dart`). Callers from `FoodBloc.PlaceOrder` only pass `deliveryAddress`, so every checkout sends the same Ho Chi Minh City coordinates regardless of the address text. Wire real coordinates from a geocoding step or saved address before going to production.
 - **Status casing fragility on socket events**. Socket payloads are matched against typed enums via `OrderStatus`/`RideStatus` parsers. Backend changes to status casing or string values (e.g. `PICKED_UP` vs `picked_up`) silently fall back to default branches in `FoodBloc` (`socket.on('order:status', ...)`) and `RideBloc`, leaving stale UI state. Treat status strings as a contract and bump the API contract whenever the backend changes them.
-- **`injectable` declared but unused**. The `injectable` annotation set is present (`@injectable` on most blocs and several repositories) and `injectable_generator` is in `dev_dependencies`, but `configureDependencies()` is hand-written and no `injection.config.dart` is generated or invoked. Either remove the annotations and the generator, or run `dart run build_runner build` and switch to `getIt.init()` — keeping both invites drift between the manual registrations and the annotation graph.
+- **`injectable` declared but unused**. The `injectable` annotation set is present (`@injectable` on most blocs and several repositories) and `injectable_generator` is in `dev_dependencies`, but `configureDependencies()` is hand-written and no `injection.config.dart` is generated or invoked. Either remove the annotations and the generator, or run `pnpm --filter @crab/mobile run codegen` and switch to `getIt.init()` — keeping both invites drift between the manual registrations and the annotation graph.
 
 ---
 

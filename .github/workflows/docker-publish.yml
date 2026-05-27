@@ -12,13 +12,16 @@ permissions:
 
 env:
   REGISTRY: docker.io
-  NAMESPACE: ${{ secrets.DOCKERHUB_USERNAME || 'nguyenson1710' }}
+  NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE || secrets.DOCKERHUB_USERNAME || 'nguyenson1710' }}
   IMAGE_PREFIX: crab-mobile
 
 jobs:
   build-and-push:
-    name: Build & Push (${{ matrix.service }})
+    name: Build / Push (${{ matrix.service }})
     runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
@@ -48,10 +51,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Login to Docker Hub
+        if: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
         uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME || 'nguyenson1710' }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+      - name: Decide publish mode
+        id: publish
+        run: |
+          if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Docker Hub secrets are not configured; building images without pushing."
+          fi
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v6
@@ -66,7 +79,8 @@ jobs:
         with:
           context: .
           file: ${{ matrix.dockerfile }}
-          push: true
+          push: ${{ steps.publish.outputs.enabled == 'true' }}
+          load: ${{ steps.publish.outputs.enabled != 'true' }}
           build-args: |
             VCS_REF=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}

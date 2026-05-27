@@ -148,7 +148,7 @@ class _RideNavigationViewState extends State<RideNavigationView> {
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
                             fontSize: 16,
-                            letterSpacing: -0.2,
+                            letterSpacing: 0,
                           ),
                         ),
                       ],

@@ -58,7 +58,7 @@ void main() {
     subtotal: 110000,
     deliveryFee: 15000,
     total: 125000,
-    deliveryAddress: '123 Le Loi',
+    deliveryAddress: 'Crab Demo Dropoff',
     createdAt: DateTime(2026, 5, 20, 12, 0, 0),
     estimatedMinutes: 30,
   );
@@ -81,7 +81,7 @@ void main() {
 
       expect(find.text('Phở 24'), findsOneWidget);
       expect(find.text('Bún Bò Huế'), findsOneWidget);
-      expect(find.text('2 restaurants nearby'), findsOneWidget);
+      expect(find.text('2 quán đang giao'), findsOneWidget);
     });
 
     testWidgets('Restaurant list shows loading state', (tester) async {
@@ -110,9 +110,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Network error'), findsOneWidget);
-      expect(find.text('Retry'), findsOneWidget);
+      expect(find.text('Thử lại'), findsOneWidget);
 
-      await tester.tap(find.text('Retry'));
+      await tester.tap(find.text('Thử lại'));
       await tester.pump();
 
       verify(() => app.foodBloc.add(const LoadRestaurants())).called(1);
@@ -134,8 +134,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Phở 24'), findsAtLeast(1));
-      expect(find.text('Confirmed'), findsOneWidget);
-      expect(find.text('Delivered'), findsOneWidget);
+      expect(find.text('Quán xác nhận'), findsOneWidget);
+      expect(find.text('Đã giao'), findsOneWidget);
     });
 
     testWidgets('Order history empty state', (tester) async {
@@ -150,7 +150,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('No orders yet'), findsOneWidget);
+      expect(find.text('Chưa có đơn món'), findsOneWidget);
     });
 
     testWidgets('Order history shows track button for active orders',
@@ -166,7 +166,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Track'), findsOneWidget);
+      expect(find.text('Theo dõi'), findsOneWidget);
     });
 
     testWidgets('Order status transitions via BLoC stream', (tester) async {

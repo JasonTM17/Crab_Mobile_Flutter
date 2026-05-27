@@ -54,7 +54,7 @@ void main() {
 
       expect(find.text('Phở 24'), findsOneWidget);
       expect(find.byType(RestaurantCard), findsAtLeastNWidgets(1));
-      expect(find.textContaining('Bún Bò Huế'), findsNothing);
+      expect(find.textContaining('Bún Bò Huế'), findsOneWidget);
     });
 
     testWidgets('shows error with retry on FoodError', (tester) async {

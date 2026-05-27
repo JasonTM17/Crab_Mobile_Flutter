@@ -267,7 +267,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 AuthTextField(
                                   controller: _phoneController,
                                   label: 'Phone number',
-                                  hint: '+84 901 234 567',
+                                  hint: 'Số điện thoại demo',
                                   prefixIcon: Icons.phone_rounded,
                                   keyboardType: TextInputType.phone,
                                   textInputAction: TextInputAction.next,

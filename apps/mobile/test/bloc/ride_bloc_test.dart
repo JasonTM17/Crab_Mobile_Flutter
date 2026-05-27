@@ -112,6 +112,7 @@ void main() {
           when(() => mockRepo.createRide(
                 pickup: any(named: 'pickup'),
                 dropoff: any(named: 'dropoff'),
+                vehicleType: any(named: 'vehicleType'),
               )).thenAnswer((_) async => tRideModel);
           return RideBloc(mockRepo);
         },
@@ -131,6 +132,7 @@ void main() {
           when(() => mockRepo.createRide(
                 pickup: any(named: 'pickup'),
                 dropoff: any(named: 'dropoff'),
+                vehicleType: any(named: 'vehicleType'),
               )).thenThrow(Exception('Server error'));
           return RideBloc(mockRepo);
         },

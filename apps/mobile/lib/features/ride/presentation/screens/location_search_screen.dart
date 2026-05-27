@@ -23,59 +23,57 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
   List<LocationModel> _results = [];
   bool _isSearching = false;
 
-  // Mock recent locations
   final List<LocationModel> _recentLocations = const [
     LocationModel(
       latitude: 10.7769,
       longitude: 106.7009,
-      name: 'Ben Thanh Market',
-      address: '1 Cong Truong Ben Thanh, District 1, HCMC',
+      name: 'Crab Hub Quận 1',
+      address: 'Sảnh đón khách, Crab Central, TP.HCM',
     ),
     LocationModel(
       latitude: 10.7956,
       longitude: 106.7218,
-      name: 'Tan Son Nhat Airport',
-      address: 'Truong Son, Tan Binh District, HCMC',
+      name: 'Crab Airport Point',
+      address: 'Khu đón xe demo, TP.HCM',
     ),
     LocationModel(
       latitude: 10.7743,
       longitude: 106.6985,
-      name: 'Reunification Palace',
-      address: '135 Nam Ky Khoi Nghia, District 1, HCMC',
+      name: 'Crab Office Nguyễn Du',
+      address: 'Tầng trệt, toà nhà Crab Demo',
     ),
     LocationModel(
       latitude: 10.7829,
       longitude: 106.6956,
-      name: 'Notre-Dame Cathedral',
-      address: '1 Cong Xa Paris, District 1, HCMC',
+      name: 'Crab Coffee Station',
+      address: 'Góc đón xe nội bộ, Quận 3',
     ),
   ];
 
-  // Mock search results
   final List<LocationModel> _mockSearchResults = const [
     LocationModel(
       latitude: 10.7300,
       longitude: 106.6997,
-      name: 'Phu My Hung',
-      address: 'Nguyen Van Linh, District 7, HCMC',
+      name: 'Crab Tower Quận 7',
+      address: 'Cổng chính khu phức hợp Crab Demo',
     ),
     LocationModel(
       latitude: 10.8411,
       longitude: 106.8098,
-      name: 'Thu Duc City',
-      address: 'Vo Van Ngan, Thu Duc, HCMC',
+      name: 'Crab Station Thủ Đức',
+      address: 'Điểm hẹn xe công nghệ, TP.Thủ Đức',
     ),
     LocationModel(
       latitude: 10.8231,
       longitude: 106.6297,
-      name: 'Binh Duong Province',
-      address: 'Thu Dau Mot, Binh Duong',
+      name: 'Crab Pickup Bình Dương',
+      address: 'Sảnh khách demo, Bình Dương',
     ),
     LocationModel(
       latitude: 10.9804,
       longitude: 106.6519,
-      name: 'Bien Hoa',
-      address: 'Bien Hoa City, Dong Nai',
+      name: 'Crab Hub Đồng Nai',
+      address: 'Khu đón trả khách demo, Đồng Nai',
     ),
   ];
 
@@ -204,7 +202,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                               size: 16, color: cs.onSurfaceVariant),
                           const SizedBox(width: 6),
                           Text(
-                            'Recent locations',
+                            'Địa điểm gần đây',
                             style: theme.textTheme.labelLarge?.copyWith(
                               color: cs.onSurfaceVariant,
                               fontWeight: FontWeight.w700,
@@ -230,8 +228,9 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                         padding: EdgeInsets.only(top: 32),
                         child: EmptyState(
                           icon: Icons.search_off_rounded,
-                          title: 'No matches',
-                          subtitle: 'Try a different keyword or address.',
+                          title: 'Chưa tìm thấy địa điểm',
+                          subtitle:
+                              'Thử nhập tên toà nhà, khu vực hoặc địa chỉ khác.',
                         ),
                       )
                     else
@@ -301,7 +300,7 @@ class _LocationTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      location.name ?? 'Unknown',
+                      location.name ?? 'Địa điểm chưa đặt tên',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),

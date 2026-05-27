@@ -122,7 +122,7 @@ Examples: `feature/ride-scheduling`, `fix/142-otp-resend-race`, `infra/grafana-d
    pnpm lint
    pnpm test
    ```
-   For mobile changes also run `flutter analyze` and `flutter test`.
+   For mobile changes also run `pnpm --filter @crab/mobile lint` and `pnpm --filter @crab/mobile test`.
 3. **Open the PR** against `main`. Title under 70 characters, conventional-commit style. Body should cover:
    - **Why** the change is needed
    - **What** changed at a high level (the diff shows the details)

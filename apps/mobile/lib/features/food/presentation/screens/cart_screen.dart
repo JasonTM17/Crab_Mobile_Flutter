@@ -24,7 +24,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   final _addressController = TextEditingController(
-    text: '123 Nguyễn Huệ, Quận 1, TP.HCM',
+    text: 'Crab Hub, Quận 1, TP.HCM',
   );
   final _promoController = TextEditingController();
 

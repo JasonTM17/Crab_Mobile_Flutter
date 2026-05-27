@@ -93,7 +93,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     AuthTextField(
                       controller: _phoneController,
                       label: 'Phone Number',
-                      hint: '+84 901 234 567',
+                      hint: 'Số điện thoại demo',
                       prefixIcon: Icons.phone_rounded,
                       keyboardType: TextInputType.phone,
                       validator: (value) {

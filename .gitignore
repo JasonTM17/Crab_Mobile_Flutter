@@ -27,6 +27,14 @@ pnpm-debug.log*
 # Testing
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
+blob-report/
+junit.xml
+coverage-final.json
+k6-summary.*
+k6-results.*
+load-test-results/
 
 # Turbo
 .turbo/
@@ -73,8 +81,10 @@ docker-compose.override.yml
 .cache/
 tmp/
 temp/
+_tmp_*
 
 # Local workspace state
+.codex/
 .omc/
 .claude/
 .claude-private/
@@ -83,6 +93,7 @@ temp/
 .private/
 
 # Private planning/docs
+plans/
 PLAN*.md
 plan*.md
 NOTES*.md
@@ -95,17 +106,25 @@ DRAFT*.md
 draft*.md
 *.private.md
 *.local.md
+CLAUDE.md
+Claude.MD
 DOCUMENTATION_MASTER.md
 RULES.md
 
 # Playwright MCP artifacts
 .playwright-mcp/
 
-# Local screenshot scratch artifacts
-/docs/screenshots/*proof*.png
-/docs/screenshots/*current*.png
-/docs/screenshots/ui-*.png
+# Local release-media scratch artifacts
+/docs/screenshots/*proof*.*
+/docs/screenshots/*current*.*
+/docs/screenshots/*emulator*.*
+/docs/screenshots/*.tmp.*
+/docs/screenshots/ui-*.*
 /docs/screenshots/ui.xml
+/docs/gifs/*proof*.*
+/docs/gifs/*current*.*
+/docs/gifs/*emulator*.*
+/docs/gifs/*.tmp.*
 /*-populated.png
 /docs-*-final.png
 /final-*.png

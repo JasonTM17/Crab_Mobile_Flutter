@@ -53,7 +53,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
+                      letterSpacing: 0,
                     ),
                   ),
                   BlocBuilder<ChatBloc, ChatState>(

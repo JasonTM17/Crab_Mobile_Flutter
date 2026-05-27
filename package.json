@@ -32,12 +32,20 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test --concurrency=1",
+    "package:check": "node scripts/check-packages.js",
     "contract:check": "node scripts/check-contracts.js",
-    "mobile:codegen": "cd apps/mobile && dart run build_runner build --delete-conflicting-outputs",
-    "mobile:analyze": "pnpm run mobile:codegen && cd apps/mobile && flutter analyze",
-    "mobile:test": "pnpm run mobile:codegen && cd apps/mobile && flutter test",
+    "db:migrate": "node scripts/run-db-script.js migrate",
+    "db:seed": "node scripts/run-db-script.js seed",
+    "test:e2e": "node scripts/portfolio-smoke.js",
+    "test:load": "node scripts/run-load-tests.js",
+    "security:audit": "pnpm audit --audit-level moderate",
+    "mobile:codegen": "pnpm --filter @crab/mobile run codegen",
+    "mobile:analyze": "pnpm --filter @crab/mobile lint",
+    "mobile:test": "pnpm --filter @crab/mobile test",
+    "mobile:screenshots": "node scripts/update-mobile-release-screenshots.js",
     "docker:config": "docker compose --env-file .env.production.example -f docker-compose.prod.yml config",
-    "verify": "pnpm run lint && pnpm run build && pnpm run contract:check && pnpm run test && pnpm run mobile:analyze && pnpm run mobile:test",
+    "verify:portfolio": "pnpm run package:check && pnpm run contract:check && pnpm --filter @crab/web-admin build && pnpm run mobile:analyze && pnpm run mobile:test && pnpm run docker:config",
+    "verify": "pnpm run lint && pnpm run build && pnpm run package:check && pnpm run contract:check && pnpm run test && pnpm run mobile:analyze && pnpm run mobile:test",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
@@ -52,6 +60,11 @@
   },
   "packageManager": "pnpm@10.0.0",
   "pnpm": {
+    "overrides": {
+      "qs": "6.15.2",
+      "uuid": "11.1.1",
+      "ws": "8.20.1"
+    },
     "onlyBuiltDependencies": [
       "bcrypt"
     ]

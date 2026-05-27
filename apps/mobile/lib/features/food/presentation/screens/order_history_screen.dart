@@ -30,8 +30,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text(
-          'Food Orders',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          'Lịch sử đơn món',
+          style: TextStyle(fontWeight: FontWeight.w800),
         ),
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -49,9 +49,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           if (state is FoodError) {
             return EmptyState(
               icon: Icons.cloud_off_rounded,
-              title: 'Could not load orders',
+              title: 'Không tải được đơn hàng',
               subtitle: state.message,
-              actionLabel: 'Retry',
+              actionLabel: 'Thử lại',
               onAction: () =>
                   context.read<FoodBloc>().add(const LoadOrderHistory()),
             );
@@ -61,8 +61,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
             if (orders.isEmpty) {
               return const EmptyState(
                 icon: Icons.restaurant_menu_rounded,
-                title: 'No orders yet',
-                subtitle: 'Order delicious food from nearby restaurants!',
+                title: 'Chưa có đơn món',
+                subtitle:
+                    'Các đơn đã đặt sẽ xuất hiện tại đây để bạn theo dõi lại.',
               );
             }
             return RefreshIndicator(
@@ -94,6 +95,18 @@ class _OrderCard extends StatelessWidget {
   final OrderModel order;
   const _OrderCard({required this.order});
 
+  String _statusLabel(OrderStatus status) {
+    return switch (status) {
+      OrderStatus.pending => 'Đã tạo đơn',
+      OrderStatus.confirmed => 'Quán xác nhận',
+      OrderStatus.preparing => 'Đang chuẩn bị',
+      OrderStatus.readyForPickup => 'Sẵn sàng',
+      OrderStatus.outForDelivery => 'Đang giao',
+      OrderStatus.delivered => 'Đã giao',
+      OrderStatus.cancelled => 'Đã huỷ',
+    };
+  }
+
   String _formatDate(DateTime dt) {
     final local = dt.toLocal();
     String pad(int n) => n.toString().padLeft(2, '0');
@@ -114,11 +127,13 @@ class _OrderCard extends StatelessWidget {
   }
 
   String _formatPrice(double val) {
-    if (val >= 1000) {
-      final k = val / 1000;
-      return '${k.toStringAsFixed(0)}k';
+    final rounded = val.round().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < rounded.length; i++) {
+      if (i > 0 && (rounded.length - i) % 3 == 0) buffer.write('.');
+      buffer.write(rounded[i]);
     }
-    return val.toStringAsFixed(0);
+    return '${buffer.toString()}đ';
   }
 
   String _shortId(String value) {
@@ -195,7 +210,7 @@ class _OrderCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      order.status.label,
+                      _statusLabel(order.status),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -230,7 +245,7 @@ class _OrderCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Total: ${_formatPrice(order.total)} ${order.currency}',
+                    'Tổng cộng: ${_formatPrice(order.total)}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
@@ -264,7 +279,7 @@ class _OrderCard extends StatelessWidget {
                         );
                       },
                       child: const Text(
-                        'Track',
+                        'Theo dõi',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,

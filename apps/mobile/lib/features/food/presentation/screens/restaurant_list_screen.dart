@@ -29,7 +29,7 @@ class _RestaurantListScreenState extends State<RestaurantListScreen> {
   ];
 
   String _selected = 'Tất cả';
-  String _address = '123 Nguyễn Huệ, Quận 1';
+  String _address = 'Crab Hub, Quận 1';
 
   @override
   void initState() {
@@ -143,8 +143,8 @@ class _RestaurantListScreenState extends State<RestaurantListScreen> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
-                                  color:
-                                      AppColors.borderLight.withValues(alpha: 0.8),
+                                  color: AppColors.borderLight
+                                      .withValues(alpha: 0.8),
                                 ),
                               ),
                               child: Text(
@@ -281,7 +281,7 @@ class _FoodHeader extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Khám phá quán gần bạn với thời gian giao nhanh và ưu đãi nổi bật.',
+            'Duyệt quán đang mở, xem phí giao hàng và chọn món trong vài bước rõ ràng.',
             style: TextStyle(
               fontSize: 14,
               height: 1.35,
@@ -377,9 +377,9 @@ class _AddressPickerSheet extends StatelessWidget {
   const _AddressPickerSheet({required this.current});
 
   static const _saved = <String>[
-    '123 Nguyễn Huệ, Quận 1',
-    '88 Lê Lợi, Quận 1',
-    'Vinhomes Central Park, Bình Thạnh',
+    'Crab Hub, Quận 1',
+    'Crab Office, Quận 3',
+    'Crab Garden, Bình Thạnh',
   ];
 
   @override
@@ -400,7 +400,8 @@ class _AddressPickerSheet extends StatelessWidget {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 minVerticalPadding: 10,
-                leading: const Icon(Icons.place_outlined, color: AppColors.primary),
+                leading:
+                    const Icon(Icons.place_outlined, color: AppColors.primary),
                 title: Text(
                   address,
                   style: const TextStyle(fontWeight: FontWeight.w700),

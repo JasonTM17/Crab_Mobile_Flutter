@@ -10,51 +10,39 @@ class ServiceGrid extends StatelessWidget {
   static const _services = <_Service>[
     _Service(
       icon: Icons.motorcycle,
-      label: 'Bike',
+      label: 'Xe máy',
       route: '/ride/book?type=BIKE',
       tint: AppColors.primary,
     ),
     _Service(
       icon: Icons.directions_car,
-      label: 'Car',
+      label: 'Ô tô',
       route: '/ride/book?type=CAR_4',
-      tint: Color(0xFF2196F3),
+      tint: AppColors.info,
     ),
     _Service(
       icon: Icons.restaurant,
-      label: 'Food',
+      label: 'Đồ ăn',
       route: '/food',
-      tint: Color(0xFFFF6B35),
+      tint: Color(0xFFFF7A1A),
     ),
     _Service(
-      icon: Icons.local_grocery_store,
-      label: 'Mart',
-      route: '/services',
-      tint: Color(0xFF9C27B0),
-    ),
-    _Service(
-      icon: Icons.local_shipping,
-      label: 'Express',
-      route: '/services',
-      tint: Color(0xFFE53935),
-    ),
-    _Service(
-      icon: Icons.payment,
-      label: 'Pay',
+      icon: Icons.account_balance_wallet,
+      label: 'Ví Crab',
       route: '/wallet',
-      tint: Color(0xFF00BCD4),
+      tint: AppColors.accent,
     ),
     _Service(
       icon: Icons.local_offer,
-      label: 'Promos',
+      label: 'Ưu đãi',
       route: '/promos',
-      tint: Color(0xFFE91E63),
+      tint: Color(0xFFE85D04),
     ),
     _Service(
       icon: Icons.more_horiz,
-      label: 'More',
+      label: 'Thêm',
       route: '/services',
-      tint: Color(0xFF6B7280),
+      tint: Color(0xFF667085),
     ),
   ];
 
@@ -64,10 +52,10 @@ class ServiceGrid extends StatelessWidget {
       shrinkWrap: true,
       padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 4,
+      crossAxisCount: 3,
       mainAxisSpacing: AppSpacing.md,
       crossAxisSpacing: AppSpacing.sm,
-      childAspectRatio: 0.84,
+      childAspectRatio: 1.08,
       children: [
         for (final service in _services)
           ServiceCard(

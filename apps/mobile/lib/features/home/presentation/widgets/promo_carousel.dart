@@ -21,13 +21,6 @@ class PromoCarousel extends StatefulWidget {
 }
 
 class _PromoCarouselState extends State<PromoCarousel> {
-  static const _emptySlide = _PromoSlide(
-    title: 'Ưu đãi đang được cập nhật',
-    cta: 'Xem ví Crab',
-    route: '/promos',
-    gradient: AppGradients.primary,
-    badge: 'Sắp có',
-  );
 
   late final Future<List<_PromoSlide>> _slidesFuture;
   int _slideCount = 0;
@@ -41,11 +34,11 @@ class _PromoCarouselState extends State<PromoCarousel> {
 
   static const _fallbackSlides = <_PromoSlide>[
     _PromoSlide(
-      title: 'Mở ví Crab để xem ưu đãi mới nhất',
-      cta: 'Xem ngay',
-      route: '/wallet',
+      title: 'Ưu đãi Crab đang được cập nhật',
+      cta: 'Mở trung tâm ưu đãi',
+      route: '/promos',
       gradient: AppGradients.walletHero,
-      badge: 'Ví Crab',
+      badge: 'Ưu đãi',
     ),
   ];
 
@@ -115,7 +108,7 @@ class _PromoCarouselState extends State<PromoCarousel> {
 
         final slides = snapshot.data?.isNotEmpty == true
             ? snapshot.data!
-            : const [_emptySlide];
+            : _fallbackSlides;
         _slideCount = slides.length;
 
         return Column(
@@ -191,8 +184,8 @@ class _PromoCard extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Colors.black.withValues(alpha: 0.14),
-                        Colors.black.withValues(alpha: 0.52)
+                        Colors.black.withValues(alpha: 0.08),
+                        Colors.black.withValues(alpha: 0.42)
                       ],
                     ),
                   ),
@@ -234,7 +227,7 @@ class _PromoCard extends StatelessWidget {
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          letterSpacing: -0.3,
+                          letterSpacing: 0,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),

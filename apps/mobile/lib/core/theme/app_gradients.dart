@@ -8,14 +8,14 @@ class AppGradients {
   static const LinearGradient primary = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF16C36A), AppColors.primary, AppColors.primaryDark],
-    stops: [0.0, 0.52, 1.0],
+    colors: [Color(0xFF22C86B), AppColors.primary, AppColors.primaryDark],
+    stops: [0.0, 0.5, 1.0],
   );
 
   static const LinearGradient primarySoft = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFFF4FFF8), Color(0xFFE7F8EE)],
+    colors: [Color(0xFFF7FFF9), Color(0xFFEAF7EF)],
   );
 
   static const LinearGradient sunset = LinearGradient(

@@ -11,7 +11,7 @@ class RideBottomSheet extends StatefulWidget {
   final FareEstimate? fareEstimate;
   final VoidCallback onPickupTap;
   final VoidCallback onDropoffTap;
-  final VoidCallback onBookRide;
+  final ValueChanged<String> onBookRide;
   final VoidCallback? onSwap;
   final bool isLoading;
   final String? errorMessage;
@@ -35,7 +35,7 @@ class RideBottomSheet extends StatefulWidget {
 }
 
 class _RideBottomSheetState extends State<RideBottomSheet> {
-  int _selectedVehicle = 1;
+  int _selectedVehicle = 0;
 
   static const List<_VehicleOption> _vehicles = [
     _VehicleOption(
@@ -47,6 +47,7 @@ class _RideBottomSheetState extends State<RideBottomSheet> {
       tint: Color(0xFFFFE8D2),
       iconColor: Color(0xFFFF8A00),
       multiplier: 0.55,
+      badge: 'Gợi ý',
     ),
     _VehicleOption(
       type: 'CAR_4',
@@ -57,6 +58,7 @@ class _RideBottomSheetState extends State<RideBottomSheet> {
       tint: Color(0xFFD9F5E5),
       iconColor: AppColors.primary,
       multiplier: 1.0,
+      badge: 'Phổ biến',
     ),
     _VehicleOption(
       type: 'CAR_7',
@@ -67,6 +69,7 @@ class _RideBottomSheetState extends State<RideBottomSheet> {
       tint: Color(0xFFE1EAFF),
       iconColor: AppColors.info,
       multiplier: 1.35,
+      badge: 'Nhóm',
     ),
   ];
 
@@ -88,16 +91,18 @@ class _RideBottomSheetState extends State<RideBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final canBook = widget.pickup != null && widget.dropoff != null;
     final fareEstimate = widget.fareEstimate;
     final base = _basePrice();
-    final selectedPrice = base * _vehicles[_selectedVehicle].multiplier;
+    final selected = _vehicles[_selectedVehicle];
+    final selectedPrice = base * selected.multiplier;
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: const [
           BoxShadow(
             color: Color(0x18000000),
             blurRadius: 28,
@@ -115,31 +120,41 @@ class _RideBottomSheetState extends State<RideBottomSheet> {
               height: 5,
               decoration: BoxDecoration(
                 color: AppColors.borderLight,
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(AppRadii.pill),
               ),
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Đặt chuyến',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimaryLight,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Đặt xe rõ giá',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ),
+              const _MiniBadge(
+                icon: Icons.verified_rounded,
+                label: 'CrabRide',
+                color: AppColors.primary,
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
             canBook
-                ? 'Chọn loại xe phù hợp và xác nhận chuyến đi của bạn.'
-                : 'Thêm điểm đón và điểm đến để xem giá cước ước tính.',
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.35,
+                ? 'Kiểm tra lộ trình, chọn xe và xác nhận trong một bước.'
+                : 'Thêm điểm đón và điểm đến để xem giá, ETA và lựa chọn xe.',
+            style: theme.textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondaryLight,
+              height: 1.35,
             ),
           ),
-          if (widget.errorMessage != null && widget.errorMessage!.isNotEmpty) ...[
+          if (widget.errorMessage != null &&
+              widget.errorMessage!.isNotEmpty) ...[
             const SizedBox(height: 14),
             _MessageCard(
               icon: Icons.error_outline_rounded,
@@ -190,32 +205,33 @@ class _RideBottomSheetState extends State<RideBottomSheet> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _FareMeta(
-                    label: 'Giá dự kiến',
+                    label: 'Giá tham chiếu',
                     value: '${_formatPrice(base)}đ',
                   ),
                 ),
               ],
             ),
           ],
+          const SizedBox(height: 14),
+          _TrustChipRow(
+              etaText: selected.etaText, hasFare: fareEstimate != null),
           const SizedBox(height: 20),
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Chọn loại xe',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimaryLight,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
               if (fareEstimate != null)
-                const Text(
+                Text(
                   'Đã gồm phụ phí hiện tại',
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: theme.textTheme.labelMedium?.copyWith(
                     color: AppColors.textSecondaryLight,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
             ],
@@ -236,9 +252,11 @@ class _RideBottomSheetState extends State<RideBottomSheet> {
           const SizedBox(height: 8),
           GradientButton(
             label: base > 0
-                ? 'Đặt xe ngay • ${_formatPrice(selectedPrice)}đ'
+                ? 'Đặt xe ngay · ${_formatPrice(selectedPrice)}đ'
                 : 'Đặt xe ngay',
-            onPressed: canBook && !widget.isLoading ? widget.onBookRide : null,
+            onPressed: canBook && !widget.isLoading
+                ? () => widget.onBookRide(selected.type)
+                : null,
             icon: Icons.arrow_forward_rounded,
           ),
         ],
@@ -256,6 +274,7 @@ class _VehicleOption {
   final Color tint;
   final Color iconColor;
   final double multiplier;
+  final String badge;
 
   const _VehicleOption({
     required this.type,
@@ -266,6 +285,7 @@ class _VehicleOption {
     required this.tint,
     required this.iconColor,
     required this.multiplier,
+    required this.badge,
   });
 }
 
@@ -284,6 +304,8 @@ class _MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -308,10 +330,9 @@ class _MessageCard extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                fontSize: 13,
+              style: theme.textTheme.bodySmall?.copyWith(
                 height: 1.35,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: color,
               ),
             ),
@@ -344,10 +365,10 @@ class _LocationBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.backgroundLight,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
         border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.9)),
       ),
       child: IntrinsicHeight(
@@ -355,10 +376,8 @@ class _LocationBlock extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(
-              width: 24,
-              child: CustomPaint(painter: _ConnectorPainter()),
-            ),
-            const SizedBox(width: 12),
+                width: 24, child: CustomPaint(painter: _ConnectorPainter())),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 children: [
@@ -368,7 +387,7 @@ class _LocationBlock extends StatelessWidget {
                     placeholder: !hasPickup,
                     onTap: onPickupTap,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _LocationRow(
                     label: 'Điểm đến',
                     address: dropoffAddress,
@@ -386,7 +405,7 @@ class _LocationBlock extends StatelessWidget {
                 onPressed: onSwap,
                 tooltip: 'Đổi điểm đón và điểm đến',
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.backgroundLight,
+                  backgroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -461,8 +480,10 @@ class _LocationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      color: AppColors.backgroundLight,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -473,12 +494,11 @@ class _LocationRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                label.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 11,
-                  letterSpacing: 0.6,
-                  fontWeight: FontWeight.w700,
+                label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
                   color: AppColors.textSecondaryLight,
+                  letterSpacing: 0,
                 ),
               ),
               const SizedBox(height: 4),
@@ -486,9 +506,8 @@ class _LocationRow extends StatelessWidget {
                 address,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: placeholder ? FontWeight.w600 : FontWeight.w700,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: placeholder ? FontWeight.w600 : FontWeight.w800,
                   color: placeholder
                       ? AppColors.textSecondaryLight
                       : AppColors.textPrimaryLight,
@@ -517,14 +536,17 @@ class _VehicleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      color: selected ? AppColors.primary.withValues(alpha: 0.06) : Colors.white,
+      color:
+          selected ? AppColors.primary.withValues(alpha: 0.06) : Colors.white,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
@@ -535,15 +557,15 @@ class _VehicleCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 54,
-                height: 54,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: option.tint,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(option.icon, color: option.iconColor, size: 28),
+                child: Icon(option.icon, color: option.iconColor, size: 26),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -553,61 +575,47 @@ class _VehicleCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             option.label,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimaryLight,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ),
-                        if (selected)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: const Text(
-                              'Đã chọn',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
+                        _MiniBadge(
+                          icon: selected
+                              ? Icons.check_rounded
+                              : Icons.schedule_rounded,
+                          label: selected ? 'Đã chọn' : option.badge,
+                          color: selected
+                              ? AppColors.primary
+                              : AppColors.textSecondaryLight,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       option.subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondaryLight,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Đến sau ${option.etaText}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimaryLight,
-                      ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        _InlineMeta(
+                          icon: Icons.timer_rounded,
+                          label: option.etaText,
+                        ),
+                        _InlineMeta(
+                          icon: Icons.payments_outlined,
+                          label: priceText,
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                priceText,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimaryLight,
                 ),
               ),
             ],
@@ -626,6 +634,8 @@ class _FareMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -637,19 +647,173 @@ class _FareMeta extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w800,
               color: AppColors.textSecondaryLight,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w900,
               color: AppColors.textPrimaryLight,
+              letterSpacing: 0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrustChipRow extends StatelessWidget {
+  const _TrustChipRow({required this.etaText, required this.hasFare});
+
+  final String etaText;
+  final bool hasFare;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
+      children: [
+        _TrustChip(
+          icon: Icons.verified_user_outlined,
+          label: hasFare ? 'Giá rõ ràng' : 'Ước tính tức thì',
+          color: AppColors.primary,
+        ),
+        _TrustChip(
+          icon: Icons.timer_rounded,
+          label: 'Đón $etaText',
+          color: AppColors.info,
+        ),
+        const _TrustChip(
+          icon: Icons.support_agent_rounded,
+          label: 'Hỗ trợ trong app',
+          color: AppColors.accent,
+        ),
+      ],
+    );
+  }
+}
+
+class _TrustChip extends StatelessWidget {
+  const _TrustChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineMeta extends StatelessWidget {
+  const _InlineMeta({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundLight,
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppColors.textSecondaryLight),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: AppColors.textPrimaryLight,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniBadge extends StatelessWidget {
+  const _MiniBadge({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0,
             ),
           ),
         ],
