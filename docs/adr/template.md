@@ -13,17 +13,17 @@ State the decision clearly and concretely.
 
 ## Consequences
 ### Positive
-- 
+- TBD
 
 ### Negative
-- 
+- TBD
 
 ### Neutral
-- 
+- TBD
 
 ## Alternatives considered
 - Option A — why it was not chosen
 - Option B — why it was not chosen
 
 ## References
-- 
+- TBD

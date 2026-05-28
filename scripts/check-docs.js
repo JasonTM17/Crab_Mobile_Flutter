@@ -96,6 +96,20 @@ const requiredReferences = [
     ],
   },
   {
+    file: 'docs/DEPLOYMENT.md',
+    refs: [
+      '<!-- DEPLOYMENT-EN:START -->',
+      '<!-- DEPLOYMENT-EN:END -->',
+      '<!-- DEPLOYMENT-VI:START -->',
+      '<!-- DEPLOYMENT-VI:END -->',
+      '## English Deployment Guide',
+      '## Vietnamese Deployment Guide',
+      'nguyenson1710/crab-mobile-<service>',
+      'ghcr.io/jasontm17/crab-mobile-<service>',
+      'pnpm run verify:portfolio',
+    ],
+  },
+  {
     file: 'docs/QUICKSTART.md',
     refs: [
       '<!-- QUICKSTART-EN:START -->',
@@ -229,6 +243,15 @@ const separatedLanguageTracks = [
     vietnameseEnd: '<!-- SCREENSHOTS-VI:END -->',
     englishHeading: '## English Screenshots Gallery',
     vietnameseHeading: '## Vietnamese Screenshots Gallery',
+  },
+  {
+    file: 'docs/DEPLOYMENT.md',
+    englishStart: '<!-- DEPLOYMENT-EN:START -->',
+    englishEnd: '<!-- DEPLOYMENT-EN:END -->',
+    vietnameseStart: '<!-- DEPLOYMENT-VI:START -->',
+    vietnameseEnd: '<!-- DEPLOYMENT-VI:END -->',
+    englishHeading: '## English Deployment Guide',
+    vietnameseHeading: '## Vietnamese Deployment Guide',
   },
   {
     file: 'docs/QUICKSTART.md',
