@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No unreleased changes yet.
+
+## [0.1.1] - 2026-05-28
+
 ### Added
 
 - Auth Service: OTP verification, phone-based login, account lockout, device management, Redis-backed sessions
@@ -35,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests: k6 load test suite (baseline-smoke, ride-flow, order-flow)
 - Docs: REALTIME, RIDE_MATCHING, FOOD_DELIVERY guides
 - Docs: MOBILE.md, ADMIN.md, RATING.md, OBSERVABILITY.md
+- Docs: bilingual portfolio case study, packages guide, screenshots gallery, quickstart, CI/CD, environment, Docker, Kubernetes, operations, troubleshooting, and deployment guide
 
 ### Changed
 
@@ -48,12 +53,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docs: refine README and docs index with release validation commands and release assets map
 - Metadata: refresh root package and Flutter pubspec public repository fields for release polish
 - Tooling: route production compose validation through `.env.production.example` placeholders
+- Docs: separate English and Vietnamese reading tracks across the main portfolio documentation
+- Mobile: rename local demo location/search and driver tracking flows so production-like demo code no longer looks unfinished
+- GitHub: align repository description and topics with production-like portfolio scope
 
 ### Fixed
 
 - pnpm-lock.yaml drift after backend-shared added jest deps
 - CI workflow now builds socket-events + backend-shared before service builds (resolves TS2307)
 - README: drop dead docs/README_VI.md link
+- Docs: extend documentation guardrails to catch mixed-language headings, missing media links, and stale portfolio references
+- Docs: remove empty ADR template bullets and deployment-guide language mixing
 
 ### Infrastructure
 
@@ -72,5 +82,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - React admin skeleton with Vite + TailwindCSS
 - Docker Compose dev stack (Postgres, MongoDB, Redis, MinIO)
 
-[Unreleased]: https://github.com/JasonTM17/Crab_Mobile_Flutter/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/JasonTM17/Crab_Mobile_Flutter/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/JasonTM17/Crab_Mobile_Flutter/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/JasonTM17/Crab_Mobile_Flutter/releases/tag/v0.1.0
