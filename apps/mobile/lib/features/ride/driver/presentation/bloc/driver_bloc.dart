@@ -13,8 +13,15 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
   final DriverRepository _driverRepository;
   Timer? _countdownTimer;
   Timer? _locationTimer;
+  int _locationSampleIndex = 0;
 
   static const int _countdownSeconds = 15;
+  static const List<_DriverLocationSample> _demoRouteSamples = [
+    _DriverLocationSample(latitude: 10.7769, longitude: 106.7009),
+    _DriverLocationSample(latitude: 10.7778, longitude: 106.7024),
+    _DriverLocationSample(latitude: 10.7791, longitude: 106.7042),
+    _DriverLocationSample(latitude: 10.7804, longitude: 106.7061),
+  ];
 
   DriverBloc(this._driverRepository) : super(const DriverOffline()) {
     on<GoOnline>(_onGoOnline);
@@ -181,13 +188,14 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
   }
 
   void _startLocationStreaming() {
-    // Send mock location every 2 seconds when online
-    // In production, replace with geolocator stream
+    _locationSampleIndex = 0;
     _locationTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      // Mock HCMC coordinates with slight drift
-      add(const UpdateLocation(
-        latitude: 10.7769,
-        longitude: 106.7009,
+      final sample =
+          _demoRouteSamples[_locationSampleIndex % _demoRouteSamples.length];
+      _locationSampleIndex++;
+      add(UpdateLocation(
+        latitude: sample.latitude,
+        longitude: sample.longitude,
       ));
     });
   }
@@ -211,11 +219,14 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     } else if (currentState is DriverRideRequest) {
       emit(currentState.copyWith(isAutoAcceptEnabled: newValue));
     } else if (currentState is DriverNavigatingToPickup) {
-      emit(DriverNavigatingToPickup(ride: currentState.ride, isAutoAcceptEnabled: newValue));
+      emit(DriverNavigatingToPickup(
+          ride: currentState.ride, isAutoAcceptEnabled: newValue));
     } else if (currentState is DriverInRide) {
-      emit(DriverInRide(ride: currentState.ride, isAutoAcceptEnabled: newValue));
+      emit(
+          DriverInRide(ride: currentState.ride, isAutoAcceptEnabled: newValue));
     } else if (currentState is DriverError) {
-      emit(DriverError(message: currentState.message, isAutoAcceptEnabled: newValue));
+      emit(DriverError(
+          message: currentState.message, isAutoAcceptEnabled: newValue));
     }
   }
 
@@ -225,4 +236,14 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     _stopLocationStreaming();
     return super.close();
   }
+}
+
+class _DriverLocationSample {
+  final double latitude;
+  final double longitude;
+
+  const _DriverLocationSample({
+    required this.latitude,
+    required this.longitude,
+  });
 }

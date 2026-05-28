@@ -117,20 +117,30 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
     );
   }
 
-  driver_models.DriverModel _placeholderDriver() {
-    return const driver_models.DriverModel(
-      id: 'placeholder',
-      name: 'Tai xe Crab',
+  driver_models.DriverModel _driverSummaryForRide(Ride ride) {
+    final assignedDriverId = ride.driverId?.trim();
+    final hasAssignedDriver =
+        assignedDriverId != null && assignedDriverId.isNotEmpty;
+
+    return driver_models.DriverModel(
+      id: hasAssignedDriver ? assignedDriverId : 'driver-assignment-pending',
+      name: hasAssignedDriver ? 'Tài xế đã nhận chuyến' : 'Đang tìm tài xế',
       phone: '',
-      rating: 4.9,
-      totalRides: 1280,
+      rating: 0,
+      totalRides: 0,
       vehicle: driver_models.VehicleModel(
-        plate: '51A-123.45',
-        model: 'Toyota Vios',
-        color: 'Trang',
-        type: 'CAR_4',
+        plate: hasAssignedDriver ? 'Hồ sơ tài xế' : 'Đang ghép tài xế',
+        model: hasAssignedDriver
+            ? 'ID ${_shortDriverId(assignedDriverId)}'
+            : ride.vehicleType,
+        color: 'Crab',
+        type: ride.vehicleType,
       ),
     );
+  }
+
+  String _shortDriverId(String driverId) {
+    return driverId.length <= 8 ? driverId : '${driverId.substring(0, 8)}...';
   }
 
   String _statusTitle(RideStatus status) {
@@ -221,6 +231,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
 
     final etaMin = r.durationMin;
     final statusColor = _statusColor(r.status);
+    final hasAssignedDriver = r.driverId?.trim().isNotEmpty ?? false;
 
     return Scaffold(
       body: Stack(
@@ -288,8 +299,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
               return Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(28)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                   boxShadow: [
                     BoxShadow(
                       color: Color(0x1A000000),
@@ -332,12 +342,12 @@ class _RideTrackingScreenState extends State<RideTrackingScreen>
                     ),
                     const SizedBox(height: 16),
                     DriverInfoCard(
-                      driver: _placeholderDriver(),
+                      driver: _driverSummaryForRide(r),
                       etaMinutes:
                           r.status == RideStatus.inProgress ? null : etaMin,
                       statusLabel: _statusTitle(r.status),
-                      onCall: _call,
-                      onChat: _openChat,
+                      onCall: hasAssignedDriver ? _call : null,
+                      onChat: hasAssignedDriver ? _openChat : null,
                       onCancel: _cancel,
                     ),
                     const SizedBox(height: 16),

@@ -50,7 +50,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     ),
   ];
 
-  final List<LocationModel> _mockSearchResults = const [
+  final List<LocationModel> _curatedSearchCatalog = const [
     LocationModel(
       latitude: 10.7300,
       longitude: 106.6997,
@@ -102,10 +102,10 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
 
     setState(() => _isSearching = true);
 
-    // Debounce with a short delay then filter mock data
+    // Debounce before filtering the curated local demo catalog.
     Future.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
-      final filtered = _mockSearchResults
+      final filtered = _curatedSearchCatalog
           .where((loc) =>
               (loc.name?.toLowerCase().contains(query.toLowerCase()) ??
                   false) ||
